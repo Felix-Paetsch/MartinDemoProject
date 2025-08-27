@@ -6,14 +6,14 @@ export default async function (env: PluginEnvironment) {
     console.log("<< STARTING MAIN PLUGIN >>");
     create_div();
 
-    const res_1 = await env.get_plugin({
+    /*const res_1 = await env.get_plugin({
         name: "test",
         version: "1.0.0"
     });
-
+    
     if (res_1.is_error) {
         throw res_1;
-    }
+    }*/
 
     const button = document.getElementById('main-plugin-button');
     await handShake(env);
