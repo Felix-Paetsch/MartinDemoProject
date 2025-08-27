@@ -1,0 +1,69 @@
+{
+    "name": "pc-messaging-kernel",
+    "version": "0.0.2",
+    "type": "module",
+    "description": "P&C Communication Lib",
+    "exports": {
+        "./debug": {
+            "types": "./dist/debug/exports.d.ts",
+            "import": "./dist/debug/exports.js",
+            "require": "./dist/debug/exports.js"
+        },
+        "./pluginSystem/common": {
+            "types": "./dist/pluginSystem/common_lib/exports.d.ts",
+            "import": "./dist/pluginSystem/common_lib/exports.js",
+            "require": "./dist/pluginSystem/common_lib/exports.js"
+        },
+        "./pluginSystem/plugin": {
+            "types": "./dist/pluginSystem/plugin_lib/exports.d.ts",
+            "import": "./dist/pluginSystem/plugin_lib/exports.js",
+            "require": "./dist/pluginSystem/plugin_lib/exports.js"
+        },
+        "./pluginSystem/kernel": {
+            "types": "./dist/pluginSystem/kernel_lib/exports.d.ts",
+            "import": "./dist/pluginSystem/kernel_lib/exports.js",
+            "require": "./dist/pluginSystem/kernel_lib/exports.js"
+        },
+        "./utils": {
+            "types": "./dist/utils/exports.d.ts",
+            "import": "./dist/utils/exports.js",
+            "require": "./dist/utils/exports.js"
+        },
+        "./messaging": {
+            "types": "./dist/messaging/exports.d.ts",
+            "import": "./dist/messaging/exports.js",
+            "require": "./dist/messaging/exports.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "author": "Felix Pätsch",
+    "license": "MIT",
+    "scripts": {
+        "dev:standAlone": "tsx watch src/testStandAlone.ts",
+        "typecheck": "tsc --noEmit",
+        "build:js": "vite build",
+        "build:types": "tsc --emitDeclarationOnly",
+        "build:full": "npm run build:js && npm run build:types"
+    },
+    "dependencies": {
+        "quickjs-emscripten": "^0.31.0",
+        "uuid": "^11.1.0"
+    },
+    "peerDependencies": {
+        "effect": "^3.15.2"
+    },
+    "devDependencies": {
+        "effect": "^3.15.2",
+        "@effect/language-service": "^0.35.2",
+        "@eslint/js": "^9.33.0",
+        "@types/node": "^20.11.24",
+        "@types/uuid": "^10.0.0",
+        "prettier": "^3.6.2",
+        "ts-node-dev": "^2.0.0",
+        "tsx": "^4.19.4",
+        "typescript": "^5.4.2",
+        "vite": "^6.3.5"
+    }
+}

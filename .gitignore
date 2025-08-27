@@ -1,0 +1,6 @@
+**/node_modules
+**/logs/logs.log
+**/dist
+.cursorignore
+**/*.tgz
+.vscode
