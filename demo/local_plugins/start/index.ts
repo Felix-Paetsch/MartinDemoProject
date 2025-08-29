@@ -6,15 +6,6 @@ export default async function (env: PluginEnvironment) {
     console.log("<< STARTING MAIN PLUGIN >>");
     create_div();
 
-    /*const res_1 = await env.get_plugin({
-        name: "test",
-        version: "1.0.0"
-    });
-    
-    if (res_1.is_error) {
-        throw res_1;
-    }*/
-
     const button = document.getElementById('main-plugin-button');
     await handShake(env);
     await handShake(env);
@@ -22,21 +13,13 @@ export default async function (env: PluginEnvironment) {
 }
 
 async function handShake(env: PluginEnvironment) {
-    const res_0 = await env.get_plugin({
-        name: "test",
-        version: "1.0.0"
-    });
-
-    if (res_0.is_error) {
-        console.log(res_0);
-        throw res_0;
-    }
-
     const res_1 = await env.get_plugin({
         name: "foo",
         version: "1.0.0"
     });
-    env.log("My lof")
+
+    env.log("My lof");
+
     if (res_1.is_error) {
         console.log(res_1);
         throw res_1;

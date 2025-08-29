@@ -8,7 +8,6 @@ import { runEffectAsPromise } from "pc-messaging-kernel/utils";
 import { v4 as uuidv4 } from 'uuid';
 import { createIframePlugin } from "./iframe_plugin";
 import { createLocalPlugin, isLocalPlugin } from "./local_plugin";
-import { createJSWASMPlugin, isJSWASMPlugin } from "./wasm/js_wasm_plugin";
 
 declare global {
     var logInverstigator: LogInvestigator;
@@ -45,10 +44,9 @@ export class KernelImpl extends KernelEnvironment {
             const address = new LocalAddress(plugin_ident.name + "_" + new_ident.instance_id);
             if (yield* isLocalPlugin(plugin_ident)) {
                 return yield* createLocalPlugin(this, new_ident, address)
-            } else if (yield* isJSWASMPlugin(plugin_ident)) {
-                const r = yield* createJSWASMPlugin(this, new_ident, address);
-                return r;
             }
+
+            console.log("Creating iframe plugin");
             return yield* createIframePlugin(this, new_ident, address)
         }).pipe(runEffectAsPromise)
     }

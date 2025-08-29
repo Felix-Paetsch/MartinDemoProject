@@ -115,6 +115,3 @@ export default function (PEC: typeof PluginEnvironment) {
             })
     })
 }
-
-// Force import
-export type _ = void;

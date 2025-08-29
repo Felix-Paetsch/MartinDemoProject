@@ -36,6 +36,7 @@ export class PluginEnvironment extends EnvironmentCommunicator {
             message: message
         }).pipe(Effect.runPromise);
     }
+
     get_plugin(plugin_ident: PluginIdent): ResultPromise<PluginMessagePartner, ProtocolError> { throw new Error("Method not implemented."); };
     on_plugin_request(cb: (mp: PluginMessagePartner, data?: Json) => void): void { throw new Error("Method not implemented."); };
     _on_plugin_request(mp: PluginMessagePartner, data?: Json): Effect.Effect<void, CallbackError> { throw new Error("Method not implemented."); };
