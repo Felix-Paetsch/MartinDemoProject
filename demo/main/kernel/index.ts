@@ -46,7 +46,8 @@ export class KernelImpl extends KernelEnvironment {
             if (yield* isLocalPlugin(plugin_ident)) {
                 return yield* createLocalPlugin(this, new_ident, address)
             } else if (yield* isJSWASMPlugin(plugin_ident)) {
-                return yield* createJSWASMPlugin(this, new_ident, address)
+                const r = yield* createJSWASMPlugin(this, new_ident, address);
+                return r;
             }
             return yield* createIframePlugin(this, new_ident, address)
         }).pipe(runEffectAsPromise)

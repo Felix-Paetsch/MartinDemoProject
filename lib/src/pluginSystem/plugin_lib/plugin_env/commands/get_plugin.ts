@@ -19,7 +19,7 @@ export default function (PEC: typeof PluginEnvironment) {
                     this.kernel_address,
                     "get_plugin",
                     plugin_ident,
-                    500
+                    5000
                 ).pipe(
                     Effect.provideService(EnvironmentT, this.env)
                 );
@@ -42,7 +42,7 @@ export default function (PEC: typeof PluginEnvironment) {
                         mp_uuid,
                         plugin_ident: this.plugin_ident
                     },
-                    1000
+                    5000
                 ).pipe(
                     Effect.provideService(EnvironmentT, this.env)
                 );

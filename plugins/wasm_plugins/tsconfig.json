@@ -6,6 +6,7 @@
         "strict": true,
         "noUncheckedIndexedAccess": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true,
@@ -18,6 +19,6 @@
             }
         ]
     },
-    "include": ["demo/**/*", "scratchpad/**/*", "plugins/**/*"],
+    "include": ["**/*"],
     "exclude": ["node_modules", "dist", "lib"]
 }

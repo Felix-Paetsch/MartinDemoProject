@@ -3,18 +3,22 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "build": "cd lib && npm run build:full && npm pack && cd .. && npm install ./lib/pc-messaging-kernel-0.0.2.tgz",
+        "build": "cd lib && npm run build:full && npm pack && cd .. && npm install ./lib/pc-messaging-kernel-0.0.2.tgz && cd plugins/wasm_plugins && npm install ../../lib/pc-messaging-kernel-0.0.2.tgz",
         "typecheck": "tsc --noEmit && cd lib && npm run typecheck",
         "scratch": "tsx watch scratchpad/index.ts",
         "dev:kernel": "cross-env BROWSER=true vite",
-        "dev:plugin:iframe": "tsx watch demo/iframe_plugins/index.ts",
-        "dev:plugin:wasm": "tsx watch demo/wasm_plugins/index.ts",
-        "dev": "concurrently \"npm run dev:kernel\" \"npm run dev:plugin:iframe\" \"npm run dev:plugin:wasm\""
+        "dev:plugin:iframe": "tsx watch plugins/iframe_plugins/index.ts",
+        "dev:plugin:wasm:hotBuild": "cd plugins/wasm_plugins && npm run dev",
+        "dev:plugin:wasm:serve": "cd plugins/wasm_plugins && npm run serve",
+        "dev:plugin:wasm": "concurrently \"npm run dev:plugin:wasm:hotBuild\" \"npm run dev:plugin:wasm:serve\"",
+        "dev": "concurrently \"npm run dev:kernel\" \"npm run dev:plugin:iframe\" \"npm run dev:plugin:wasm:serve\" \"npm run dev:plugin:wasm:hotBuild\""
     },
     "author": "",
     "license": "ISC",
     "description": "",
     "dependencies": {
+        "@jitl/quickjs-ng-wasmfile-debug-sync": "^0.31.0",
+        "@jitl/quickjs-singlefile-mjs-debug-sync": "^0.31.0",
         "@types/node": "^24.3.0",
         "chalk": "^5.6.0",
         "concurrently": "^9.2.1",

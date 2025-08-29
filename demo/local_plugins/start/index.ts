@@ -22,7 +22,16 @@ export default async function (env: PluginEnvironment) {
 }
 
 async function handShake(env: PluginEnvironment) {
-    console.log("<< CLICKED >>");
+    const res_0 = await env.get_plugin({
+        name: "test",
+        version: "1.0.0"
+    });
+
+    if (res_0.is_error) {
+        console.log(res_0);
+        throw res_0;
+    }
+
     const res_1 = await env.get_plugin({
         name: "foo",
         version: "1.0.0"

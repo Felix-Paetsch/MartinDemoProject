@@ -1,51 +1,39 @@
+import variant from "@jitl/quickjs-singlefile-mjs-debug-sync";
 import { Effect } from "effect";
 import { Address } from "pc-messaging-kernel/messaging";
 import { Initialization, MessageChannel } from "pc-messaging-kernel/pluginSystem/common";
 import { KernelEnvironment, PluginReference } from "pc-messaging-kernel/pluginSystem/kernel";
 import { PluginIdent, PluginIdentWithInstanceId } from "pc-messaging-kernel/pluginSystem/plugin";
 import { callbackAsEffect, Json } from "pc-messaging-kernel/utils";
-import { newQuickJSAsyncWASMModule } from "quickjs-emscripten";
+import { newQuickJSWASMModule, setDebugMode } from "quickjs-emscripten";
 
-const baseCode = `
-// import init from "#init#";
-import plugin from "#";
-console.log("A");
-console.log("B");
-console.log("C");
-// init(plugin);
-`
-
-const WASM_Module = newQuickJSAsyncWASMModule();
+setDebugMode(true);
+const QuickJS = newQuickJSWASMModule(variant);
 export const createJSWASMPlugin = Effect.fn("createJSWASMPlugin")(
     function* (k: KernelEnvironment, plugin_ident: PluginIdentWithInstanceId, pluginAddress: Address) {
+        // Already this gives an error!!
         const module = yield* Effect.tryPromise({
-            try: () => WASM_Module,
-            catch: (e) => new Error("Failed to load WASM module")
-        })
-
+            try: () => QuickJS,
+            catch: (e) => new Error("Failed to load QuickJS")
+        }).pipe(
+            Effect.tapError(e => {
+                console.log("ERROR", e);
+                return Effect.succeed(e);
+            })
+        );
+        const pluginCode = yield* Effect.tryPromise({
+            try: () => fetch(`http://localhost:5174/${plugin_ident.name}.js`).then(r => r.text()),
+            catch: (e) => new Error("Failed to load plugin code")
+        });
         const runtime = module.newRuntime()
         runtime.setMemoryLimit(1024 * 640)
         runtime.setMaxStackSize(1024 * 320)
         let interruptCycles = 0
-        runtime.setInterruptHandler(() => ++interruptCycles > 1024)
-        runtime.setModuleLoader(async (modulePath) => {
-            const url = new URL(modulePath);
-            return await fetch(url).then((res) => res.text());
-        }, (baseModuleName, requestedName) => {
-            console.log("WANNA REQUEST", requestedName, baseModuleName);
-
-            if (requestedName === "#") {
-                const currentFileUrl = new URL(import.meta.url);
-                const entry_path = new URL(`/src/demos/website/core/wasm_plugins/${plugin_ident.name}/index`, currentFileUrl);
-                return entry_path.href;
-            } else if (requestedName === "#init#") {
-                const currentFileUrl = new URL(import.meta.url);
-                const entry_path = new URL(`/src/demos/website/core/kernel/wasm/base`, currentFileUrl);
-                return entry_path.href;
-            }
-            return new URL(requestedName, new URL(baseModuleName)).href;
-        });
-
+        runtime.setInterruptHandler(() => {
+            ++interruptCycles;
+            if (interruptCycles > 1024) console.log("INTERRUPT");
+            return interruptCycles > 1024;
+        })
 
         const context = runtime.newContext();
         const sendHandle = context.newFunction("_send_message", (arg_0) => {
@@ -67,11 +55,25 @@ export const createJSWASMPlugin = Effect.fn("createJSWASMPlugin")(
         consoleHandle.dispose()
         logHandle.dispose()
 
-        yield* Effect.tryPromise({
-            try: () => context.evalCodeAsync(baseCode),
+        console.log("We are now running");
+        const result = yield* Effect.try({
+            try: () => context.evalCode("console.log('hi');" + pluginCode),
             catch: (e) => new Error("Failed to evaluate base code")
         });
 
+        if (result.error) {
+            try {
+                console.log(context.unwrapResult(result));
+            } catch (e) {
+                console.log("ERROR", e);
+            }
+        } else {
+            console.log("no error");
+        }
+        const result2 = context.unwrapResult(result);
+        console.log("MID");
+        const result3 = context.dump(result2);
+        console.log("THE RESULT2", result3);
         /* new stuff */
         const c: MessageChannel = {
             send: (msg) => {
@@ -81,12 +83,12 @@ export const createJSWASMPlugin = Effect.fn("createJSWASMPlugin")(
             },
             recieve: (_cb) => { cb = _cb; }
         };
-
+        console.log("YAY");
         const {
             execute,
             remove
         } = yield* Initialization.kernel(c, k.address, pluginAddress, plugin_ident);
-
+        console.log("NAY");
         const plugin_reference = new PluginReference(
             pluginAddress,
             plugin_ident,
@@ -96,23 +98,20 @@ export const createJSWASMPlugin = Effect.fn("createJSWASMPlugin")(
             }
         );
         k.register_plugin_middleware(plugin_reference);
-
+        console.log("HHHHHHH");
         yield* callbackAsEffect(execute)();
+        console.log("IIIIIII");
         return plugin_reference;
     })
 
 export const isJSWASMPlugin = (plugin_ident: PluginIdent) => Effect.async<boolean>((resume) => {
     const name = plugin_ident.name.toLowerCase();
     // /src/demos/website/core/..
-    const potential_path = `/src/demos/website/core/wasm_plugins/${name}/index.ts`;
+    const potential_path = `http://localhost:5174/${name}.js`;
 
     fetch(potential_path).then(
         r => {
-            const content_type = r.headers.get("content-type") || "error";
-            resume(Effect.succeed(r.ok && (
-                content_type == "text/js"
-                || content_type == "text/javascript"
-            )));
+            resume(Effect.succeed(r.ok));
         }
     ).catch(e => resume(Effect.succeed(false)));
 }).pipe(Effect.withSpan("testIsJSWASMPlugin"))
