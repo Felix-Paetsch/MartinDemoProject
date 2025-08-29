@@ -12,9 +12,9 @@ import { KernelEnv } from "../../common_lib/messageEnvironments/kernelEnvironmen
 import { createLocalEnvironment } from "../../common_lib/messageEnvironments/localEnvironment";
 import { PluginEnvironment } from "../../plugin_lib/plugin_env/plugin_env";
 import { PluginIdent, PluginIdentWithInstanceId } from "../../plugin_lib/plugin_env/plugin_ident";
-import applyGetPluginPrototypeModifier from "./commands/get_plugin";
-import applyKernelMessagePrototypeModifier from "./commands/kernel_message";
-import applyRemovePluginPrototypeModifier from "./commands/remove_plugin";
+import { register_get_plugin_command as register_kernel_get_plugin_command } from "./commands/get_plugin";
+import { register_kernel_message_command } from "./commands/kernel_message";
+import { _send_remove_plugin_message_impl, register_remove_plugin_command as register_kernel_remove_plugin_command } from "./commands/remove_plugin";
 import { PluginReference } from "./plugin_reference/plugin_reference";
 
 export abstract class KernelEnvironment extends EnvironmentCommunicator {
@@ -25,6 +25,11 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         super(env);
         this.command_prefix = "KERNEL";
         this.register_kernel_middleware();
+
+        // Register command handlers
+        register_kernel_get_plugin_command(KernelEnvironment);
+        register_kernel_message_command(KernelEnvironment);
+        register_kernel_remove_plugin_command(KernelEnvironment);
     }
 
     get address() {
@@ -138,9 +143,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
 
     on_kernel_message(command: string, data: any, plugin_ident: PluginIdentWithInstanceId) { }
 
-    _send_remove_plugin_message(address: Address, data: Json): Effect.Effect<void, ProtocolError> { throw new Error("Method not implemented."); };
+    _send_remove_plugin_message(address: Address, data?: Json): Effect.Effect<void, ProtocolError> {
+        return _send_remove_plugin_message_impl.call(this, address, data);
+    };
 }
-
-applyGetPluginPrototypeModifier(KernelEnvironment)
-applyRemovePluginPrototypeModifier(KernelEnvironment)
-applyKernelMessagePrototypeModifier(KernelEnvironment)

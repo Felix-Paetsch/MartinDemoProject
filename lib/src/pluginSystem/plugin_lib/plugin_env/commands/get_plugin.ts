@@ -11,66 +11,67 @@ import { PluginMessagePartner } from "../../message_partners/plugin";
 import { PluginEnvironment } from "../plugin_env";
 import { PluginIdent, pluginIdentSchemaWithInstanceId } from "../plugin_ident";
 
-export default function (PEC: typeof PluginEnvironment) {
-    PEC.prototype.get_plugin = function (plugin_ident: PluginIdent) {
-        return runEffectAsPromise(
-            Effect.gen(this, function* () {
-                const handlerE = yield* this._send_command(
-                    this.kernel_address,
-                    "get_plugin",
-                    plugin_ident,
-                    5000
-                ).pipe(
-                    Effect.provideService(EnvironmentT, this.env)
-                );
+export function get_plugin_impl(this: PluginEnvironment, plugin_ident: PluginIdent) {
+    return runEffectAsPromise(
+        Effect.gen(this, function* () {
+            const handlerE = yield* this._send_command(
+                this.kernel_address,
+                "get_plugin",
+                plugin_ident,
+                5000
+            ).pipe(
+                Effect.provideService(EnvironmentT, this.env)
+            );
 
-                const handler = yield* handlerE;
+            const handler = yield* handlerE;
 
-                const responseData = handler.protocol_data;
-                const plugin_data = yield* Schema.decodeUnknown(
-                    Schema.Struct({
-                        address: Address.AddressFromString,
-                        plugin_ident: pluginIdentSchemaWithInstanceId
-                    })
-                )(responseData);
+            const responseData = handler.protocol_data;
+            const plugin_data = yield* Schema.decodeUnknown(
+                Schema.Struct({
+                    address: Address.AddressFromString,
+                    plugin_ident: pluginIdentSchemaWithInstanceId
+                })
+            )(responseData);
 
-                const mp_uuid = uuidv4();
-                const pluginHandlerE = yield* this._send_command(
-                    plugin_data.address,
-                    "get_plugin",
-                    {
-                        mp_uuid,
-                        plugin_ident: this.plugin_ident
-                    },
-                    5000
-                ).pipe(
-                    Effect.provideService(EnvironmentT, this.env)
-                );
+            const mp_uuid = uuidv4();
+            const pluginHandlerE = yield* this._send_command(
+                plugin_data.address,
+                "get_plugin",
+                {
+                    mp_uuid,
+                    plugin_ident: this.plugin_ident
+                },
+                5000
+            ).pipe(
+                Effect.provideService(EnvironmentT, this.env)
+            );
 
-                yield* pluginHandlerE;
-                const messagePartner = new PluginMessagePartner(
-                    plugin_data.address,
-                    this.env,
-                    plugin_data.plugin_ident,
-                    mp_uuid
-                );
-                return messagePartner;
-            }).pipe(
-                Effect.catchAll(e => ProtocolErrorN({
-                    message: "Failed to get plugin",
-                    error: e instanceof Error ? e : new Error(String(e))
-                }))
-            )
-        );
-    }
+            yield* pluginHandlerE;
+            const messagePartner = new PluginMessagePartner(
+                plugin_data.address,
+                this.env,
+                plugin_data.plugin_ident,
+                mp_uuid
+            );
+            return messagePartner;
+        }).pipe(
+            Effect.catchAll(e => ProtocolErrorN({
+                message: "Failed to get plugin",
+                error: e instanceof Error ? e : new Error(String(e))
+            }))
+        )
+    );
+}
 
-    PEC.prototype._on_plugin_request = function (mp: PluginMessagePartner, data?: Json): Effect.Effect<void, CallbackError> {
-        return Effect.void;
-    }
-    PEC.prototype.on_plugin_request = function (cb: (mp: PluginMessagePartner, data?: Json) => void) {
-        this._on_plugin_request = callbackAsEffect(cb);
-    }
+export function _on_plugin_request_impl(mp: PluginMessagePartner, data?: Json): Effect.Effect<void, CallbackError> {
+    return Effect.void;
+}
 
+export function on_plugin_request_impl(this: PluginEnvironment, cb: (mp: PluginMessagePartner, data?: Json) => void) {
+    this._on_plugin_request = callbackAsEffect(cb);
+}
+
+export function register_get_plugin_command(PEC: typeof PluginEnvironment) {
     PEC.add_plugin_command({
         command: "get_plugin",
         on_command: Effect.fn("get_plugin")(
@@ -114,4 +115,9 @@ export default function (PEC: typeof PluginEnvironment) {
                 );
             })
     })
+}
+
+// Keep the original function for backward compatibility during transition
+export default function (PEC: typeof PluginEnvironment) {
+    register_get_plugin_command(PEC);
 }

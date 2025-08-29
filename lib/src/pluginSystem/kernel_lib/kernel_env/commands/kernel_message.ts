@@ -5,7 +5,7 @@ import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communi
 
 import { KernelEnvironment } from "../kernel_env";
 
-export default function (KEV: typeof KernelEnvironment) {
+export function register_kernel_message_command(KEV: typeof KernelEnvironment) {
     KEV.add_plugin_command({
         command: "send_kernel_message",
         on_command: Effect.fn("recieve_kernel_message")(
@@ -35,4 +35,9 @@ export default function (KEV: typeof KernelEnvironment) {
                 );
             })
     })
+}
+
+// Keep the original function for backward compatibility during transition
+export default function (KEV: typeof KernelEnvironment) {
+    register_kernel_message_command(KEV);
 }

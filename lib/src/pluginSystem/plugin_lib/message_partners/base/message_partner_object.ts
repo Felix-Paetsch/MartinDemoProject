@@ -5,8 +5,8 @@ import { Json } from "../../../../utils/json";
 import { EnvironmentT } from "../../../common_lib/messageEnvironments/environment";
 import { MessagePartner } from "../message_partner/message_partner";
 import { MPOCommunicationHandler } from "./mpo_commands/mpo_communication/MPOCommunicationHandler";
-import applyPingPrototypeModifier from "./mpo_commands/ping";
-import applyRemovePrototypeModifier from "./mpo_commands/remove";
+import { ping_impl, register_ping_command } from "./mpo_commands/ping";
+import { __remove_cb_impl, on_remove_impl, register_remove_command, remove_impl } from "./mpo_commands/remove";
 
 export class MPOInitializationError extends Data.TaggedError("MPOInitializationError")<{
     message_partner_uuid: string;
@@ -35,6 +35,10 @@ export class MessagePartnerObject {
     ) {
         // The ? is for MessagePartner initialization
         this.message_partner?.register_message_partner_object(this);
+
+        // Register command handlers
+        register_ping_command(MessagePartnerObject);
+        register_remove_command(MessagePartnerObject);
     }
 
     get ident(): MessagePartnerObjectIdent {
@@ -165,13 +169,19 @@ export class MessagePartnerObject {
         return Object.values(classCommandMap);
     }
 
-    ping(): ResultPromise<true, Error> { throw new Error("Method not implemented."); };
-    remove(data?: Json): Promise<void> { throw new Error("Method not implemented."); };
-    on_remove(cb: (data: Json) => void): void { throw new Error("Method not implemented."); };
-    __remove_cb(data: Json): void { throw new Error("Method not implemented."); };
+    ping(): ResultPromise<true, Error> {
+        return ping_impl.call(this);
+    };
+    remove(data?: Json): Promise<void> {
+        return remove_impl.call(this, data);
+    };
+    on_remove(cb: (data: Json) => void): void {
+        return on_remove_impl.call(this, cb);
+    };
+    __remove_cb(data: Json): void {
+        return __remove_cb_impl.call(this, data);
+    };
 }
 
 export class MessagePartnerObjectT extends Context.Tag("MessagePartnerObjectT")<MessagePartnerObjectT, MessagePartnerObject>() { }
 
-applyRemovePrototypeModifier(MessagePartnerObject);
-applyPingPrototypeModifier(MessagePartnerObject);

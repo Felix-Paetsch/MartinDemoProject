@@ -8,8 +8,8 @@ import { Environment, EnvironmentT } from "../../../../pluginSystem/common_lib/m
 import { Bridge } from "../../exports";
 import { MessagePartnerObject, MPOInitializationError } from "../base/message_partner_object";
 import { MPOCommunicationProtocol } from "../base/mpo_commands/mpo_communication/protocol";
-import applyBranchPrototypeModifier from "./commands/branch";
-import applyBridgePrototypeModifier from "./commands/bridge";
+import { __branch_cb_impl, branch_impl, on_branch_impl, register_branch_command } from "./commands/branch";
+import { __bridge_cb_impl, bridge_impl, on_bridge_impl, register_bridge_command } from "./commands/bridge";
 
 export class MessagePartner extends MessagePartnerObject {
     static message_partners: MessagePartner[] = [];
@@ -31,6 +31,10 @@ export class MessagePartner extends MessagePartnerObject {
         (this.message_partner as any) = this;
         MessagePartner.message_partners.push(this);
         this.MPOCommunication = new MPOCommunicationProtocol(env);
+
+        // Register command handlers
+        register_branch_command(MessagePartner);
+        register_bridge_command(MessagePartner);
     }
 
     is_removed(): boolean {
@@ -115,16 +119,25 @@ export class MessagePartner extends MessagePartnerObject {
         })
     }
 
-    branch(data: Json): Effect.Effect<MessagePartner, ProtocolError> { throw new Error("Method not implemented."); };
-    on_branch(cb: (mpo: MessagePartner, data: Json) => void): void { throw new Error("Method not implemented."); };
-    __branch_cb(mpo: MessagePartner, data: Json): void { throw new Error("Method not implemented."); };
-    bridge(data?: Json): ResultPromise<Bridge, ProtocolError> { throw new Error("Method not implemented."); };
-    on_bridge(cb: (mpo: Bridge, data: Json) => void): void { throw new Error("Method not implemented."); };
-    __bridge_cb(mpo: Bridge, data: Json): void { throw new Error("Method not implemented."); };
+    branch(data: Json): Effect.Effect<MessagePartner, ProtocolError> {
+        return branch_impl.call(this, data);
+    };
+    on_branch(cb: (mpo: MessagePartner, data: Json) => void): void {
+        return on_branch_impl.call(this, cb);
+    };
+    __branch_cb(mpo: MessagePartner, data: Json): void {
+        return __branch_cb_impl.call(this, mpo, data);
+    };
+    bridge(data?: Json): ResultPromise<Bridge, ProtocolError> {
+        return bridge_impl.call(this, data);
+    };
+    on_bridge(cb: (mpo: Bridge, data: Json) => void): void {
+        return on_bridge_impl.call(this, cb);
+    };
+    __bridge_cb(mpo: Bridge, data: Json): void {
+        return __bridge_cb_impl.call(this, mpo, data);
+    };
 }
 
 export class MessagePartnerT extends Context.Tag("MessagePartnerT")<MessagePartnerT, MessagePartner>() { }
 
-// applySignalPrototypeModifier(MessagePartner);
-applyBridgePrototypeModifier(MessagePartner);
-applyBranchPrototypeModifier(MessagePartner);

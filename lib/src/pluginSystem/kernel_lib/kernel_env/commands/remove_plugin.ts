@@ -6,18 +6,18 @@ import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communi
 import { EnvironmentT } from "../../../common_lib/messageEnvironments/environment";
 import { KernelEnvironment } from "../kernel_env";
 
-export default function (KEV: typeof KernelEnvironment) {
-    KEV.prototype._send_remove_plugin_message = function (address: Address) {
-        return Effect.gen(this, function* () {
-            yield* yield* this._send_command(
-                address,
-                "remove_plugin"
-            )
-        }).pipe(
-            Effect.provideService(EnvironmentT, this.env)
-        );
-    }
+export function _send_remove_plugin_message_impl(this: KernelEnvironment, address: Address, data?: Json) {
+    return Effect.gen(this, function* () {
+        yield* yield* this._send_command(
+            address,
+            "remove_plugin"
+        )
+    }).pipe(
+        Effect.provideService(EnvironmentT, this.env)
+    );
+}
 
+export function register_remove_plugin_command(KEV: typeof KernelEnvironment) {
     KEV.add_plugin_command({
         command: "remove_plugin_self",
         on_command: (env: KernelEnvironment, handler: EnvironmentCommunicationHandler) => {
@@ -29,4 +29,9 @@ export default function (KEV: typeof KernelEnvironment) {
             }).pipe(Effect.ignore);
         }
     });
+}
+
+// Keep the original function for backward compatibility during transition
+export default function (KEV: typeof KernelEnvironment) {
+    register_remove_plugin_command(KEV);
 }

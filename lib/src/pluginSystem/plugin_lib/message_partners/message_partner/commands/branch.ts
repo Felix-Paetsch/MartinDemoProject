@@ -5,25 +5,26 @@ import { MPOCommunicationHandler } from "../../base/mpo_commands/mpo_communicati
 import { createMpo, receiveMpo } from "../create_mpo";
 import { MessagePartner } from "../message_partner";
 
-export default function (MPC: typeof MessagePartner) {
-    const cmd = "create_message_partner";
-    MPC.prototype.branch = function (data: Json = null): Effect.Effect<MessagePartner, ProtocolError> {
-        return createMpo<MessagePartner>(
-            this,
-            MessagePartnerFactory,
-            cmd,
-            data
-        );
-    }
+const cmd = "create_message_partner";
 
-    MPC.prototype.on_branch = function (cb: (mpo: MessagePartner, data: Json) => void): void {
-        this.__branch_cb = cb;
-    }
+export function branch_impl(this: MessagePartner, data: Json = null): Effect.Effect<MessagePartner, ProtocolError> {
+    return createMpo<MessagePartner>(
+        this,
+        MessagePartnerFactory,
+        cmd,
+        data
+    );
+}
 
-    MPC.prototype.__branch_cb = function (mpo: MessagePartner, data: Json): void {
-        mpo.remove();
-    }
+export function on_branch_impl(this: MessagePartner, cb: (mpo: MessagePartner, data: Json) => void): void {
+    this.__branch_cb = cb;
+}
 
+export function __branch_cb_impl(this: MessagePartner, mpo: MessagePartner, data: Json): void {
+    mpo.remove();
+}
+
+export function register_branch_command(MPC: typeof MessagePartner) {
     MPC.add_command({
         command: cmd,
         on_first_request: (mp: MessagePartner, im: MPOCommunicationHandler, data: Json) => {
@@ -32,6 +33,11 @@ export default function (MPC: typeof MessagePartner) {
             }).pipe(Effect.withSpan(cmd));
         }
     });
+}
+
+// Keep the original function for backward compatibility during transition
+export default function (MPC: typeof MessagePartner) {
+    register_branch_command(MPC);
 }
 
 const MessagePartnerFactory = class {
