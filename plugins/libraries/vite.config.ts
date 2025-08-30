@@ -2,32 +2,35 @@ import { readdirSync, statSync } from 'fs';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
-// Find all plugin directories (subdirectories with index.ts files)
-const pluginDirs = readdirSync(__dirname)
-    .filter(name => {
-        const fullPath = resolve(__dirname, name);
-        return statSync(fullPath).isDirectory() &&
-            name !== 'node_modules' &&
-            name !== 'dist' &&
-            statSync(resolve(fullPath, 'index.ts')).isFile();
-    });
+// Find all plugin/library directories (subdirectories with index.ts files)
+const libDirs = readdirSync(__dirname).filter((name) => {
+    const fullPath = resolve(__dirname, name);
+    return (
+        statSync(fullPath).isDirectory() &&
+        name !== 'node_modules' &&
+        name !== 'dist' &&
+        statSync(resolve(fullPath, 'index.ts')).isFile()
+    );
+});
 
-// Create build entries for each plugin
-const buildEntries = pluginDirs.reduce((entries, pluginDir) => {
-    entries[pluginDir] = resolve(__dirname, pluginDir, 'index.ts');
+// Create build entries for each library
+const libEntries = libDirs.reduce((entries, libDir) => {
+    entries[libDir] = resolve(__dirname, libDir, 'index.ts');
     return entries;
 }, {} as Record<string, string>);
 
 export default defineConfig({
     build: {
+        lib: {
+            // Multiple entry points (one per library)
+            entry: libEntries,
+            formats: ['es'], // Only ES modules
+            fileName: (format, entryName) => `${entryName}.js`
+        },
         rollupOptions: {
-            input: buildEntries,
             output: {
                 dir: 'dist',
-                entryFileNames: '[name].js',
-                chunkFileNames: '[name].js',
                 assetFileNames: '[name].[ext]',
-                format: 'es',
                 inlineDynamicImports: true
             },
             external: [], // Bundle everything
@@ -36,10 +39,6 @@ export default defineConfig({
         target: 'es2020',
         minify: false,
         sourcemap: false
-    },
-    optimizeDeps: {
-        include: ['pc-messaging-kernel'],
-        force: true
     },
     define: {
         'process.env.BROWSER': 'true'

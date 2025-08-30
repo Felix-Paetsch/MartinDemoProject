@@ -1,11 +1,18 @@
+import { Schema } from "effect";
 import { Address } from "../../messaging/base/address";
 import { EnvironmentCommunicator } from "../common_lib/env_communication/environment_communicator";
 import { Environment } from "../common_lib/messageEnvironments/environment";
 import { MPOCommunicationProtocol } from "../plugin_lib/message_partners/base/mpo_commands/mpo_communication/protocol";
-import { LibraryIdent } from "../plugin_lib/message_partners/library";
 import { register_call_command } from "./commands/call";
 import { register_exposes_command } from "./commands/exposes";
 import { AbstractLibraryImplementation } from "./library_implementation";
+
+export const libraryIdentSchema = Schema.Struct({
+    name: Schema.String,
+    version: Schema.String
+})
+
+export type LibraryIdent = Schema.Schema.Type<typeof libraryIdentSchema>;
 
 export class LibraryEnvironment extends EnvironmentCommunicator {
     constructor(

@@ -7,12 +7,12 @@ export default async function (env: PluginEnvironment) {
     create_div();
 
     const button = document.getElementById('main-plugin-button');
-    //await handShake(env);
-    //await handShake(env);
+    await handShake(env);
+    await handShake(env);
     button!.addEventListener('click', () => handShake(env));
 
     const library = await env.get_library({
-        name: "foo_lib",
+        name: "test",
         version: "1.0.0"
     });
 
@@ -23,7 +23,7 @@ export default async function (env: PluginEnvironment) {
     const lib = library.value;
     const exposed = await lib.exposed_functions();
     console.log(exposed);
-    const res = await lib.call("hello", "Martin");
+    const res = await lib.call("hi", "Martin");
     console.log(res);
 }
 

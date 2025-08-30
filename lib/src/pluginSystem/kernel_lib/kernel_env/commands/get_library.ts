@@ -3,8 +3,7 @@ import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_er
 import { ResultToEffect } from "../../../../utils/boundary/run";
 import { Json } from "../../../../utils/json";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
-
-import { libraryIdentSchema } from "../../../plugin_lib/message_partners/library";
+import { libraryIdentSchema } from "../../../library/library_environment";
 import { LibraryReference } from "../external_reference/library_reference";
 import { KernelEnvironment } from "../kernel_env";
 

@@ -1,6 +1,6 @@
 import { Address } from "../../../../messaging/base/address";
 import { Middleware } from "../../../../messaging/base/middleware";
-import { LibraryIdent } from "../../../../pluginSystem/plugin_lib/message_partners/library";
+import { LibraryIdent } from "../../../../pluginSystem/library/library_environment";
 import { Result, ResultPromise } from "../../../../utils/boundary/result";
 import { KernelEnvironment } from "../kernel_env";
 import { ExternalReference } from "./external_reference";

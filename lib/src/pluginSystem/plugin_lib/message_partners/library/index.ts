@@ -1,18 +1,11 @@
-import { Schema } from "effect";
 import { v4 as uuidv4 } from "uuid";
 import { Address } from "../../../../messaging/base/address";
 import { Json } from "../../../../utils/json";
 import { call_impl } from "../../../library/commands/call";
 import { get_exposed_functions_impl } from "../../../library/commands/exposes";
-import { MessagePartner } from "../message_partner/message_partner";
+import { LibraryIdent } from "../../../library/library_environment";
 import { PluginEnvironment } from "../../plugin_env/plugin_env";
-
-export const libraryIdentSchema = Schema.Struct({
-    name: Schema.String,
-    version: Schema.String
-})
-
-export type LibraryIdent = Schema.Schema.Type<typeof libraryIdentSchema>;
+import { MessagePartner } from "../message_partner/message_partner";
 
 export class LibraryMessagePartner extends MessagePartner {
     constructor(

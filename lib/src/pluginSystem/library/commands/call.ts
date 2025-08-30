@@ -31,7 +31,7 @@ export function call_impl(this: LibraryMessagePartner, fn: string, args: Json[])
             return handler.protocol_data;
         }).pipe(
             Effect.catchAll(e => ProtocolErrorN({
-                message: "Failed to call function",
+                message: e.message || "Failed to call function",
                 error: e instanceof Error ? e : new Error(String(e))
             }))
         )
@@ -56,7 +56,7 @@ export function register_call_command(LEC: typeof LibraryEnvironment) {
 
                 const res: Json = yield* callbackAsEffect(lib.implementation.call)(fn, args, handler.message).pipe(
                     Effect.catchAll(e => handler.errorR({
-                        message: "Failed to call function",
+                        message: e.message || "Failed to call function",
                         error: e
                     }))
                 );

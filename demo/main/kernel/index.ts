@@ -2,13 +2,14 @@ import { Effect } from "effect";
 import { Middleware as DebugMiddleware, LogInvestigator } from "pc-messaging-kernel/debug";
 import { LocalAddress } from "pc-messaging-kernel/messaging";
 import { Middleware as CommonMiddleware } from "pc-messaging-kernel/pluginSystem/common";
-import { KernelEnvironment, PluginReference } from "pc-messaging-kernel/pluginSystem/kernel";
+import { KernelEnvironment, LibraryReference, PluginReference } from "pc-messaging-kernel/pluginSystem/kernel";
+import { LibraryEnvironment, LibraryIdent } from "pc-messaging-kernel/pluginSystem/library";
 import { PluginEnvironment, PluginIdent, PluginIdentWithInstanceId } from "pc-messaging-kernel/pluginSystem/plugin";
-import { ResultPromise, runEffectAsPromise } from "pc-messaging-kernel/utils";
+import { ResultPromise, ResultToEffect, runEffectAsPromise } from "pc-messaging-kernel/utils";
 import { v4 as uuidv4 } from 'uuid';
 import { createIframePlugin } from "./iframe_plugin";
-import Library from "./library";
 import { createLocalPlugin, isLocalPlugin } from "./local_plugin";
+import { createJSWASMLibrary } from "./wasm/library";
 
 declare global {
     var logInverstigator: LogInvestigator;
@@ -64,8 +65,22 @@ export class KernelImpl extends KernelEnvironment {
         }).pipe(runEffectAsPromise)
     }
 
-    create_library(library_ident: LibraryIdent): ResultPromise<LibraryReference, Error> {
-        return this.create_local_library(library_ident, new Library())
+    async create_library(library_ident: LibraryIdent): ResultPromise<LibraryReference, Error> {
+        return Effect.gen(this, function* () {
+            const code = yield* Effect.tryPromise({
+                try: () => fetch(`http://localhost:5174/${library_ident.name
+                    }.js`).then(res => res.text()),
+                catch: (e) => new Error("Failed to fetch code")
+            });
+            const res = yield* createJSWASMLibrary(code);
+
+            return yield* ResultToEffect(
+                this.create_local_library(library_ident, res)
+            )
+        }).pipe(
+            Effect.withSpan("KernelCreateLibrary"),
+            runEffectAsPromise
+        )
     };
 
     on_kernel_message(command: string, data: any, plugin_ident: PluginIdentWithInstanceId) {

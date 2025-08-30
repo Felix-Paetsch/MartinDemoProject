@@ -1,9 +1,9 @@
-import { LibraryIdent } from "pc-messaging-kernel/pluginSystem/plugin_lib/message_partners/library";
 import { Middleware as DebugMiddleware } from "../debug/exports";
 import { pluginDebugLogging } from "../debug/logging/create/plugin_middleware";
 import { Address, LocalAddress, Message } from "../messaging/exports";
 import { Middleware as CommonMiddleware } from "../pluginSystem/common_lib/exports";
 import { KernelEnvironment, PluginReference } from "../pluginSystem/kernel_lib/exports";
+import { LibraryIdent } from "../pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../pluginSystem/library/library_implementation";
 import { PluginEnvironment, PluginIdent } from "../pluginSystem/plugin_lib/exports";
 import { callbackAsResult, Json, Success } from "../utils/exports";
