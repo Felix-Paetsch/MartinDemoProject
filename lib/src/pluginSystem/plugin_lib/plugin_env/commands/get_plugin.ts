@@ -116,8 +116,3 @@ export function register_get_plugin_command(PEC: typeof PluginEnvironment) {
             })
     })
 }
-
-// Keep the original function for backward compatibility during transition
-export default function (PEC: typeof PluginEnvironment) {
-    register_get_plugin_command(PEC);
-}

@@ -2,6 +2,7 @@ import { Effect } from "effect";
 import { Address } from "../../../../messaging/base/address";
 
 import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
+import { Json } from "../../../../utils/json";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
 import { EnvironmentT } from "../../../common_lib/messageEnvironments/environment";
 import { KernelEnvironment } from "../kernel_env";
@@ -29,9 +30,4 @@ export function register_remove_plugin_command(KEV: typeof KernelEnvironment) {
             }).pipe(Effect.ignore);
         }
     });
-}
-
-// Keep the original function for backward compatibility during transition
-export default function (KEV: typeof KernelEnvironment) {
-    register_remove_plugin_command(KEV);
 }

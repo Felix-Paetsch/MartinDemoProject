@@ -24,6 +24,11 @@
             "import": "./dist/pluginSystem/kernel_lib/exports.js",
             "require": "./dist/pluginSystem/kernel_lib/exports.js"
         },
+        "./pluginSystem/library": {
+            "types": "./dist/pluginSystem/library/exports.d.ts",
+            "import": "./dist/pluginSystem/library/exports.js",
+            "require": "./dist/pluginSystem/library/exports.js"
+        },
         "./utils": {
             "types": "./dist/utils/exports.d.ts",
             "import": "./dist/utils/exports.js",
@@ -41,7 +46,8 @@
     "author": "Felix Pätsch",
     "license": "MIT",
     "scripts": {
-        "dev:standAlone": "tsx watch src/testStandAlone.ts",
+        "dev:scratch": "tsx watch src/scratch/testLib.ts",
+        "dev:logs": "tsx watch src/scratch/inv_logs.ts",
         "typecheck": "tsc --noEmit",
         "build:js": "vite build",
         "build:types": "tsc --emitDeclarationOnly",

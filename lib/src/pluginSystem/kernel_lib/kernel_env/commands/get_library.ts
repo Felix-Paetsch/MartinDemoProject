@@ -4,31 +4,34 @@ import { ResultToEffect } from "../../../../utils/boundary/run";
 import { Json } from "../../../../utils/json";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
 
-import { pluginIdentSchema } from "../../../plugin_lib/plugin_env/plugin_ident";
+import { libraryIdentSchema } from "../../../plugin_lib/message_partners/library";
+import { LibraryReference } from "../external_reference/library_reference";
 import { KernelEnvironment } from "../kernel_env";
 
-export function register_get_plugin_command(KEV: typeof KernelEnvironment) {
+export function register_get_library_command(KEV: typeof KernelEnvironment) {
     KEV.add_plugin_command({
-        command: "get_plugin",
-        on_command: Effect.fn("get_plugin")(
+        command: "get_library",
+        on_command: Effect.fn("get_library")(
             function* (communicator: KernelEnvironment, handler: EnvironmentCommunicationHandler, data: Json) {
-                const plugin_ident = yield* Schema.decodeUnknown(pluginIdentSchema)(data).pipe(
+                const library_ident = yield* Schema.decodeUnknown(libraryIdentSchema)(data).pipe(
                     Effect.catchAll(e => handler.errorR({
-                        message: "Failed to decode plugin ident",
+                        message: "Failed to decode library ident",
                         error: e
                     }))
                 );
-                const res = communicator.get_plugin(plugin_ident);
-                const plugin = yield* ResultToEffect(res).pipe(
+
+
+                const res = communicator.get_library(library_ident);
+                const library: LibraryReference = yield* ResultToEffect(res).pipe(
                     Effect.catchAll(e => handler.errorR({
-                        message: "Callback error creating plugin",
+                        message: "Callback error creating library",
                         error: e
                     }))
                 );
 
                 yield* handler.close({
-                    address: plugin.address.serialize(),
-                    plugin_ident: plugin.plugin_ident
+                    address: library.address.serialize(),
+                    library_ident: library.library_ident
                 }, true).pipe(
                     Effect.catchAll(e => ProtocolErrorN({
                         message: "Failed to close handler",

@@ -13,6 +13,7 @@ export default defineConfig({
                 'pluginSystem/common_lib/exports': 'src/pluginSystem/common_lib/exports.ts',
                 'pluginSystem/plugin_lib/exports': 'src/pluginSystem/plugin_lib/exports.ts',
                 'pluginSystem/kernel_lib/exports': 'src/pluginSystem/kernel_lib/exports.ts',
+                'pluginSystem/library/exports': 'src/pluginSystem/library/exports.ts',
                 'messaging/exports': 'src/messaging/exports.ts',
                 'utils/exports': 'src/utils/exports.ts'
             },

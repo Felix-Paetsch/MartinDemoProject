@@ -1,30 +1,17 @@
-import { Middleware as DebugMiddleware, Severity } from "./debug/exports";
-import { pluginDebugLogging } from "./debug/logging/create/plugin_middleware";
-import { Address, LocalAddress } from "./messaging/exports";
-import { Middleware as CommonMiddleware } from "./pluginSystem/common_lib/exports";
-import { KernelEnvironment, PluginReference } from "./pluginSystem/kernel_lib/exports";
-import { Bridge, MessagePartner, PluginEnvironment, PluginIdent } from "./pluginSystem/plugin_lib/exports";
-import { callbackAsResult, Success } from "./utils/exports";
+import { LibraryIdent } from "pc-messaging-kernel/pluginSystem/plugin_lib/message_partners/library";
+import { Middleware as DebugMiddleware } from "../debug/exports";
+import { pluginDebugLogging } from "../debug/logging/create/plugin_middleware";
+import { Address, LocalAddress, Message } from "../messaging/exports";
+import { Middleware as CommonMiddleware } from "../pluginSystem/common_lib/exports";
+import { KernelEnvironment, PluginReference } from "../pluginSystem/kernel_lib/exports";
+import { AbstractLibraryImplementation } from "../pluginSystem/library/library_implementation";
+import { PluginEnvironment, PluginIdent } from "../pluginSystem/plugin_lib/exports";
+import { callbackAsResult, Json, Success } from "../utils/exports";
 
-const side_plugin = async (env: PluginEnvironment) => {
-    console.log("<< STARTING SIDE PLUGIN >>")
-    env.on_plugin_request((mp: MessagePartner) => {
-        mp.on_bridge((bridge: Bridge) => {
-            bridge.on((data) => {
-                console.log(data + ", and I must scream");
-            });
-            bridge.on_listener_registered(async (bridge) => {
-                await bridge.send("I am here");
-            });
-        });
-
-        env.log("Hello from side plugin", Severity.INFO);
-    });
-}
 
 const main_plugin = async (env: PluginEnvironment) => {
     console.log("<< STARTING MAIN PLUGIN >>")
-    const res_1 = await env.get_plugin({
+    const res_1 = await env.get_library({
         name: "side",
         version: "1.0.0"
     });
@@ -33,17 +20,21 @@ const main_plugin = async (env: PluginEnvironment) => {
         throw res_1.error;
     }
 
-    const mp = res_1.value;
-    const res_2 = await mp.bridge();
-    if (res_2.is_error) {
-        throw res_2.error;
-    }
-    const bridge = res_2.value;
+    const lib = res_1.value;
+    const exp = await lib.exposed_functions();
+    console.log(exp);
+    const res2 = await lib.call("tes2t");
+    console.log(res2);
+}
 
-    await bridge.send("I have no mouth");
-    bridge.on((data) => {
-        console.log(data + ", and I must still scream");
-    });
+class LibraryImpl extends AbstractLibraryImplementation {
+    exposes(msg: Message): string[] {
+        return ["test"];
+    }
+
+    call(fn: string, args: readonly Json[], msg: Message): Json | Promise<Json> {
+        return "test";
+    }
 }
 
 class KernelImpl extends KernelEnvironment {
@@ -63,9 +54,13 @@ class KernelImpl extends KernelEnvironment {
         env.useMiddleware(pluginDebugLogging(this.address), "monitoring");
     }
 
+    async create_library(library_ident: LibraryIdent) {
+        return await this.create_local_library(library_ident, new LibraryImpl());
+    }
+
     async create_plugin(plugin_ident: PluginIdent) {
         const name = plugin_ident.name;
-        const plugin = name === "START" ? main_plugin : side_plugin;
+        const plugin = name === "START" ? main_plugin : main_plugin;
         const res1 = await this.create_local_plugin_environment(new LocalAddress(name), plugin_ident);
         if (res1.is_error) return res1;
         const { env, ref } = res1.value;

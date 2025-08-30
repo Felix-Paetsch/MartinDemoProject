@@ -9,7 +9,9 @@ import { Json } from "../../../utils/json";
 import { EnvironmentCommunicator } from "../../common_lib/env_communication/environment_communicator";
 import { Environment } from "../../common_lib/messageEnvironments/environment";
 import { MPOCommunicationProtocol } from "../message_partners/base/mpo_commands/mpo_communication/protocol";
+import { LibraryIdent, LibraryMessagePartner } from "../message_partners/library";
 import { PluginMessagePartner } from "../message_partners/plugin";
+import { get_library } from "./commands/get_library";
 import { _on_plugin_request_impl, get_plugin_impl, on_plugin_request_impl, register_get_plugin_command } from "./commands/get_plugin";
 import { send_kernel_message_impl } from "./commands/kernel_message";
 import { __remove_cb_impl, on_remove_impl, register_remove_plugin_command, remove_self_impl } from "./commands/remove_plugin";
@@ -24,14 +26,8 @@ export class PluginEnvironment extends EnvironmentCommunicator {
         super(env);
         this.command_prefix = "PLUGIN";
 
-        Effect.gen(this, function* () {
-            const mw = new MPOCommunicationProtocol(env).middleware();
-            this.useMiddleware(mw, "listeners");
-        }).pipe(Effect.runSync);
-
-        // Register command handlers
-        register_get_plugin_command(PluginEnvironment);
-        register_remove_plugin_command(PluginEnvironment);
+        const mw = new MPOCommunicationProtocol(env).middleware();
+        this.useMiddleware(mw, "listeners");
     }
 
     log(message: Json, severity: Severity = Severity.INFO) {
@@ -41,6 +37,9 @@ export class PluginEnvironment extends EnvironmentCommunicator {
         }).pipe(Effect.runPromise);
     }
 
+    get_library(library_ident: LibraryIdent): ResultPromise<LibraryMessagePartner, ProtocolError> {
+        return get_library.call(this, library_ident);
+    };
     get_plugin(plugin_ident: PluginIdent): ResultPromise<PluginMessagePartner, ProtocolError> {
         return get_plugin_impl.call(this, plugin_ident);
     };
@@ -63,3 +62,6 @@ export class PluginEnvironment extends EnvironmentCommunicator {
         return __remove_cb_impl.call(this, data);
     };
 }
+
+register_get_plugin_command(PluginEnvironment);
+register_remove_plugin_command(PluginEnvironment);

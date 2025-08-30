@@ -49,8 +49,3 @@ export function register_remove_plugin_command(PEC: typeof PluginEnvironment) {
         )
     })
 }
-
-// Keep the original function for backward compatibility during transition
-export default function (PEC: typeof PluginEnvironment) {
-    register_remove_plugin_command(PEC);
-}

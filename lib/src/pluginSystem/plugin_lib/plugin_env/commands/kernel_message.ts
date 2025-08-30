@@ -16,8 +16,3 @@ export function send_kernel_message_impl(this: PluginEnvironment, command: strin
         ).pipe(Effect.withSpan("send_kernel_message"))
     );
 }
-
-// Keep the original function for backward compatibility during transition
-export default function (PEC: typeof PluginEnvironment) {
-    // No command registration needed for this one
-}

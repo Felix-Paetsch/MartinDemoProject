@@ -36,8 +36,3 @@ export function register_kernel_message_command(KEV: typeof KernelEnvironment) {
             })
     })
 }
-
-// Keep the original function for backward compatibility during transition
-export default function (KEV: typeof KernelEnvironment) {
-    register_kernel_message_command(KEV);
-}
