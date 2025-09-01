@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { AbstractLibraryImplementation } from "pc-messaging-kernel/pluginSystem/library";
 import { CallbackError } from "pc-messaging-kernel/utils";
-import { getQuickJS, QuickJSContext } from "quickjs-emscripten";
+import { getQuickJS, QuickJSContext, Scope } from "quickjs-emscripten";
 import { expose_partial } from "./expose";
 
 const QuickJS = getQuickJS();
@@ -12,14 +12,16 @@ export const createJSWASMLibrary = Effect.fn("createJSWASMLibrary")(
             catch: (e) => new Error("Failed to load QuickJS")
         });
 
+        const scope = new Scope();
+
         try {
-            const runtime = qjs.newRuntime();
+            const runtime = scope.manage(qjs.newRuntime());
             runtime.setModuleLoader((r) => r === "__everything__" ? code : "")
 
             runtime.setMemoryLimit(1024 * 640)
             runtime.setMaxStackSize(1024 * 320)
 
-            const context = runtime.newContext();
+            const context = scope.manage(runtime.newContext());
             yield* exposeGlobals(context);
 
             const base_code = `
@@ -62,9 +64,11 @@ export const createJSWASMLibrary = Effect.fn("createJSWASMLibrary")(
                     catch (e) {
                         throw new Error("Failed to evaluate function > " + e);
                     }
-                }
+                },
+                scope.dispose
             );
         } catch (e) {
+            scope.dispose();
             return yield* Effect.fail(new CallbackError(
                 e as Error
             ));

@@ -8,7 +8,6 @@ import { AbstractLibraryImplementation } from "../pluginSystem/library/library_i
 import { PluginEnvironment, PluginIdent } from "../pluginSystem/plugin_lib/exports";
 import { callbackAsResult, Json, Success } from "../utils/exports";
 
-
 const main_plugin = async (env: PluginEnvironment) => {
     console.log("<< STARTING MAIN PLUGIN >>")
     const res_1 = await env.get_library({
