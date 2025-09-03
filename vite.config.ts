@@ -8,7 +8,6 @@ export default defineConfig({
     resolve: {
         alias: {
             "@": "/demo",
-            // 👇 replace only in browser builds
             "quickjs-emscripten":
                 process.env.BROWSER === "true"
                     ? "https://esm.sh/quickjs-emscripten@0.31.0"

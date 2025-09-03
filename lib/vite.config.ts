@@ -19,6 +19,16 @@ export default defineConfig({
             },
             formats: ['es']
         },
+        rollupOptions: {
+            external: ['effect', 'uuid', 'quickjs-emscripten'],
+            output: {
+                globals: {
+                    'effect': 'Effect',
+                    'uuid': 'uuid',
+                    'quickjs-emscripten': 'QuickJS'
+                }
+            }
+        },
         sourcemap: true
     },
     resolve: {
@@ -30,8 +40,5 @@ export default defineConfig({
                     ? "https://esm.sh/quickjs-emscripten@0.31.0"
                     : "quickjs-emscripten",
         },
-    },
-    optimizeDeps: {
-        include: ['effect']
     }
 }); 

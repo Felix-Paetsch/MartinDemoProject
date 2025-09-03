@@ -16,6 +16,7 @@ Browsers and node have increasingly powerful debug tools. Thus it is useful that
 ## Plugin Environments
 
 Ideally plugins can be run in seperate environments (maybe even a debug environment) - e.g. local/WASM/iframe - without difference in logic from the plugin side and maybe with better debug tools
+(JA)
 
 ## Logging
 
@@ -34,5 +35,18 @@ These logs have some functionality around them to query them.
 ## See also
 
 -   Errors
--   Desting
+-   Testing
 -   CleanUp
+
+## Debug - Build
+
+## Martin toughts
+
+-   Principal: Präventiv handeln
+
+    -   Dinge einschränken: Bridges, Libraries
+    -   Deklarativ
+
+-   (gut in NextJS:) Sever Pfade + API endpoints am selben Ort
+    -   UI zusammen mit Endpunkten erstellen
+    -   Template Project

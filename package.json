@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "build": "cd lib && npm run build:full && npm pack && cd .. && npm install ./lib/pc-messaging-kernel-0.0.2.tgz && cd plugins/wasm_plugins && npm install ../../lib/pc-messaging-kernel-0.0.2.tgz",
+        "build": "cd lib && npm run build:full && npm pack && cd .. && npm install ./lib/pc-messaging-kernel-0.1.0.tgz && cd plugins/wasm_plugins && npm install ../../lib/pc-messaging-kernel-0.1.0.tgz",
         "typecheck": "cd lib && npm run typecheck && cd .. && tsc --noEmit",
         "scratch": "tsx watch scratchpad/index.ts",
         "dev:kernel": "cross-env BROWSER=true vite",
@@ -24,7 +24,7 @@
         "concurrently": "^9.2.1",
         "cross-env": "^10.0.0",
         "effect": "^3.15.2",
-        "pc-messaging-kernel": "^0.1.0",
+        "pc-messaging-kernel": "file:lib/pc-messaging-kernel-0.1.0.tgz",
         "tsx": "^4.20.5",
         "vite": "^7.1.3"
     }

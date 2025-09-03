@@ -2,6 +2,15 @@ Return errors aren't handled correctly with ptotocols
 Allow getting libraries (and plugins) from address
 In the filter method in debug: If there is an error, just think of it as false
 
+-   We need support for p5.js
+-   GPU accallerated as easy as p5.js
+-   Power Users
+
+Topics:
+
+-   Welche Menschen ansprechen?
+-   Groß vs klein?
+
 Todo:
 
 -   Better versioning utils
@@ -12,6 +21,9 @@ Use Effect.fn
 Create and annotate spans
 Effect.log => For spans
 When returning error and translating Effect <-> TS give span and so on
+
+-   Wenn es gut läuft sind wir an einem guten Ort
+    => Wie kommt man an Modell?
 
 const er = Cause.prettyErrors(e)[0];
 Cause.pretty
