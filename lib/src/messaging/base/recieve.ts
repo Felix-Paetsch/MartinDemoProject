@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { PromisifyDeamon } from "../../utils/promisify";
+import { UnblockFiberDeamon } from "../../utils/promisify";
 import { Address } from "./address";
 import { applyMiddlewareEffect } from "./apply_middleware_effect";
 import { InvalidMessageFormatError } from "./errors/message_errors";
@@ -37,6 +37,6 @@ export const recieve =
             Effect.catchAll(e => Effect.gen(function* () {
                 return yield* Effect.void;
             })),
-            PromisifyDeamon
+            UnblockFiberDeamon
         )
     )

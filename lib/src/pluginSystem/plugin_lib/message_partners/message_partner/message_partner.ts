@@ -1,11 +1,11 @@
 import { Context, Effect, Option, ParseResult, pipe, Schema } from "effect";
-import { ProtocolError } from "pc-messaging-kernel/messaging/protocols/base/protocol_errors";
-import { ResultPromise } from "pc-messaging-kernel/utils/boundary/result";
-import { Json } from "pc-messaging-kernel/utils/json";
+import { ProtocolError } from "../../../../messaging/protocols/base/protocol_errors";
+import { ResultPromise } from "../../../../utils/boundary/result";
+import { Json } from "../../../../utils/json";
 import { v4 as uuidv4 } from "uuid";
 import { Address } from "../../../../messaging/base/address";
-import { Environment, EnvironmentT } from "../../../../pluginSystem/common_lib/messageEnvironments/environment";
-import { Bridge } from "../../exports";
+import { Environment, EnvironmentT } from "../../../common_lib/messageEnvironments/environment";
+import { Bridge } from "../bridge/bridge";
 import { MessagePartnerObject, MPOInitializationError } from "../base/message_partner_object";
 import { MPOCommunicationProtocol } from "../base/mpo_commands/mpo_communication/protocol";
 import { __branch_cb_impl, branch_impl, on_branch_impl, register_branch_command } from "./commands/branch";

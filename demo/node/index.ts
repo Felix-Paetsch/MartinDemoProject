@@ -5,7 +5,7 @@ import { Middleware as CommonMiddleware } from "../../lib/src/pluginSystem/commo
 import { KernelEnvironment, PluginReference } from "../../lib/src/pluginSystem/kernel_lib/exports";
 import { LibraryEnvironment } from "../../lib/src/pluginSystem/library/library_environment";
 import { Bridge, MessagePartner, PluginEnvironment, PluginIdent } from "../../lib/src/pluginSystem/plugin_lib/exports";
-import { callbackAsResult, Result, Success } from "../../lib/src/utils/exports";
+import { callbackToResult, Result, Success } from "../../lib/src/utils/exports";
 
 const side_plugin = async (env: PluginEnvironment) => {
     console.log("<< STARTING SIDE PLUGIN >>");
@@ -76,13 +76,13 @@ class KernelImpl extends KernelEnvironment {
 
     async create_plugin(plugin_ident: PluginIdent) {
         const name = plugin_ident.name;
-        const plugin = name === "START" ? main_plugin : side_plugin;
+        const plugin = name === "start" ? main_plugin : side_plugin;
         const res1 = await this.create_local_plugin_environment(new LocalAddress(name), plugin_ident);
         if (res1.is_error) return res1;
         const { env, ref } = res1.value;
         this.register_plugin_middleware(ref);
         this.register_local_plugin_middleware(env);
-        const res2 = await callbackAsResult(plugin)(env);
+        const res2 = await callbackToResult(plugin, env);
         if (res2.is_error) return res2;
         return new Success(ref);
     }

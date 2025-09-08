@@ -1,14 +1,14 @@
 import { Effect, Schema } from "effect";
 import { Address } from "../../../../messaging/base/address";
 import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
-import { runEffectAsPromise } from "../../../../utils/boundary/run";
+import { EffectToResult } from "../../../../utils/boundary/run";
 import { EnvironmentT } from "../../../common_lib/messageEnvironments/environment";
 import { LibraryIdent, libraryIdentSchema } from "../../../library/library_environment";
 import { LibraryMessagePartner } from "../../message_partners/library";
 import { PluginEnvironment } from "../plugin_env";
 
 export function get_library(this: PluginEnvironment, library_ident: LibraryIdent) {
-    return runEffectAsPromise(
+    return EffectToResult(
         Effect.gen(this, function* () {
             const handlerE = yield* this._send_command(
                 this.kernel_address,

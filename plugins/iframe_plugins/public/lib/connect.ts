@@ -3,7 +3,7 @@ import { TimeoutException } from "effect/Cause";
 import { Middleware as DebugMiddleware } from "pc-messaging-kernel/debug";
 import { Middleware as CommonMiddleware, Initialization } from "pc-messaging-kernel/pluginSystem/common";
 import { Plugin, PluginEnvironment } from "pc-messaging-kernel/pluginSystem/plugin";
-import { Json, Promisify, runEffectAsPromise } from "pc-messaging-kernel/utils";
+import { EffectToResult, Json, UnblockFiber } from "pc-messaging-kernel/utils";
 
 export default function execute_plugin(
     plugin: Plugin
@@ -25,10 +25,10 @@ export default function execute_plugin(
             plugin
         );
 
-        return yield* Deferred.await(awaitPluginInitialized).pipe(Promisify);
+        return yield* Deferred.await(awaitPluginInitialized).pipe(UnblockFiber);
     }).pipe(
         Effect.withSpan("PluginEvaluation"),
-        runEffectAsPromise
+        EffectToResult
     )
 }
 

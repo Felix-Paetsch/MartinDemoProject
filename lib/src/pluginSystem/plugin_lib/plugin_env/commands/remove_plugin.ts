@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { EnvironmentT } from "../../../../pluginSystem/common_lib/messageEnvironments/environment";
-import { callbackAsEffect } from "../../../../utils/boundary/callbacks";
+import { callbackToEffect } from "../../../../utils/boundary/callbacks";
 import { Json } from "../../../../utils/json";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
 import { PluginEnvironment } from "../plugin_env";
@@ -35,7 +35,7 @@ export function register_remove_plugin_command(PEC: typeof PluginEnvironment) {
                 handler: EnvironmentCommunicationHandler,
                 data: Json
             ) {
-                yield* callbackAsEffect(communicator.__remove_cb, data)
+                yield* callbackToEffect(communicator.__remove_cb, data)
                     .pipe(Effect.ignore);
 
                 communicator.message_partners().forEach(mp => mp.remove());

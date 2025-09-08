@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { callbackAsEffect } from "../../../../../utils/boundary/callbacks";
-import { ResultToEffect, runEffectAsPromise } from "../../../../../utils/boundary/run";
+import { callbackToEffect } from "../../../../../utils/boundary/callbacks";
+import { EffectToResult, ResultToEffect } from "../../../../../utils/boundary/run";
 import { MessagePartner } from "../../message_partner/message_partner";
 import { MessagePartnerObject } from "../message_partner_object";
 
@@ -27,7 +27,7 @@ export function remove(this: MessagePartnerObject, remove_where: "INTERNAL" | "E
             eff.push(this._send_first_mpo_message("remove_mpo"));
         }
         if (remove_where === "INTERNAL" || remove_where === "BOTH") {
-            eff.push(callbackAsEffect(this.__remove_cb));
+            eff.push(callbackToEffect(this.__remove_cb));
         }
 
         const messagePartner = this.message_partner;
@@ -46,6 +46,6 @@ export function remove(this: MessagePartnerObject, remove_where: "INTERNAL" | "E
         );
     }).pipe(
         Effect.ignore,
-        runEffectAsPromise
+        EffectToResult
     )
 }

@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { ProtocolError } from "../../../../../messaging/protocols/base/protocol_errors";
 import { ResultPromise } from "../../../../../utils/boundary/result";
-import { EffectAsPromise } from "../../../../../utils/boundary/run";
+import { EffectToResult } from "../../../../../utils/boundary/run";
 import { Json } from "../../../../../utils/json";
 import { MPOCommunicationHandler } from "../../base/mpo_commands/mpo_communication/MPOCommunicationHandler";
 import { Bridge } from "../../bridge/bridge";
@@ -11,13 +11,12 @@ import { MessagePartner } from "../message_partner";
 const cmd = "create_bridge";
 
 export function bridge_impl(this: MessagePartner, data: Json = null): ResultPromise<Bridge, ProtocolError> {
-    const r = EffectAsPromise(createMpo<Bridge>(
+    return EffectToResult(createMpo<Bridge>(
         this,
         Bridge,
         cmd,
         data
     ));
-    return r();
 }
 
 export function on_bridge_impl(this: MessagePartner, cb: (mpo: Bridge, data: Json) => void): void {

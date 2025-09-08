@@ -1,4 +1,4 @@
-import LogInvestigator from "../debug/logging/parse/logInverstigator";
+import LogInvestigator from "../debug/internal_logging/parse/logInverstigator";
 
 
 const inv = await LogInvestigator.fromFile("./src/debug/logging/logs/logs.log");

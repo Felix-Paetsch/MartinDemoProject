@@ -6,7 +6,7 @@ import { ProtocolError } from "../../../messaging/protocols/base/protocol_errors
 import { LibraryEnvironment, LibraryIdent } from "../../../pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../../../pluginSystem/library/library_implementation";
 import { Failure, ResultPromise, Success } from "../../../utils/boundary/result";
-import { runEffectAsPromise } from "../../../utils/boundary/run";
+import { EffectToResult } from "../../../utils/boundary/run";
 import { Json } from "../../../utils/json";
 import { EnvironmentCommunicator } from "../../common_lib/env_communication/environment_communicator";
 import { Environment } from "../../common_lib/messageEnvironments/environment";
@@ -51,7 +51,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
 
     start() {
         return this.get_plugin({
-            name: "START"
+            name: "start"
         })
     }
 
@@ -82,7 +82,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
             }
         }).pipe(
             Effect.withSpan("KernelCreateLocalPluginEnvironment"),
-            runEffectAsPromise
+            EffectToResult
         );
     }
 
@@ -201,7 +201,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
             return ref;
         }).pipe(
             Effect.withSpan("KernelCreateLocalLibrary"),
-            runEffectAsPromise
+            EffectToResult
         );
     }
 

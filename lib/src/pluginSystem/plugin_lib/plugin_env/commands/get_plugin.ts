@@ -3,8 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from "../../../../messaging/base/address";
 import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
 import { EnvironmentT } from "../../../../pluginSystem/common_lib/messageEnvironments/environment";
-import { callbackAsEffectFn, CallbackError } from "../../../../utils/boundary/callbacks";
-import { runEffectAsPromise } from "../../../../utils/boundary/run";
+import { CallbackError, callbackToEffectFn } from "../../../../utils/boundary/callbacks";
+import { EffectToResult } from "../../../../utils/boundary/run";
 import { Json } from "../../../../utils/json";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
 import { PluginMessagePartner } from "../../message_partners/plugin";
@@ -12,7 +12,7 @@ import { PluginEnvironment } from "../plugin_env";
 import { PluginIdent, pluginIdentSchemaWithInstanceId } from "../plugin_ident";
 
 export function get_plugin_impl(this: PluginEnvironment, plugin_ident: PluginIdent) {
-    return runEffectAsPromise(
+    return EffectToResult(
         Effect.gen(this, function* () {
             const handler = yield* yield* this._send_command(
                 this.kernel_address,
@@ -65,7 +65,7 @@ export function _on_plugin_request_impl(mp: PluginMessagePartner, data?: Json): 
 }
 
 export function on_plugin_request_impl(this: PluginEnvironment, cb: (mp: PluginMessagePartner, data?: Json) => void) {
-    this._on_plugin_request = callbackAsEffectFn(cb);
+    this._on_plugin_request = callbackToEffectFn(cb);
 }
 
 export function register_get_plugin_command(PEC: typeof PluginEnvironment) {

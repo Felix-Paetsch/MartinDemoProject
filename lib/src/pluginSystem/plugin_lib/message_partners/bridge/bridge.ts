@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { ProtocolError } from "../../../../messaging/protocols/base/protocol_errors";
-import { callbackAsEffect, CallbackError } from "../../../../utils/boundary/callbacks";
+import { CallbackError, callbackToEffectFn } from "../../../../utils/boundary/callbacks";
 import { Result } from "../../../../utils/boundary/result";
-import { runEffectAsPromise, runEffectAsPromiseFlash } from "../../../../utils/boundary/run";
+import { EffectToResult, EffectToResultFlash } from "../../../../utils/boundary/run";
 import { Json } from "../../../../utils/json";
 import { MessagePartnerObject } from "../base/message_partner_object";
 import { MPOCommunicationHandler } from "../base/mpo_commands/mpo_communication/MPOCommunicationHandler";
@@ -11,22 +11,22 @@ export class Bridge extends MessagePartnerObject {
     send(data: Json): Promise<Result<null, ProtocolError>> {
         return this._send_first_mpo_message("send_bridge", data).pipe(
             Effect.as(null),
-            runEffectAsPromiseFlash
+            EffectToResultFlash
         );
     }
 
     __on_message_cb: (data: Json) => Effect.Effect<void, CallbackError> = () => Effect.void;
     on(cb: (data: Json) => void) {
-        this.__on_message_cb = callbackAsEffect(cb);
+        this.__on_message_cb = callbackToEffectFn(cb);
         this._send_command("on_new_listener").pipe(
             Effect.ignore,
-            runEffectAsPromise
+            EffectToResult
         );
     }
 
     __on_listener_registered: () => Effect.Effect<void, CallbackError> = () => Effect.void;;
     on_listener_registered(cb: (b: Bridge) => void) {
-        this.__on_listener_registered = () => callbackAsEffect(cb)(this);
+        this.__on_listener_registered = () => callbackToEffectFn(cb)(this);
     }
 }
 

@@ -1,12 +1,12 @@
 import { Middleware as DebugMiddleware } from "../debug/exports";
-import { pluginDebugLogging } from "../debug/logging/middleware/plugin_middleware";
+import { pluginDebugLogging } from "../debug/internal_logging/logging/middleware/plugin_middleware";
 import { Address, LocalAddress, Message } from "../messaging/exports";
 import { Middleware as CommonMiddleware } from "../pluginSystem/common_lib/exports";
 import { KernelEnvironment, PluginReference } from "../pluginSystem/kernel_lib/exports";
 import { LibraryIdent } from "../pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../pluginSystem/library/library_implementation";
 import { PluginEnvironment, PluginIdent } from "../pluginSystem/plugin_lib/exports";
-import { callbackAsResult, Json, Success } from "../utils/exports";
+import { callbackToResult, Json, Success } from "../utils/exports";
 
 const main_plugin = async (env: PluginEnvironment) => {
     console.log("<< STARTING MAIN PLUGIN >>")
@@ -59,13 +59,13 @@ class KernelImpl extends KernelEnvironment {
 
     async create_plugin(plugin_ident: PluginIdent) {
         const name = plugin_ident.name;
-        const plugin = name === "START" ? main_plugin : main_plugin;
+        const plugin = name === "start" ? main_plugin : main_plugin;
         const res1 = await this.create_local_plugin_environment(new LocalAddress(name), plugin_ident);
         if (res1.is_error) return res1;
         const { env, ref } = res1.value;
         this.register_plugin_middleware(ref);
         this.register_local_plugin_middleware(env);
-        const res2 = await callbackAsResult(plugin)(env);
+        const res2 = await callbackToResult(plugin, env);
         if (res2.is_error) return res2;
         return new Success(ref);
     }

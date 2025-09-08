@@ -5,7 +5,7 @@ import { Middleware as CommonMiddleware } from "pc-messaging-kernel/pluginSystem
 import { KernelEnvironment, LibraryReference, PluginReference } from "pc-messaging-kernel/pluginSystem/kernel";
 import { LibraryEnvironment, LibraryIdent } from "pc-messaging-kernel/pluginSystem/library";
 import { PluginEnvironment, PluginIdent, PluginIdentWithInstanceId } from "pc-messaging-kernel/pluginSystem/plugin";
-import { ResultPromise, ResultToEffect, runEffectAsPromise } from "pc-messaging-kernel/utils";
+import { EffectToResult, ResultPromise, ResultToEffect } from "pc-messaging-kernel/utils";
 import { v4 as uuidv4 } from 'uuid';
 import { createIframePlugin } from "./iframe_plugin";
 import { createLocalPlugin, isLocalPlugin } from "./local_plugin";
@@ -62,7 +62,7 @@ export class KernelImpl extends KernelEnvironment {
 
             console.log("Creating iframe plugin");
             return yield* createIframePlugin(this, new_ident, address)
-        }).pipe(runEffectAsPromise)
+        }).pipe(EffectToResult)
     }
 
     async create_library(library_ident: LibraryIdent): ResultPromise<LibraryReference, Error> {
@@ -79,7 +79,7 @@ export class KernelImpl extends KernelEnvironment {
             )
         }).pipe(
             Effect.withSpan("KernelCreateLibrary"),
-            runEffectAsPromise
+            EffectToResult
         )
     };
 

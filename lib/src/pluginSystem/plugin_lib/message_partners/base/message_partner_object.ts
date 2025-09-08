@@ -1,5 +1,5 @@
 import { Context, Data, Effect, Option, ParseResult, pipe, Schema } from "effect";
-import { ResultPromise } from "pc-messaging-kernel/utils/boundary/result";
+import { ResultPromise } from "../../../../utils/boundary/result";
 import { ProtocolError, ProtocolErrorR } from "../../../../messaging/protocols/base/protocol_errors";
 import { Json } from "../../../../utils/json";
 import { EnvironmentT } from "../../../common_lib/messageEnvironments/environment";

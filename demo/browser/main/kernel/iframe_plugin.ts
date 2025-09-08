@@ -4,7 +4,7 @@ import { Address } from "pc-messaging-kernel/messaging";
 import { Initialization, type MessageChannel } from "pc-messaging-kernel/pluginSystem/common";
 import { KernelEnvironment, PluginReference } from "pc-messaging-kernel/pluginSystem/kernel";
 import { PluginIdentWithInstanceId } from "pc-messaging-kernel/pluginSystem/plugin";
-import { callbackAsEffect, Json } from "pc-messaging-kernel/utils";
+import { callbackToEffect, Json } from "pc-messaging-kernel/utils";
 const appContainer = document.getElementById("app")!;
 function createIframe(id: string, src: string): HTMLIFrameElement {
     const iframe = document.createElement('iframe');
@@ -38,7 +38,7 @@ export const createIframePlugin = Effect.fn("createIframePlugin")(
         );
         k.register_plugin_middleware(plugin_reference);
 
-        yield* callbackAsEffect(execute)();
+        yield* callbackToEffect(execute);
         return plugin_reference;
     }
 )
