@@ -12,7 +12,7 @@ export const createLocalPlugin = Effect.fn("createLocalPlugin")(
         const plugin: (env: PluginEnvironment) => Promise<void> = imported.default;
 
         const { env, ref } = yield* ResultToEffect(
-            k.create_local_plugin_environment(pluginAddress, plugin_ident)
+            k.create_local_plugin_environment(plugin_ident, pluginAddress)
         );
 
         k.register_plugin_middleware(ref);

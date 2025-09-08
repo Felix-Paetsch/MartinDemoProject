@@ -55,12 +55,12 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         })
     }
 
-    create_local_plugin_environment(address: Address, plugin_ident: PluginIdent): ResultPromise<{
+    create_local_plugin_environment(plugin_ident: PluginIdent, address: Address = Address.new_local_address("PLUGIN_" + uuidv4())): ResultPromise<{
         env: PluginEnvironment,
         ref: PluginReference
     }, Error> {
         return Effect.gen(this, function* () {
-            const Lenv = yield* createLocalEnvironment(Address.new_local_address("PLUGIN_" + uuidv4()));
+            const Lenv = yield* createLocalEnvironment(address);
             const uuid = uuidv4();
             const ident = {
                 instance_id: uuid,

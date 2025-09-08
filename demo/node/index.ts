@@ -58,26 +58,26 @@ class KernelImpl extends KernelEnvironment {
 
     register_plugin_middleware(ref: PluginReference) {
         ref.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        this.useMiddleware(log_external_mw(), "monitoring");
+        ref.useMiddleware(log_external_mw(), "monitoring");
         ref.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
     register_local_plugin_middleware(env: PluginEnvironment) {
         env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        this.useMiddleware(log_external_mw(), "monitoring");
+        env.useMiddleware(log_external_mw(), "monitoring");
         env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
     register_local_library_middleware(env: LibraryEnvironment) {
         env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        this.useMiddleware(log_external_mw(), "monitoring");
+        env.useMiddleware(log_external_mw(), "monitoring");
         env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
     async create_plugin(plugin_ident: PluginIdent) {
         const name = plugin_ident.name;
         const plugin = name === "start" ? main_plugin : side_plugin;
-        const res1 = await this.create_local_plugin_environment(new LocalAddress(name), plugin_ident);
+        const res1 = await this.create_local_plugin_environment(plugin_ident, new LocalAddress(name));
         if (res1.is_error) return res1;
         const { env, ref } = res1.value;
         this.register_plugin_middleware(ref);

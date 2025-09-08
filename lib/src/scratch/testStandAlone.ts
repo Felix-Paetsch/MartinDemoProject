@@ -66,7 +66,7 @@ class KernelImpl extends KernelEnvironment {
     async create_plugin(plugin_ident: PluginIdent) {
         const name = plugin_ident.name;
         const plugin = name === "start" ? main_plugin : side_plugin;
-        const res1 = await this.create_local_plugin_environment(new LocalAddress(name), plugin_ident);
+        const res1 = await this.create_local_plugin_environment(plugin_ident, new LocalAddress(name));
         if (res1.is_error) return res1;
         const { env, ref } = res1.value;
         this.register_plugin_middleware(ref);

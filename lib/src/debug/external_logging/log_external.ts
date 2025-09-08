@@ -28,7 +28,7 @@ export function clear_external_logs(logging_url?: string) {
         }),
         catch: (error) => new Error(`Failed to clear external logs: ${error}`)
     })
-    return Effect.runPromise(clear_logs);
+    return Effect.runPromise(clear_logs.pipe(Effect.ignore));
 }
 
 export function log_external(data: Json, url?: string) {
@@ -37,6 +37,7 @@ export function log_external(data: Json, url?: string) {
         url || default_logging_target,
         data
     ).pipe(
+        Effect.ignore,
         Effect.runPromise
     )
 }

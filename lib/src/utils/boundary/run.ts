@@ -22,11 +22,11 @@ export function EffectToResult<T, E extends Error>(e: Effect.Effect<T, E>) {
     return EffectToResultFn(e)()
 }
 
-export function EffectToResultFlashFn<T, E extends Error>(e: Effect.Effect<T, E>): () => ResultPromise<null, E> {
-    return () => EffectToResult(e.pipe(Effect.as(null)))
+export function EffectToResultFlashFn<T, E extends Error>(e: Effect.Effect<T, E>): () => ResultPromise<void, E> {
+    return () => EffectToResult(e.pipe(Effect.as(undefined)))
 }
 
-export function EffectToResultFlash<T, E extends Error>(e: Effect.Effect<T, E>): ResultPromise<null, E> {
+export function EffectToResultFlash<T, E extends Error>(e: Effect.Effect<T, E>): ResultPromise<void, E> {
     return EffectToResultFlashFn(e)()
 }
 
