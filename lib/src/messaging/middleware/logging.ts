@@ -93,6 +93,20 @@ export const log = Effect.fn("log")(
         );
     });
 
+export const log_external = Effect.fn("log_external")(
+    function* (url: string, data: Json) {
+        yield* Effect.tryPromise({
+            try: () => fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            }),
+            catch: (error) => new Error(`Failed to log to external URL: ${error}`)
+        });
+    });
+
 export function log_to_address(address: Address): Middleware {
     return Effect.fn("log_to_address")(
         function* (message: Message, lcmd: LocalComputedMessageData) {
@@ -104,6 +118,20 @@ export function log_to_address(address: Address): Middleware {
             });
 
             yield* send(logMessage);
+        }, (e) => e.pipe(
+            Effect.tapError(e => Effect.logError(e)),
+            Effect.ignore
+        ))
+}
+
+export function log_to_url(url: string) {
+    return Effect.fn("log_to_url")(
+        function* (message: Message) {
+            const loggingContent = yield* Schema.decode(ToLog)(message);
+            yield* log_external(
+                url,
+                loggingContent
+            )
         }, (e) => e.pipe(
             Effect.tapError(e => Effect.logError(e)),
             Effect.ignore

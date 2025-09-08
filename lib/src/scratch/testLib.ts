@@ -1,5 +1,5 @@
 import { Middleware as DebugMiddleware } from "../debug/exports";
-import { pluginDebugLogging } from "../debug/logging/create/plugin_middleware";
+import { pluginDebugLogging } from "../debug/logging/middleware/plugin_middleware";
 import { Address, LocalAddress, Message } from "../messaging/exports";
 import { Middleware as CommonMiddleware } from "../pluginSystem/common_lib/exports";
 import { KernelEnvironment, PluginReference } from "../pluginSystem/kernel_lib/exports";

@@ -6,7 +6,7 @@ import { ProtocolError } from "../../../messaging/protocols/base/protocol_errors
 import { LibraryEnvironment, LibraryIdent } from "../../../pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../../../pluginSystem/library/library_implementation";
 import { Failure, ResultPromise, Success } from "../../../utils/boundary/result";
-import { EffectAsPromise, ResultToEffect, runEffectAsPromise } from "../../../utils/boundary/run";
+import { runEffectAsPromise } from "../../../utils/boundary/run";
 import { Json } from "../../../utils/json";
 import { EnvironmentCommunicator } from "../../common_lib/env_communication/environment_communicator";
 import { Environment } from "../../common_lib/messageEnvironments/environment";
@@ -17,7 +17,7 @@ import { PluginIdent, PluginIdentWithInstanceId } from "../../plugin_lib/plugin_
 import { register_get_library_command } from "./commands/get_library";
 import { register_get_plugin_command as register_kernel_get_plugin_command } from "./commands/get_plugin";
 import { register_kernel_message_command } from "./commands/kernel_message";
-import { _send_remove_plugin_message_impl, register_remove_plugin_command as register_kernel_remove_plugin_command } from "./commands/remove_plugin";
+import { _send_remove_plugin_message, register_remove_plugin_command as register_kernel_remove_plugin_command } from "./commands/remove_plugin";
 import { LibraryReference } from "./external_reference/library_reference";
 import { PluginReference } from "./external_reference/plugin_reference";
 
@@ -43,9 +43,8 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     register_library_middleware(ref: LibraryReference): void { }
     register_local_library_middleware(env: LibraryEnvironment): void { }
 
-    use_middleware(middleware: Middleware): Promise<Success<void>> {
+    use_middleware(middleware: Middleware): Promise<void> {
         return this.env.useMiddleware(middleware).pipe(
-            Effect.andThen(() => new Success(undefined)),
             Effect.runPromise
         );
     }
@@ -131,17 +130,12 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         return Failure.promise(new Error("Create plugin not implemented"))
     };
 
-    remove_plugin(ref: PluginReference): ResultPromise<void, Error> {
-        return Effect.gen(this, function* () {
-            yield* ResultToEffect(ref.remove());
-            const index = this.registered_plugins.findIndex(plugin => plugin.plugin_ident.instance_id === ref.plugin_ident.instance_id);
-            if (index !== -1) {
-                this.registered_plugins.splice(index, 1);
-            }
-        }).pipe(
-            Effect.catchAll(e => Effect.succeed(console.log(e))),
-            runEffectAsPromise
-        );
+    async remove_plugin(ref: PluginReference): Promise<void> {
+        await ref.remove();
+        const index = this.registered_plugins.findIndex(plugin => plugin.plugin_ident.instance_id === ref.plugin_ident.instance_id);
+        if (index !== -1) {
+            this.registered_plugins.splice(index, 1);
+        }
     }
 
     get_library(library_ident: LibraryIdent): ResultPromise<LibraryReference, Error> {
@@ -182,29 +176,25 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         return Failure.promise(new Error("Create library not implemented"))
     };
 
-    remove_library(ref: LibraryReference): ResultPromise<void, Error> {
-        return Effect.gen(this, function* () {
-            yield* ResultToEffect(ref.remove());
-            const index = this.registered_libraries.findIndex(plugin => plugin.library_ident.name === ref.library_ident.name && plugin.library_ident.version === ref.library_ident.version);
-            if (index !== -1) {
-                this.registered_libraries.splice(index, 1);
-            }
-        }).pipe(
-            Effect.catchAll(e => Effect.succeed(console.log(e))),
-            runEffectAsPromise
-        );
+    async remove_library(ref: LibraryReference): Promise<void> {
+        await ref.remove();
+        const index = this.registered_libraries.findIndex(plugin => plugin.library_ident.name === ref.library_ident.name && plugin.library_ident.version === ref.library_ident.version);
+        if (index !== -1) {
+            this.registered_libraries.splice(index, 1);
+        }
     }
 
     create_local_library(library_ident: LibraryIdent, implementation: AbstractLibraryImplementation): ResultPromise<LibraryReference, Error> {
         return Effect.gen(this, function* () {
             const Lenv = yield* createLocalEnvironment(Address.new_local_address("LIB_" + uuidv4()));
 
-            new LibraryEnvironment(Lenv, this.address, library_ident, implementation);
+            const lib = new LibraryEnvironment(Lenv, this.address, library_ident, implementation);
+            this.register_local_library_middleware(lib);
             const ref = new LibraryReference(
                 Lenv.ownAddress,
                 library_ident,
                 this,
-                EffectAsPromise(Lenv.remove),
+                () => Lenv.remove.pipe(Effect.runPromise),
                 (mw: Middleware) => Lenv.useSendMiddleware(mw).pipe(Effect.runSync)
             )
 
@@ -218,7 +208,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     on_kernel_message(command: string, data: any, plugin_ident: PluginIdentWithInstanceId) { }
 
     _send_remove_plugin_message(address: Address, data?: Json): Effect.Effect<void, ProtocolError> {
-        return _send_remove_plugin_message_impl.call(this, address, data);
+        return _send_remove_plugin_message.call(this, address, data);
     };
 }
 

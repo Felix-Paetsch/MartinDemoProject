@@ -47,3 +47,4 @@
 -   good .Die, .Ignore and Ensuring hygine with clear design docs
 
 -   Random failures
+-   We trust martins code (and mine)

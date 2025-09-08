@@ -35,11 +35,6 @@ export function register_branch_command(MPC: typeof MessagePartner) {
     });
 }
 
-// Keep the original function for backward compatibility during transition
-export default function (MPC: typeof MessagePartner) {
-    register_branch_command(MPC);
-}
-
 const MessagePartnerFactory = class {
     constructor(mpo: MessagePartner, uuid: string) {
         return new MessagePartner(mpo.address, mpo.env, uuid);

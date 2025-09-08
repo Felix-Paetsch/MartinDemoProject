@@ -1,5 +1,4 @@
 import { Effect } from "effect";
-import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
 import { EnvironmentT } from "../../../../pluginSystem/common_lib/messageEnvironments/environment";
 import { callbackAsEffect } from "../../../../utils/boundary/callbacks";
 import { Json } from "../../../../utils/json";
@@ -36,15 +35,12 @@ export function register_remove_plugin_command(PEC: typeof PluginEnvironment) {
                 handler: EnvironmentCommunicationHandler,
                 data: Json
             ) {
-                yield* callbackAsEffect(communicator.__remove_cb)(data).pipe(
-                    Effect.catchAll(e => handler.asErrorR(e))
-                );
-                yield* handler.close({ success: true }, true).pipe(
-                    Effect.catchAll(e => ProtocolErrorN({
-                        message: "Failed to close handler",
-                        error: new Error(String(e))
-                    }))
-                );
+                yield* callbackAsEffect(communicator.__remove_cb, data)
+                    .pipe(Effect.ignore);
+
+                communicator.message_partners().forEach(mp => mp.remove());
+
+                yield* handler.close({ success: true }, true);
             }
         )
     })

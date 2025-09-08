@@ -21,20 +21,13 @@ export function createMpo<T extends MessagePartnerObject>(
         const mpo = yield* MessagePartnerObject.make(messagePartner, uuid, senderClass).pipe(
             Effect.mapError(e => im.asErrorR(e))
         );
-        // im.onMessageError(mpo.remove());
 
-        // This blocks, instead of giving back control.
-        yield* im.awaitResponse("OK");
-        const confirmationData = im.protocol_data as string;
-
-        if (confirmationData !== "OK") {
-            return yield* im.errorR({
-                message: "Did not receive ok confirmation from receiver",
-                data: confirmationData
-            });
-        }
-
-        const _ = yield* im.finishExternal();
+        yield* im.awaitResponse().pipe(
+            Effect.tapError(e => Effect.sync(() => {
+                mpo.on_remove(() => { });
+                mpo.remove("INTERNAL");
+            }))
+        );
         return mpo;
     }).pipe(
         fail_as_protocol_error
@@ -50,19 +43,11 @@ export function receiveMpo<T extends MessagePartnerObject>(
     return Effect.gen(function* () {
         const uuid = uuidv4();
         yield* im.awaitResponse(uuid, 1000);
-        const okData = im.protocol_data as string;
-        if (okData !== "OK") {
-            return yield* im.errorR({
-                message: "Did not receive ok from sender",
-                data: okData
-            });
-        }
-
         const mpo_object = yield* MessagePartnerObject.make(messagePartner, uuid, receiverClass).pipe(
             Effect.mapError(e => im.asErrorR(e))
         );
 
-        yield* callbackAsEffect(cb)(mpo_object);
+        yield* callbackAsEffect(cb, mpo_object).pipe(Effect.ignore);
         yield* im.close("OK", true);
     }).pipe(
         fail_as_protocol_error

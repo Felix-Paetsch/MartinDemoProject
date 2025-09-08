@@ -1,13 +1,15 @@
-import { Middleware as DebugMiddleware, Severity } from "../debug/exports";
-import { pluginDebugLogging } from "../debug/logging/middleware/plugin_middleware";
-import { Address, LocalAddress } from "../messaging/exports";
-import { Middleware as CommonMiddleware } from "../pluginSystem/common_lib/exports";
-import { KernelEnvironment, PluginReference } from "../pluginSystem/kernel_lib/exports";
-import { Bridge, MessagePartner, PluginEnvironment, PluginIdent } from "../pluginSystem/plugin_lib/exports";
-import { callbackAsResult, Success } from "../utils/exports";
+import { Middleware as DebugMiddleware, Severity } from "../../lib/src/debug/exports";
+import { clear_external_logs, log_external, log_external_mw } from "../../lib/src/debug/external_logging/log_external";
+import { Address, LocalAddress } from "../../lib/src/messaging/exports";
+import { Middleware as CommonMiddleware } from "../../lib/src/pluginSystem/common_lib/exports";
+import { KernelEnvironment, PluginReference } from "../../lib/src/pluginSystem/kernel_lib/exports";
+import { LibraryEnvironment } from "../../lib/src/pluginSystem/library/library_environment";
+import { Bridge, MessagePartner, PluginEnvironment, PluginIdent } from "../../lib/src/pluginSystem/plugin_lib/exports";
+import { callbackAsResult, Result, Success } from "../../lib/src/utils/exports";
 
 const side_plugin = async (env: PluginEnvironment) => {
-    console.log("<< STARTING SIDE PLUGIN >>")
+    console.log("<< STARTING SIDE PLUGIN >>");
+    log_external({ message: "Side plugin started" });
     env.on_plugin_request((mp: MessagePartner) => {
         mp.on_bridge((bridge: Bridge) => {
             bridge.on((data) => {
@@ -34,7 +36,7 @@ const main_plugin = async (env: PluginEnvironment) => {
     }
 
     const mp = res_1.value;
-    const res_2 = await mp.bridge();
+    const res_2: Result<Bridge, Error> = await mp.bridge();
     if (res_2.is_error) {
         throw res_2.error;
     }
@@ -49,18 +51,27 @@ const main_plugin = async (env: PluginEnvironment) => {
 class KernelImpl extends KernelEnvironment {
     register_kernel_middleware() {
         this.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        this.useMiddleware(pluginDebugLogging(this.address), "monitoring");
-        this.useMiddleware(DebugMiddleware.kernel("src/debug/logging/logs/logs.log"), "monitoring");
+        this.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
+        this.useMiddleware(log_external_mw(), "monitoring");
+        this.useMiddleware(DebugMiddleware.kernel("debug/logs/internal_logs.log"), "monitoring");
     }
 
     register_plugin_middleware(ref: PluginReference) {
         ref.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        ref.useMiddleware(pluginDebugLogging(this.address), "monitoring");
+        this.useMiddleware(log_external_mw(), "monitoring");
+        ref.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
     register_local_plugin_middleware(env: PluginEnvironment) {
         env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        env.useMiddleware(pluginDebugLogging(this.address), "monitoring");
+        this.useMiddleware(log_external_mw(), "monitoring");
+        env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
+    }
+
+    register_local_library_middleware(env: LibraryEnvironment) {
+        env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
+        this.useMiddleware(log_external_mw(), "monitoring");
+        env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
     async create_plugin(plugin_ident: PluginIdent) {
@@ -78,4 +89,7 @@ class KernelImpl extends KernelEnvironment {
 }
 
 Address.setLocalAddress(new LocalAddress("KERNEL"));
-new KernelImpl().start();
+clear_external_logs()?.then(
+    () => new KernelImpl().start()
+)//.then(r => console.log(r))
+

@@ -28,4 +28,8 @@ export class LibraryMessagePartner extends MessagePartner {
     _send_env_command(command: string, data: Json, timeout: number = 5000) {
         return this.plugin_env._send_command(this.address, command, data, timeout);
     }
+
+    remove() {
+        return super.remove("INTERNAL");
+    }
 }

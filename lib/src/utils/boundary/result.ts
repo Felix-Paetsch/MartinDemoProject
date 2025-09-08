@@ -7,6 +7,9 @@ export class Success<Res> {
     static promise<S>(r: S): ResultPromise<S, never> {
         return Promise.resolve(new Success(r))
     }
+    static empty(): ResultPromise<void, never> {
+        return Promise.resolve(new Success(undefined))
+    }
 }
 
 export function createFailure(
@@ -128,4 +131,4 @@ export class Failure<Err extends Error> extends Error {
 }
 
 export type Result<Res, Err extends Error> = Success<Res> | Failure<Err>;
-export type ResultPromise<Res, Err extends Error> = Promise<Result<Res, Err>>;
+export type ResultPromise<Res, Err extends Error> = Promise<Success<Res> | Failure<Err>>;

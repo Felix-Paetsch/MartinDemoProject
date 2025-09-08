@@ -1,8 +1,8 @@
 import { Effect, Schema } from "effect";
 import * as fs from "fs/promises";
 import * as path from "path";
-import { Middleware } from "../../../messaging/base/middleware";
-import { Log, recieveMessageLogs } from "../../../messaging/middleware/logging";
+import { Middleware } from "../../../../messaging/base/middleware";
+import { Log, recieveMessageLogs } from "../../../../messaging/middleware/logging";
 
 export function kernelDebugLogging(logFile: string = path.join(
     process.cwd(), "logs.log")

@@ -7,7 +7,7 @@ import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communi
 import { EnvironmentT } from "../../../common_lib/messageEnvironments/environment";
 import { KernelEnvironment } from "../kernel_env";
 
-export function _send_remove_plugin_message_impl(this: KernelEnvironment, address: Address, data?: Json) {
+export function _send_remove_plugin_message(this: KernelEnvironment, address: Address, data?: Json) {
     return Effect.gen(this, function* () {
         yield* yield* this._send_command(
             address,

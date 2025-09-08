@@ -53,12 +53,17 @@ export function asyncCallbackAsEffect<
 }
 
 export function callbackAsEffect<
+    Args extends any[]
+>(cb: (...args: Args) => void | Promise<void>, ...args: Args): Effect.Effect<void, CallbackError> {
+    return Effect.suspend(() => callbackAsEffectFn(cb)(...args));
+}
+
+export function callbackAsEffectFn<
     Args extends any[],
-    R
 >(
-    cb: (...args: Args) => R | Promise<R>
-): (...args: Args) => Effect.Effect<R, CallbackError> {
-    return Effect.fn("callbackAsEffect")(function* (
+    cb: (...args: Args) => void | Promise<void>
+): (...args: Args) => Effect.Effect<void, CallbackError> {
+    return Effect.fn("callbackAsEffectFn")(function* (
         ...args: Args
     ) {
         const res = yield* Effect.try({
@@ -94,9 +99,8 @@ export function asyncCallbackAsResult<
 }
 
 export function callbackAsResult<
-    Args extends any[],
-    R
->(cb: (...args: Args) => R | Promise<R>) {
+    Args extends any[]
+>(cb: (...args: Args) => void | Promise<void>) {
     return (...args: Args) =>
-        runEffectAsPromise(callbackAsEffect(cb)(...args));
+        runEffectAsPromise(callbackAsEffect(cb, ...args));
 }

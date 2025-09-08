@@ -26,6 +26,8 @@ b) Log data
 currently either to a file [node] or a global object [browser]. The latter can eventually be expanded to exfiltrate data via http.
 These logs have some functionality around them to query them.
 
+=> Unified logging system (?)
+
 ## Future ideas / requirements
 
 -   Performance Analysis

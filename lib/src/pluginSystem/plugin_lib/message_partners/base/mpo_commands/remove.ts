@@ -1,44 +1,51 @@
 import { Effect } from "effect";
-import { fail_as_protocol_error } from "../../../../../messaging/protocols/base/protocol_errors";
-import { Json } from "../../../../../utils/json";
+import { callbackAsEffect } from "../../../../../utils/boundary/callbacks";
+import { ResultToEffect, runEffectAsPromise } from "../../../../../utils/boundary/run";
+import { MessagePartner } from "../../message_partner/message_partner";
 import { MessagePartnerObject } from "../message_partner_object";
-import { MPOCommunicationHandler } from "./mpo_communication/MPOCommunicationHandler";
-
 
 export function register_remove_command(MPC: typeof MessagePartnerObject) {
     MPC.add_command({
         command: "remove_mpo",
-        on_first_request: (mp: MessagePartnerObject, ich: MPOCommunicationHandler, data: Json) => {
-            return Effect.gen(mp, function* () {
-                this.removed = true;
-                this.__remove_cb(data);
-                return yield* ich.respond("OK");
-            }).pipe(
-                fail_as_protocol_error
-            )
+        on_first_request: (mp: MessagePartnerObject) => {
+            return ResultToEffect(mp.remove("INTERNAL"));
         }
     });
 }
 
-export function on_remove_impl(this: MessagePartnerObject, cb: (data: Json) => void) {
+export function on_remove_impl(this: MessagePartnerObject, cb: () => void) {
     this.__remove_cb = cb;
 }
 
-export function __remove_cb_impl(this: MessagePartnerObject, data: Json): void {
-    // Default implementation - can be overridden
-}
+export function __remove_cb_impl(this: MessagePartnerObject): void { }
 
-export function remove_impl(this: MessagePartnerObject, data: Json = null) {
+export function remove(this: MessagePartnerObject, remove_where: "INTERNAL" | "EXTERNAL" | "BOTH" = "BOTH") {
     return Effect.gen(this, function* () {
         this.removed = true;
-        return yield* this._send_first_mpo_message("remove_mpo", data);
+        const eff = [];
+        if (remove_where === "EXTERNAL" || remove_where === "BOTH") {
+            eff.push(this._send_first_mpo_message("remove_mpo"));
+        }
+        if (remove_where === "INTERNAL" || remove_where === "BOTH") {
+            eff.push(callbackAsEffect(this.__remove_cb));
+        }
+
+        const messagePartner = this.message_partner;
+        if (messagePartner === this) {
+            MessagePartner.message_partners = MessagePartner.message_partners.filter(mp => mp !== this);
+        } else {
+            messagePartner._message_partner_objects = messagePartner._message_partner_objects.filter(mpo => mpo !== this);
+        }
+
+        yield* Effect.all(
+            eff,
+            {
+                concurrency: "unbounded",
+                mode: "either"
+            }
+        );
     }).pipe(
         Effect.ignore,
-        Effect.runPromise
+        runEffectAsPromise
     )
-}
-
-// Keep the original function for backward compatibility during transition
-export default function (MPC: typeof MessagePartnerObject) {
-    register_remove_command(MPC);
 }

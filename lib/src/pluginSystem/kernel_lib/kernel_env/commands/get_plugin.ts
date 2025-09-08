@@ -1,5 +1,4 @@
 import { Effect, Schema } from "effect";
-import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
 import { ResultToEffect } from "../../../../utils/boundary/run";
 import { Json } from "../../../../utils/json";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
@@ -29,12 +28,7 @@ export function register_get_plugin_command(KEV: typeof KernelEnvironment) {
                 yield* handler.close({
                     address: plugin.address.serialize(),
                     plugin_ident: plugin.plugin_ident
-                }, true).pipe(
-                    Effect.catchAll(e => ProtocolErrorN({
-                        message: "Failed to close handler",
-                        error: e
-                    }))
-                );
+                }, true).pipe(Effect.ignore);
             })
     })
 }

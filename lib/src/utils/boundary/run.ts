@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { asyncCallbackAsEffect, CallbackError } from "./callbacks";
+import { asyncCallbackAsEffect } from "./callbacks";
 import { createFailure, Failure, Result, ResultPromise, Success } from "./result";
 
 export function dangerouslyRunPromise<T>(e: Effect.Effect<T>): Promise<T> {
@@ -29,24 +29,26 @@ export function EffectAsPromiseFlash<T, E extends Error>(e: Effect.Effect<T, E>)
     return () => runEffectAsPromiseFlash(e)
 }
 
-export function ResultToEffect<T, E extends Error>(r: Result<T, E>): Effect.Effect<T, Failure<E>>;
-export function ResultToEffect<T, E extends Error>(r: ResultPromise<T, E>): Effect.Effect<T, Failure<E> | CallbackError>;
-export function ResultToEffect<T, E extends Error>(r: Result<T, E> | ResultPromise<T, E>): Effect.Effect<T, Failure<E> | CallbackError> {
+export function ResultToEffect<T, E extends Error>(r: Result<T, E>): Effect.Effect<T, Exclude<Failure<E>, Failure<never>>>;
+export function ResultToEffect<T, E extends Error>(r: ResultPromise<T, E>): Effect.Effect<T, Exclude<Failure<E>, Failure<never>>>;
+export function ResultToEffect<T, E extends Error>(r: Result<T, E> | ResultPromise<T, E>): Effect.Effect<T, Exclude<Failure<E>, Failure<never>>> {
     if (r instanceof Promise) {
         const res = asyncCallbackAsEffect(() => r)();
         // @effect-diagnostics-next-line missingEffectError:off
-        return res.pipe(Effect.andThen(r => {
-            if (r instanceof Failure) return Effect.fail(r as Failure<E>).pipe(
-                Effect.withSpan("ResultToEffect")
-            );
-            return Effect.succeed(r.value).pipe(
-                Effect.withSpan("ResultToEffect")
-            );
-        }));
+        return res.pipe(
+            Effect.catchAll(e => Effect.die(e)),
+            Effect.andThen(r => {
+                if (r instanceof Failure) return Effect.fail(r as any).pipe(
+                    Effect.withSpan("ResultToEffect")
+                );
+                return Effect.succeed(r.value).pipe(
+                    Effect.withSpan("ResultToEffect")
+                );
+            }));
     }
 
     // @effect-diagnostics-next-line missingEffectError:off
-    if (r instanceof Failure) return Effect.fail(r as Failure<E>).pipe(
+    if (r instanceof Failure) return Effect.fail(r as any).pipe(
         Effect.withSpan("ResultToEffect")
     );
     return Effect.succeed(r.value).pipe(

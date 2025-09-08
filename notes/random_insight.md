@@ -7,6 +7,14 @@ Each plugin randomly sends out a system of asserts it assumes on the other plugi
 File system:
 Provider, ability to subscribe / unsubscribe..
 
+As soon as we have that a library can talk about the messages it want to send
+it can be wrapped with a pluginenv just for that
+
+Learn about
+
+-   finalizers
+-   aquire, release, interruptability
+
 WASM:
 
 -   how does it work

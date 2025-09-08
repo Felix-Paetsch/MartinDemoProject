@@ -3,6 +3,7 @@ import { Severity } from "../../../debug/exports";
 import { Address } from "../../../messaging/base/address";
 import { log } from "../../../messaging/middleware/logging";
 import { ProtocolError } from "../../../messaging/protocols/base/protocol_errors";
+import { MessagePartner } from "../../../pluginSystem/plugin_lib/message_partners/message_partner/message_partner";
 import { CallbackError } from "../../../utils/boundary/callbacks";
 import { ResultPromise } from "../../../utils/boundary/result";
 import { Json } from "../../../utils/json";
@@ -29,6 +30,12 @@ export class PluginEnvironment extends EnvironmentCommunicator {
 
         const mw = new MPOCommunicationProtocol(env).middleware();
         this.useMiddleware(mw, "listeners");
+    }
+
+    message_partners() {
+        return MessagePartner.message_partners.filter(
+            mp => mp.env === this.env
+        );
     }
 
     log(message: Json, severity: Severity = Severity.INFO) {

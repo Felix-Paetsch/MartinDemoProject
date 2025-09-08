@@ -6,6 +6,10 @@ export abstract class AbstractLibraryImplementation {
     abstract exposes(msg: Message): string[];
     abstract call(fn: string, args: readonly Json[], msg: Message): Json | Promise<Json>;
 
+    is_disposed(): boolean {
+        return this._disposed;
+    }
+
     dispose(): void {
         if (this._disposed) {
             throw new Error("Library already disposed");

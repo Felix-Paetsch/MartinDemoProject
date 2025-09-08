@@ -1,9 +1,24 @@
+1. Handle everything gracefully - and write specification
+2. Review effect.ignore's and finalizers
+3. Add logging on error cases
+4. Review if we need a refactor
+5. Review if we really need cleanup logs
+6. Consider fancy things: make all callbacks have JSON => Promise<void>; timeouts
+
+-   What abt Middleware errors? (unexpected ones)
+-   Plugin.is_idle() - when requested a plugin, but it did its thing and now noone wants something from it. Idle should be an obt out and not opt in.. (?)
+    => How much ability to shoot into foot?
+
+-   timeouts caused by long callbacks should be triggered on the callback execution function
+    (ideally with interruption)
+-   Interruption? Defence against it?
+
+-   Eventually: Write out several message flows, maybe inside a folder on paper or so
 -   Why is there an extra address for messaging with local environments in the browser compared to node?
 -   Overwrite ResultPromise
 -   export ProtocolError
 -   better errors
 
--   Move things to effect.fn
 -   Still debug logging
 
 -   Sport

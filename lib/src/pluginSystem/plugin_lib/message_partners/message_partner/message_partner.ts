@@ -19,7 +19,7 @@ export class MessagePartner extends MessagePartnerObject {
         ));
     }
 
-    private message_partner_objects: MessagePartnerObject[] = [];
+    public _message_partner_objects: MessagePartnerObject[] = [];
     readonly MPOCommunication: MPOCommunicationProtocol;
 
     constructor(
@@ -43,7 +43,7 @@ export class MessagePartner extends MessagePartnerObject {
 
     register_message_partner_object(mpo: MessagePartnerObject) {
         if (!(mpo instanceof MessagePartner)) {
-            this.message_partner_objects.push(mpo);
+            this._message_partner_objects.push(mpo);
         }
     }
 
@@ -55,7 +55,7 @@ export class MessagePartner extends MessagePartnerObject {
             return Option.some(this);
         }
 
-        return Option.fromNullable(this.message_partner_objects.find(
+        return Option.fromNullable(this._message_partner_objects.find(
             mp => mp.uuid === uuid
         ));
     }

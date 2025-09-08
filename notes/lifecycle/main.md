@@ -43,3 +43,31 @@ In the outside world we can run test-cases over these matches. In particular als
 In general this
 a) Might be nice for testing
 b) Be nice for
+
+## Problems with cleanup:
+
+-   What happens on error?
+-   How to make it fast?
+-   What if cleanUps want to make callbacks to the object cleaned up (perhaps indirectly)
+-   Get rid of the "is removed" and just delete the object directly
+-   To remedy this: Add methods to see if an object exists (anymore)
+-   What happens on error with initialization?
+
+## Solutions:
+
+-   Only the top level thing is actually cleanUped
+-   Mostly forward processing
+-   No fragile logik
+-   Clear Cut validation that everything got removed, even in case of errors
+-   Every cleanup has a clear starting method/trigger
+-   Remove operations should be as minimal as possible
+-   We dont to extra cleanup on plugin user error (i.g. often Await cb, but ignore their errors)
+
+Fazit: Need good diagrams to display how things work
+
+## The general setup for removal is as follows:
+
+1. Set removed to true
+2. Callbacks
+3. Remove from arrays and so on
+4. "Remove from memory"

@@ -6,12 +6,14 @@
         "build": "cd lib && npm run build:full && npm pack && cd .. && npm install ./lib/pc-messaging-kernel-0.1.0.tgz && cd plugins/wasm_plugins && npm install ../../lib/pc-messaging-kernel-0.1.0.tgz",
         "typecheck": "cd lib && npm run typecheck && cd .. && tsc --noEmit",
         "scratch": "tsx watch scratchpad/index.ts",
+        "dev:node": "tsx watch demo/node/index.ts",
+        "dev:external": "tsx watch debug/server/index.ts",
         "dev:kernel": "cross-env BROWSER=true vite",
         "dev:plugin:iframe": "tsx watch plugins/iframe_plugins/index.ts",
         "dev:plugin:lib:hotBuild": "cd plugins/libraries && npm run dev",
         "dev:plugin:lib:serve": "cd plugins/libraries && npm run serve",
         "dev:plugin:lib": "concurrently \"npm run dev:plugin:lib:hotBuild\" \"npm run dev:plugin:lib:serve\"",
-        "dev": "concurrently \"npm run dev:kernel\" \"npm run dev:plugin:iframe\" \"npm run dev:plugin:lib:serve\" \"npm run dev:plugin:lib:hotBuild\""
+        "dev": "concurrently \"npm run dev:external\" \"npm run dev:node\""
     },
     "author": "",
     "license": "ISC",
@@ -23,7 +25,9 @@
         "chalk": "^5.6.0",
         "concurrently": "^9.2.1",
         "cross-env": "^10.0.0",
+        "dotenv": "^17.2.2",
         "effect": "^3.15.2",
+        "express": "^5.1.0",
         "pc-messaging-kernel": "file:lib/pc-messaging-kernel-0.1.0.tgz",
         "tsx": "^4.20.5",
         "vite": "^7.1.3"

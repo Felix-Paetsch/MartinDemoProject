@@ -6,7 +6,7 @@ import { EnvironmentT } from "../../../common_lib/messageEnvironments/environmen
 import { MessagePartner } from "../message_partner/message_partner";
 import { MPOCommunicationHandler } from "./mpo_commands/mpo_communication/MPOCommunicationHandler";
 import { ping_impl, register_ping_command } from "./mpo_commands/ping";
-import { __remove_cb_impl, on_remove_impl, register_remove_command, remove_impl } from "./mpo_commands/remove";
+import { __remove_cb_impl, on_remove_impl, register_remove_command, remove } from "./mpo_commands/remove";
 
 export class MPOInitializationError extends Data.TaggedError("MPOInitializationError")<{
     message_partner_uuid: string;
@@ -172,14 +172,14 @@ export class MessagePartnerObject {
     ping(): ResultPromise<true, Error> {
         return ping_impl.call(this);
     };
-    remove(data?: Json): Promise<void> {
-        return remove_impl.call(this, data);
+    remove(where: "INTERNAL" | "EXTERNAL" | "BOTH" = "BOTH"): ResultPromise<void, never> {
+        return remove.call(this, where);
     };
-    on_remove(cb: (data: Json) => void): void {
+    on_remove(cb: () => void): void {
         return on_remove_impl.call(this, cb);
     };
-    __remove_cb(data: Json): void {
-        return __remove_cb_impl.call(this, data);
+    __remove_cb(): void {
+        return __remove_cb_impl.call(this);
     };
 }
 

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Address } from "../../../../messaging/base/address";
 import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
 import { EnvironmentT } from "../../../../pluginSystem/common_lib/messageEnvironments/environment";
-import { callbackAsEffect, CallbackError } from "../../../../utils/boundary/callbacks";
+import { callbackAsEffectFn, CallbackError } from "../../../../utils/boundary/callbacks";
 import { runEffectAsPromise } from "../../../../utils/boundary/run";
 import { Json } from "../../../../utils/json";
 import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
@@ -14,7 +14,7 @@ import { PluginIdent, pluginIdentSchemaWithInstanceId } from "../plugin_ident";
 export function get_plugin_impl(this: PluginEnvironment, plugin_ident: PluginIdent) {
     return runEffectAsPromise(
         Effect.gen(this, function* () {
-            const handlerE = yield* this._send_command(
+            const handler = yield* yield* this._send_command(
                 this.kernel_address,
                 "get_plugin",
                 plugin_ident,
@@ -22,8 +22,6 @@ export function get_plugin_impl(this: PluginEnvironment, plugin_ident: PluginIde
             ).pipe(
                 Effect.provideService(EnvironmentT, this.env)
             );
-
-            const handler = yield* handlerE;
 
             const responseData = handler.protocol_data;
             const plugin_data = yield* Schema.decodeUnknown(
@@ -34,7 +32,7 @@ export function get_plugin_impl(this: PluginEnvironment, plugin_ident: PluginIde
             )(responseData);
 
             const mp_uuid = uuidv4();
-            const pluginHandlerE = yield* this._send_command(
+            yield* yield* this._send_command(
                 plugin_data.address,
                 "get_plugin",
                 {
@@ -46,7 +44,6 @@ export function get_plugin_impl(this: PluginEnvironment, plugin_ident: PluginIde
                 Effect.provideService(EnvironmentT, this.env)
             );
 
-            yield* pluginHandlerE;
             const messagePartner = new PluginMessagePartner(
                 plugin_data.address,
                 this.env,
@@ -68,7 +65,7 @@ export function _on_plugin_request_impl(mp: PluginMessagePartner, data?: Json): 
 }
 
 export function on_plugin_request_impl(this: PluginEnvironment, cb: (mp: PluginMessagePartner, data?: Json) => void) {
-    this._on_plugin_request = callbackAsEffect(cb);
+    this._on_plugin_request = callbackAsEffectFn(cb);
 }
 
 export function register_get_plugin_command(PEC: typeof PluginEnvironment) {
@@ -101,18 +98,8 @@ export function register_get_plugin_command(PEC: typeof PluginEnvironment) {
                     plugin_ident,
                     mp_uuid
                 );
-                yield* communicator._on_plugin_request(message_partner, data).pipe(
-                    Effect.catchAll(e => ProtocolErrorN({
-                        message: "Error in plugin request callback",
-                        error: e instanceof Error ? e : new Error(String(e))
-                    }))
-                );
-                yield* handler.close({ success: true, partner_created: true }, true).pipe(
-                    Effect.catchAll(e => ProtocolErrorN({
-                        message: "Failed to close handler",
-                        error: new Error(String(e))
-                    }))
-                );
+                yield* communicator._on_plugin_request(message_partner, data).pipe(Effect.ignore);
+                yield* handler.close("OK", true);
             })
     })
 }
