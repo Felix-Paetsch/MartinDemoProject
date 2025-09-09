@@ -2,12 +2,10 @@ import { Effect, Equal } from "effect";
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from "../../../messaging/base/address";
 import { Middleware } from "../../../messaging/base/middleware";
-import { ProtocolError } from "../../../messaging/protocols/base/protocol_errors";
 import { LibraryEnvironment, LibraryIdent } from "../../../pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../../../pluginSystem/library/library_implementation";
 import { Failure, ResultPromise, Success } from "../../../utils/boundary/result";
 import { EffectToResult } from "../../../utils/boundary/run";
-import { Json } from "../../../utils/json";
 import { EnvironmentCommunicator } from "../../common_lib/env_communication/environment_communicator";
 import { Environment } from "../../common_lib/messageEnvironments/environment";
 import { KernelEnv } from "../../common_lib/messageEnvironments/kernelEnvironment";
@@ -17,7 +15,7 @@ import { PluginIdent, PluginIdentWithInstanceId } from "../../plugin_lib/plugin_
 import { register_get_library_command } from "./commands/get_library";
 import { register_get_plugin_command as register_kernel_get_plugin_command } from "./commands/get_plugin";
 import { register_kernel_message_command } from "./commands/kernel_message";
-import { _send_remove_plugin_message, register_remove_plugin_command as register_kernel_remove_plugin_command } from "./commands/remove_plugin";
+import { register_remove_plugin_command as register_kernel_remove_plugin_command } from "./commands/remove_plugin";
 import { LibraryReference } from "./external_reference/library_reference";
 import { PluginReference } from "./external_reference/plugin_reference";
 
@@ -207,8 +205,24 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
 
     on_kernel_message(command: string, data: any, plugin_ident: PluginIdentWithInstanceId) { }
 
-    _send_remove_plugin_message(address: Address, data?: Json): Effect.Effect<void, ProtocolError> {
-        return _send_remove_plugin_message.call(this, address, data);
+    _send_remove_plugin_message(address: Address) {
+        return this._send_command(
+            address,
+            "remove_plugin"
+        ).pipe(
+            Effect.andThen(e => e),
+            Effect.ignore
+        );
+    };
+
+    _send_remove_library_message(address: Address) {
+        return this._send_command(
+            address,
+            "remove_library"
+        ).pipe(
+            Effect.andThen(e => e),
+            Effect.ignore
+        );
     };
 }
 

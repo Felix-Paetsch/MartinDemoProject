@@ -27,7 +27,7 @@ export class PluginReference extends ExternalReference {
         const sremove = super.remove.bind(this);
         return Effect.gen(this, function* () {
             // Awaiting response, but ignoreing failure
-            yield* this.kernel._send_remove_plugin_message(this.address, this.plugin_ident).pipe(Effect.ignore);
+            yield* this.kernel._send_remove_plugin_message(this.address).pipe(Effect.ignore);
             yield* Effect.promise(sremove);
         }).pipe(
             Effect.withSpan("PluginReferenceRemove"),

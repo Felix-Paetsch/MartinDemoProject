@@ -6,6 +6,7 @@ import { MPOCommunicationProtocol } from "../plugin_lib/message_partners/base/mp
 import { register_call_command } from "./commands/call";
 import { register_exposes_command } from "./commands/exposes";
 import { AbstractLibraryImplementation } from "./library_implementation";
+import { register_remove_library_command } from "./commands/remove";
 
 export const libraryIdentSchema = Schema.Struct({
     name: Schema.String,
@@ -25,8 +26,9 @@ export class LibraryEnvironment extends EnvironmentCommunicator {
 
         const mw = new MPOCommunicationProtocol(env).middleware();
         this.useMiddleware(mw, "listeners");
-
-        register_exposes_command(LibraryEnvironment);
-        register_call_command(LibraryEnvironment);
     }
 }
+
+register_exposes_command(LibraryEnvironment);
+register_call_command(LibraryEnvironment);
+register_remove_library_command(LibraryEnvironment);

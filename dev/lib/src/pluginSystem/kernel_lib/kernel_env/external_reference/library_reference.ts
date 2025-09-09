@@ -1,3 +1,4 @@
+import { Effect } from "effect";
 import { Address } from "../../../../messaging/base/address";
 import { Middleware } from "../../../../messaging/base/middleware";
 import { LibraryIdent } from "../../../../pluginSystem/library/library_environment";
@@ -16,5 +17,17 @@ export class LibraryReference extends ExternalReference {
     ) {
         super(address, kernel, on_remove, registerOwnMiddlewareMethod);
         this.library_ident = library_ident;
+    }
+
+    remove(): Promise<void> {
+        const sremove = super.remove.bind(this);
+        return Effect.gen(this, function* () {
+            // Awaiting response, but ignoreing failure
+            yield* this.kernel._send_remove_library_message(this.address).pipe(Effect.ignore);
+            yield* Effect.promise(sremove);
+        }).pipe(
+            Effect.withSpan("LibraryReferenceRemove"),
+            Effect.runPromise
+        );
     }
 }

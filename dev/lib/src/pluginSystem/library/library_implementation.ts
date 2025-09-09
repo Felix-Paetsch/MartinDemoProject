@@ -17,15 +17,15 @@ export abstract class AbstractLibraryImplementation {
         this._disposed = true;
     }
 
-    static from_object(
-        obj: Record<string, (...args: Json[]) => Json>,
+    static from_object<Args extends Json[]>(
+        obj: Record<string, (...args: Args) => Json | Promise<Json>>,
         dispose: () => void = () => { }
     ): AbstractLibraryImplementation {
         return new ConcreteLibraryImplementation(
             () => Object.keys(obj),
             (fn, args) => {
                 if (Object.keys(obj).includes(fn) && typeof obj[fn] === "function") {
-                    return obj[fn](...args);
+                    return obj[fn](...args as Args);
                 }
                 throw new Error("Function not found");
             },

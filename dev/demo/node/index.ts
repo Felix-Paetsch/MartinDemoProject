@@ -2,8 +2,9 @@ import { Middleware as DebugMiddleware, Severity } from "../../lib/src/debug/exp
 import { clear_external_logs, log_external, log_external_mw } from "../../lib/src/debug/external_logging/log_external";
 import { Address, LocalAddress } from "../../lib/src/messaging/exports";
 import { Middleware as CommonMiddleware } from "../../lib/src/pluginSystem/common_lib/exports";
-import { KernelEnvironment, PluginReference } from "../../lib/src/pluginSystem/kernel_lib/exports";
-import { LibraryEnvironment } from "../../lib/src/pluginSystem/library/library_environment";
+import { KernelEnvironment, LibraryReference, PluginReference } from "../../lib/src/pluginSystem/kernel_lib/exports";
+import { LibraryEnvironment, LibraryIdent } from "../../lib/src/pluginSystem/library/library_environment";
+import { AbstractLibraryImplementation } from "../../lib/src/pluginSystem/library/library_implementation";
 import { Bridge, MessagePartner, PluginEnvironment, PluginIdent } from "../../lib/src/pluginSystem/plugin_lib/exports";
 import { callbackToResult, Result, Success } from "../../lib/src/utils/exports";
 
@@ -22,6 +23,17 @@ const side_plugin = async (env: PluginEnvironment) => {
 
         env.log("Hello from side plugin", Severity.INFO);
     });
+
+    const lib = await env.get_library({
+        name: "test",
+        version: "1.0.0"
+    });
+    if (lib.is_error) {
+        console.log("This is an error");
+        throw lib.error;
+    }
+    const res = await lib.value.call("hi", ["Martin"]);
+    console.log(res);
 }
 
 const main_plugin = async (env: PluginEnvironment) => {
@@ -47,6 +59,8 @@ const main_plugin = async (env: PluginEnvironment) => {
         console.log(data + ", and I must still scream");
     });
 }
+
+let lib_ref: LibraryReference | null = null;
 
 class KernelImpl extends KernelEnvironment {
     register_kernel_middleware() {
@@ -74,6 +88,19 @@ class KernelImpl extends KernelEnvironment {
         env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
+    async create_library(library_ident: LibraryIdent) {
+        const lib = AbstractLibraryImplementation.from_object({
+            "hi": (name: string) => `Hello ${name}`
+        }, () => {
+            console.log("Library disposed");
+            lib_ref = null;
+        });
+        const res = await this.create_local_library(library_ident, lib);
+        if (res.is_error) return res;
+        lib_ref = res.value;
+        return res;
+    }
+
     async create_plugin(plugin_ident: PluginIdent) {
         const name = plugin_ident.name;
         const plugin = name === "start" ? main_plugin : side_plugin;
@@ -89,7 +116,10 @@ class KernelImpl extends KernelEnvironment {
 }
 
 Address.setLocalAddress(new LocalAddress("KERNEL"));
+const kernel = new KernelImpl();
 clear_external_logs()?.then(
-    () => new KernelImpl().start()
-)//.then(r => console.log(r))
+    () => kernel.start()
+).then(r => {
+    kernel.remove_library(lib_ref!)
+});
 
