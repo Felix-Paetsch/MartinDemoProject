@@ -1,20 +1,20 @@
 import { Effect } from "effect";
 import { Address } from "./address";
 import { findEndpointOrFail } from "./endpoints";
-import { LocalComputedMessageData } from "./local_computed_message_data";
 import { Message } from "./message";
-import { MiddlewareInterrupt, MiddlewarePassthrough } from "./middleware";
+import { isMiddlewareInterrupt, MiddlewareContinue, MiddlewareInterrupt } from "./middleware";
+import { callbackToEffect } from "./errors/main";
 
 export const applyMiddlewareEffect =
-    Effect.fn("applyMiddlewareEffect")(function* (msg: Message, of_address: Address, lcmd: LocalComputedMessageData) {
+    Effect.fn("applyMiddlewareEffect")(function* (msg: Message, of_address: Address) {
         const endpoint = yield* findEndpointOrFail(of_address);
 
         for (const middleware of endpoint.middlewares) {
-            const interrupt = yield* middleware(msg, lcmd);
-            if (interrupt == MiddlewareInterrupt) {
-                return interrupt as MiddlewarePassthrough;
+            const interrupt = yield* callbackToEffect(middleware, msg);
+            if (isMiddlewareInterrupt(interrupt)) {
+                return MiddlewareInterrupt;
             }
         }
 
-        return yield* Effect.void;
+        return MiddlewareContinue;
     }); 

@@ -1,5 +1,5 @@
 import { Middleware } from "../base/middleware";
-import { collection_middleware, harpoon_middleware } from "./collection";
+import { collection_middleware } from "./collection";
 
 type ExtractPartitionKey<T> = T extends string
     ? T
@@ -22,22 +22,22 @@ export function partition_middleware<
 >(
     partitions: T
 ): PartitionMiddlewareGen<ExtractPartitionKeys<T>> {
-    const partitionMap: { [key: string]: ReturnType<typeof harpoon_middleware> } = {};
+    const partitionMap: { [key: string]: ReturnType<typeof collection_middleware> } = {};
 
     for (const partition of partitions) {
         let key: string;
-        let currentHarpoonMiddleware: ReturnType<typeof harpoon_middleware>;
+        let currentHarpoonMiddleware: ReturnType<typeof collection_middleware>;
 
         if (typeof partition === 'string') {
             key = partition;
-            currentHarpoonMiddleware = harpoon_middleware([]);
+            currentHarpoonMiddleware = collection_middleware([]);
         } else if (Array.isArray(partition)) {
             const [k, middleware] = partition;
             key = k;
             if (Array.isArray(middleware)) {
-                currentHarpoonMiddleware = harpoon_middleware(middleware);
+                currentHarpoonMiddleware = collection_middleware(middleware);
             } else {
-                currentHarpoonMiddleware = harpoon_middleware([middleware]);
+                currentHarpoonMiddleware = collection_middleware([middleware]);
             }
         } else {
             throw new Error("Invalid partition format.");
@@ -49,7 +49,7 @@ export function partition_middleware<
     const mainMiddleware = (): Middleware => {
         return collection_middleware(
             ...Object.values(partitionMap).map(m => m())
-        );
+        )();
     };
 
     return new Proxy(mainMiddleware, {

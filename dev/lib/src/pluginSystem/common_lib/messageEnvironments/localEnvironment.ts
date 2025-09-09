@@ -1,9 +1,9 @@
 import { Effect } from "effect";
 import { Address, LocalAddress } from "../../../messaging/base/address";
-import { CommunicationChannel, MessageChannelTransmissionError, registerCommunicationChannel } from "../../../messaging/base/communication_channel";
+import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/base/communication_channel";
 import { LocalComputedMessageData } from "../../../messaging/base/local_computed_message_data";
 import { Message, MessageT, TransmittableMessage, TransmittableMessageT } from "../../../messaging/base/message";
-import { Middleware, MiddlewareInterrupt, useMiddleware } from "../../../messaging/base/middleware";
+import { isMiddlewareInterrupt, Middleware, MiddlewareInterrupt, useMiddleware } from "../../../messaging/base/middleware";
 import { AddressNotFoundError } from "../../../messaging/base/send";
 import { harpoon_middleware } from "../../../messaging/middleware/collection";
 import { Environment } from "./environment";
@@ -80,7 +80,7 @@ const localEndpointMiddleware = (
             }
 
             const interupt = yield* at_endpoint(msg, first_message_data);
-            if (interupt === MiddlewareInterrupt) {
+            if (isMiddlewareInterrupt(interupt)) {
                 return interupt;
             }
 
@@ -89,7 +89,7 @@ const localEndpointMiddleware = (
         }
 
         const interupt = yield* before_endpoint(msg, message_data);
-        if (interupt === MiddlewareInterrupt) {
+        if (isMiddlewareInterrupt(interupt)) {
             return interupt;
         }
 

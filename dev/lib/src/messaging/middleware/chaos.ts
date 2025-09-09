@@ -1,38 +1,37 @@
 import { Effect } from "effect";
 import { Address } from "../base/address";
-import { LocalComputedMessageData } from "../base/local_computed_message_data";
 import { Message } from "../base/message";
-import { Middleware, MiddlewareContinue, MiddlewareInterrupt } from "../base/middleware";
+import { Middleware, MiddlewareContinue, MiddlewareInterrupt, EffectToMiddleware } from "../base/middleware";
 
 export function block_address(address: Address, m: BlockingMethod): Middleware {
-    return Effect.fn("block_address")(
-        function* (message: Message, lcmd: LocalComputedMessageData) {
+    return EffectToMiddleware(Effect.fn("block_address")(
+        function* (message: Message) {
             if (message.target !== address) {
                 return MiddlewareContinue;
             }
-            if (m(message, lcmd)) {
+            if (m(message)) {
                 return MiddlewareInterrupt;
             }
             return MiddlewareContinue;
         }
-    )
+    ));
 }
 
 export function block_all_communication(m: BlockingMethod): Middleware {
-    return Effect.fn("block_all_communication")(
-        function* (message: Message, lcmd: LocalComputedMessageData) {
-            if (m(message, lcmd)) {
+    return EffectToMiddleware(Effect.fn("block_all_communication")(
+        function* (message: Message) {
+            if (m(message)) {
                 return MiddlewareInterrupt;
             }
             return MiddlewareContinue;
         }
-    )
+    ));
 }
 
-type BlockingMethod = (message: Message, lcmd: LocalComputedMessageData) => boolean; // True means the message is blocked
+type BlockingMethod = (message: Message) => boolean; // True means the message is blocked
 
 export function with_probability(probability: number): BlockingMethod {
-    return (message: Message, lcmd: LocalComputedMessageData) => Math.random() < probability;
+    return (message: Message) => Math.random() < probability;
 }
 
 export function for_time_periods(duration: number, expected_time_to_first_event_s: number): BlockingMethod {
@@ -90,10 +89,10 @@ export function after_probability(probability: number): BlockingMethod {
 
 function block_after_first_failure(blocking_method: BlockingMethod): BlockingMethod {
     let failed = false;
-    return (message: Message, lcmd: LocalComputedMessageData) => {
+    return (message: Message) => {
         if (failed) {
             return true;
         }
-        return failed = blocking_method(message, lcmd);
+        return failed = blocking_method(message);
     }
 }

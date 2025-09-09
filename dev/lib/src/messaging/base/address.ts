@@ -7,7 +7,6 @@ export class AddressDeserializationError extends Data.TaggedError("AddressDeseri
 export class AddressT extends Context.Tag("AddressT")<AddressT, Address>() { }
 
 export type SerializedAddress = `primary_id: ${string}\nsecondary_id: ${string}`
-    & { readonly __brand: "SerializedAddress" };
 
 export class Address implements Equal.Equal {
     readonly _primary_id: string;
@@ -57,14 +56,20 @@ export class Address implements Equal.Equal {
         return this.serialize();
     }
 
-    static deserialize(serialized: SerializedAddress): Effect.Effect<Address, AddressDeserializationError> {
+    static deserialize(serialized: SerializedAddress): Address {
+        return Address.deserializeFromUnkownE(serialized).pipe(
+            Effect.runSync
+        );
+    }
+
+    static deserializeE(serialized: SerializedAddress): Effect.Effect<Address, AddressDeserializationError> {
         return Schema.decode(Address.AddressFromString)(serialized)
             .pipe(
                 Effect.catchTag("ParseError", () => new AddressDeserializationError({ address: serialized }))
             )
     }
 
-    static deserializeFromUnkown(serialized: unknown): Effect.Effect<Address, AddressDeserializationError> {
+    static deserializeFromUnkownE(serialized: unknown): Effect.Effect<Address, AddressDeserializationError> {
         return Schema.decodeUnknown(Address.AddressFromString)(serialized)
             .pipe(
                 Effect.catchTag("ParseError", () => new AddressDeserializationError({ address: serialized }))

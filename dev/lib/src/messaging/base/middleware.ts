@@ -1,16 +1,25 @@
-import { Context, Effect } from "effect";
+import { Context, Effect, flow } from "effect";
 import { Address } from "./address";
 import { findEndpoint } from "./endpoints";
-import { LocalComputedMessageData } from "./local_computed_message_data";
 import { Message } from "./message";
+import { CallbackError } from "./errors/errors";
 
-type MiddlewareInterrupt = { readonly __brand: "MiddlewareInterrupt" };
-type MiddlewareContinue = { readonly __brand: "MiddlewareContinue" } | void | undefined;
+type MiddlewareInterrupt = false;
+type MiddlewareContinue = true | void | undefined;
 export type MiddlewarePassthrough = MiddlewareInterrupt | MiddlewareContinue;
-export const MiddlewareInterrupt: MiddlewareInterrupt = { __brand: "MiddlewareInterrupt" } as MiddlewareInterrupt;
-export const MiddlewareContinue: MiddlewareContinue = { __brand: "MiddlewareContinue" } as MiddlewareContinue;
+export const MiddlewareInterrupt: MiddlewareInterrupt = false;
+export const MiddlewareContinue: MiddlewareContinue = true;
 
-export type Middleware = (message: Message, lcmd: LocalComputedMessageData) => Effect.Effect<MiddlewarePassthrough, never>;
+export function isMiddlewareInterrupt(interrupt: MiddlewarePassthrough): interrupt is MiddlewareInterrupt {
+    return interrupt === false;
+}
+
+export function isMiddlewareContinue(interrupt: MiddlewarePassthrough): interrupt is MiddlewareContinue {
+    return interrupt !== false;
+}
+
+export type Middleware = (message: Message) => MiddlewarePassthrough | Promise<MiddlewarePassthrough>;
+export type MiddlewareEffect = (message: Message) => Effect.Effect<MiddlewarePassthrough, CallbackError>;
 
 export type MiddlewareConf = {
     readonly middleware: Middleware;
@@ -33,3 +42,19 @@ export const useMiddleware = Effect.fn("useMiddleware")(
         endpoint.middlewares.push(middleware);
     }
 );
+
+export const EffectToMiddleware = (middleware: MiddlewareEffect): Middleware => {
+    return flow(middleware, (e) => {
+        let err: CallbackError | undefined;
+        return e.pipe(
+            Effect.catchAll(e => {
+                err = e;
+                return Effect.succeed(true);
+            }),
+            Effect.runPromise
+        ).then((r) => {
+            if (err) throw err.error;
+            return r;
+        })
+    });
+}

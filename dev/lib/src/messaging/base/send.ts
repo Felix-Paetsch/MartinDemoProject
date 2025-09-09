@@ -1,100 +1,110 @@
-import { Context, Data, Effect, Equal } from "effect";
+import { Context, Effect, Equal } from "effect";
 import { Address } from "./address";
 import { applyMiddlewareEffect } from "./apply_middleware_effect";
-import { sendThroughCommunicationChannel } from "./communication_channel";
 import { findEndpointOrFail } from "./endpoints";
-import { applyErrorHandler, applyAnomalyHandler } from "./listen";
-import { LocalComputedMessageData, LocalComputedMessageDataT } from "./local_computed_message_data";
-import { Message, MessageT } from "./message";
-import { MiddlewareInterrupt } from "./middleware";
+import { Message, TransmittableMessage } from "./message";
+import { isMiddlewareInterrupt } from "./middleware";
+import { callbackToEffectUnhandled } from "./errors/main";
+import { HandledError } from "./errors/errors";
+import { MessageChannelTransmissionError } from "./errors/anomalies";
 
-export class AddressNotFoundError extends Data.TaggedError("AddressNotFoundError")<{
-        address: Address;
-}> { }
+export const send = Effect.fn("send")(function* (msg: TransmittableMessage) {
+    if (typeof msg === "string") {
+        msg = yield* Message.deserialize(msg).pipe(
+            Effect.catchAll(HandledError.handleA)
+        );
+    }
 
-export const send = Effect.fn("send")(function* (msg: Message, currentLocalComputedMessageData: Partial<LocalComputedMessageData> | null = null) {
-        const address = msg.target;
-        const lcmd: LocalComputedMessageData = {
-                ...(currentLocalComputedMessageData || {}),
-                at_target: false,
-                at_source: false,
-                current_address: Address.local_address,
-                direction: "incoming"
-        };
+    const was_sent = msg.from_external;
+    const address = msg.target;
+    msg.local_data = {
+        ...msg.local_data,
+        at_target: false,
+        at_source: false,
+        current_address: Address.local_address,
+        direction: "incoming"
+    };
+    msg.from_external = true;
 
-        // at kernel
-        if (!currentLocalComputedMessageData && Equal.equals(address, Address.local_address)) {
-                Object.assign(lcmd, {
-                        at_target: true,
-                        at_source: true,
-                        current_address: Address.local_address,
-                        direction: "local"
-                });
-
-                yield* applyMiddlewareEffect(msg, Address.local_address, lcmd);
-                return yield* Effect.void;
-
-        }
-
-        // incoming to kernel at kernel
-        if (Equal.equals(address, Address.local_address)) {
-                Object.assign(lcmd, {
-                        at_target: true,
-                        at_source: false,
-                        current_address: Address.local_address,
-                        direction: "incoming"
-                });
-
-                yield* applyMiddlewareEffect(msg, Address.local_address, lcmd);
-                return yield* Effect.void;
-        } else if (currentLocalComputedMessageData) {
-                // incoming to kernel from somewhere else -> run incomming mw
-                Object.assign(lcmd, {
-                        at_target: false,
-                        at_source: false, // !exists_lcmd,
-                        current_address: Address.local_address,
-                        direction: "incoming"
-                });
-
-                const interrupt = yield* applyMiddlewareEffect(msg, Address.local_address, lcmd);
-
-                if (interrupt == MiddlewareInterrupt) {
-                        return yield* Effect.void;
-                }
-        }
-
-        // Just send to kernel or after processing incommming
-        const endpoint = yield* findEndpointOrFail(address);
-
-        Object.assign(lcmd, {
-                at_target: false,
-                at_source: !currentLocalComputedMessageData,
-                current_address: Address.local_address,
-                direction: "outgoing"
+    // at kernel
+    if (!was_sent && Equal.equals(address, Address.local_address)) {
+        Object.assign(msg.local_data, {
+            at_target: true,
+            at_source: true,
+            current_address: Address.local_address,
+            direction: "local"
         });
 
-        // Outgoing from kernel 
-        const interrupt2 = yield* applyMiddlewareEffect(msg, Address.local_address, lcmd);
+        yield* applyMiddlewareEffect(msg, Address.local_address);
+        return yield* Effect.void;
 
-        if (interrupt2 == MiddlewareInterrupt) {
-                return yield* Effect.void;
-        }
+    }
 
-        Object.assign(lcmd, {
-                at_target: false,
-                at_source: false,
-                current_address: Address.local_address,
-                direction: "outgoing"
+    // incoming to kernel at kernel
+    if (Equal.equals(address, Address.local_address)) {
+        Object.assign(msg.local_data, {
+            at_target: true,
+            at_source: false,
+            current_address: Address.local_address,
+            direction: "incoming"
         });
 
-        // Outgoing via address
-        const interrupt3 = yield* applyMiddlewareEffect(msg, msg.target, lcmd);
+        yield* applyMiddlewareEffect(msg, Address.local_address);
+        return yield* Effect.void;
+    } else if (was_sent) {
+        // incoming to kernel from somewhere else -> run incomming mw
+        Object.assign(msg.local_data, {
+            at_target: false,
+            at_source: false, // !exists_lcmd,
+            current_address: Address.local_address,
+            direction: "incoming"
+        });
 
-        if (interrupt3 == MiddlewareInterrupt) {
-                return yield* Effect.void;
+        const interrupt = yield* applyMiddlewareEffect(msg, Address.local_address);
+
+        if (isMiddlewareInterrupt(interrupt)) {
+            return yield* Effect.void;
         }
+    }
 
-        return yield* sendThroughCommunicationChannel(endpoint.communicationChannel, msg.serialize())
+    // Just send to kernel or after processing incommming
+    const endpoint = yield* findEndpointOrFail(address);
+
+    Object.assign(msg.local_data, {
+        at_target: false,
+        at_source: !was_sent,
+        current_address: Address.local_address,
+        direction: "outgoing"
+    });
+
+    // Outgoing from kernel 
+    const interrupt2 = yield* applyMiddlewareEffect(msg, Address.local_address);
+
+    if (isMiddlewareInterrupt(interrupt2)) {
+        return yield* Effect.void;
+    }
+
+    Object.assign(msg.local_data, {
+        at_target: false,
+        at_source: false,
+        current_address: Address.local_address,
+        direction: "outgoing"
+    });
+
+    // Outgoing via address
+    const interrupt3 = yield* applyMiddlewareEffect(msg, msg.target);
+
+    if (isMiddlewareInterrupt(interrupt3)) {
+        return yield* Effect.void;
+    }
+
+    return yield* callbackToEffectUnhandled(endpoint.communicationChannel.send, msg.serialize()).pipe(
+        Effect.mapError(e => {
+            if (e instanceof HandledError) return e;
+            return new MessageChannelTransmissionError(e);
+        }),
+        Effect.catchAll(HandledError.handleA)
+    )
 })
 
 export type SendEffect = (m: Message) => ReturnType<typeof send>;

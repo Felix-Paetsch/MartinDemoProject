@@ -1,10 +1,8 @@
 import { Context, Data, Deferred, Duration, Effect, Schedule, Schema } from "effect";
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from "../base/address";
-import { InvalidMessageFormatError, MessageTransmissionError } from "../base/errors/message_errors";
-import { LocalComputedMessageData } from "../base/local_computed_message_data";
 import { Message } from "../base/message";
-import { Middleware, MiddlewareContinue, MiddlewareInterrupt } from "../base/middleware";
+import { Middleware, MiddlewareContinue, MiddlewareInterrupt, EffectToMiddleware } from "../base/middleware";
 import { send as kernel_send, SendEffect } from "../base/send";
 import { Json } from "../../utils/json";
 import { guard_at_target } from "./guard";
@@ -33,6 +31,16 @@ export class ChainMessageResultT extends Context.Tag("ChainMessageResultT")<
     ChainMessageResultT,
     ChainMessageResult
 >() { }
+
+export class MessageTransmissionError extends Data.TaggedError("MessageTransmissionError")<{
+    error: Error;
+}> { }
+
+export class InvalidMessageFormatError extends Data.TaggedError("InvalidMessageFormatError")<{
+    Message: Message;
+    error: Error;
+    message: string;
+}> { }
 
 export type ChainContinueEffect = Effect.Effect<
     Effect.Effect<ChainMessageResult, ChainTimeout, never>,
@@ -111,19 +119,17 @@ const make_chain_message_promise = Effect.fn("make_chain_message_promise")(
         return deferred_with_timeout;
     });
 
-
-
 export const chain_middleware = (
-    on_first_request: (message: Message, lcmd: LocalComputedMessageData) => Effect.Effect<void, never, ResponseFunctionT | ChainMessageResultT>,
-    should_process_message: (message: Message, lcmd: LocalComputedMessageData) => Effect.Effect<boolean, never>
+    on_first_request: (message: Message) => Effect.Effect<void, never, ResponseFunctionT | ChainMessageResultT>,
+    should_process_message: (message: Message) => Effect.Effect<boolean, never>
 ) => guard_at_target(
-    Effect.fn("chain_middleware")(
-        function* (message: Message, lcmd: LocalComputedMessageData) {
+    EffectToMiddleware(Effect.fn("chain_middleware")(
+        function* (message: Message) {
             const chain_message = message.meta_data.chain_message;
             if (
                 typeof chain_message === "undefined"
-                || !lcmd.at_target
-                || !(yield* should_process_message(message, lcmd))
+                || !message.local_data.at_target
+                || !(yield* should_process_message(message))
             ) {
                 return MiddlewareContinue;
             }
@@ -149,7 +155,9 @@ export const chain_middleware = (
             const promise_key = get_message_promise_key(data.msg_chain_uid, data.current_msg_chain_length, "recieve");
 
             if (data.current_msg_chain_length === 1) {
-                yield* on_first_request(message, lcmd).pipe(Effect.provide(chain_message_context));
+                yield* on_first_request(message).pipe(
+                    Effect.provide(chain_message_context)
+                );
             } else if (chain_queue[promise_key]) {
                 yield* chain_queue[promise_key].on_chain_message_result({
                     message: message,
@@ -164,7 +172,7 @@ export const chain_middleware = (
             Effect.tapError(e => Effect.logError(e)),
             Effect.ignore
         )
-    )
+    ))
 )
 
 const continue_chain_fn = (request_chain_message_meta_data: typeof chain_message_schema.Type): ResponseFunction => {
@@ -197,25 +205,25 @@ const continue_chain_fn = (request_chain_message_meta_data: typeof chain_message
             });
 
             const prom = yield* make_chain_message_promise(res, msg_chain_uid, new_timeout ?? timeout);
-            yield* send(res);
+            yield* send(res).pipe(Effect.ignore);
 
             return prom;
         });
 }
 
 export const id_chain_middleware = (
-    on_first_request: (message: Message, lcmd: LocalComputedMessageData) => Effect.Effect<void, never, ResponseFunctionT | ChainMessageResultT>,
+    on_first_request: (message: Message) => Effect.Effect<void, never, ResponseFunctionT | ChainMessageResultT>,
     id: string,
-    should_process_message: (message: Message, lcmd: LocalComputedMessageData) => Effect.Effect<boolean, never> = () => Effect.succeed(true)
+    should_process_message: (message: Message) => Effect.Effect<boolean, never> = () => Effect.succeed(true)
 ): Middleware & {
     make_message_chain: (message: Message, timeout?: number, current_sender?: Address) => Effect.Effect<Message, ChainTimeout>
 } => {
     const mw = chain_middleware(
         on_first_request,
         Effect.fn("id_chain_middleware_should_process_message")(
-            function* (message: Message, lcmd: LocalComputedMessageData) {
+            function* (message: Message) {
                 return (message.meta_data as any).chain_message?.chain_middleware_id === id
-                    && (yield* should_process_message(message, lcmd));
+                    && (yield* should_process_message(message));
             })
     );
 

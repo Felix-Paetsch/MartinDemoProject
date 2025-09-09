@@ -1,23 +1,23 @@
-import { Effect } from "effect";
-import { LocalComputedMessageData } from "../base/local_computed_message_data";
+
 import { Message } from "../base/message";
-import { Middleware, MiddlewareContinue, MiddlewareInterrupt } from "../base/middleware";
+import { isMiddlewareContinue, isMiddlewareInterrupt, Middleware, MiddlewareContinue, MiddlewareInterrupt } from "../base/middleware";
 
-export function harpoon_middleware(arr: Middleware[]): Array<Middleware> & (() => Middleware);
-export function harpoon_middleware(...arr: Middleware[]): Array<Middleware> & (() => Middleware);
-export function harpoon_middleware(...args: any[]): Array<Middleware> & (() => Middleware) {
+export function collection_middleware(arr: Middleware[]): Array<Middleware> & (() => Middleware);
+export function collection_middleware(...arr: Middleware[]): Array<Middleware> & (() => Middleware);
+export function collection_middleware(...args: any[]): Array<Middleware> & (() => Middleware) {
     const arr: Middleware[] = Array.isArray(args[0]) ? args[0] : args;
 
-    const mwf = (): Middleware => Effect.fn("harpoon_middleware")(
-        function* (message: Message, lcmd: LocalComputedMessageData) {
+    const mwf = (): Middleware => {
+        return async (message: Message) => {
             for (let a of arr) {
-                const mp = yield* a(message, lcmd);
-                if (mp === MiddlewareInterrupt) {
+                const mp = await a(message);
+                if (isMiddlewareInterrupt(mp)) {
                     return mp;
                 }
             }
             return MiddlewareContinue;
-        });
+        }
+    }
 
     return new Proxy(mwf, {
         get(target, prop, receiver) {
@@ -52,21 +52,22 @@ export function harpoon_middleware(...args: any[]): Array<Middleware> & (() => M
     }) as Array<Middleware> & (() => Middleware);
 }
 
-export function non_interrupt_harpoon_middleware(arr: Middleware[]): Array<Middleware> & (() => Middleware);
-export function non_interrupt_harpoon_middleware(...arr: Middleware[]): Array<Middleware> & (() => Middleware);
-export function non_interrupt_harpoon_middleware(...args: any[]): Array<Middleware> & (() => Middleware) {
+export function non_interrupt_collection_middleware(arr: Middleware[]): Array<Middleware> & (() => Middleware);
+export function non_interrupt_collection_middleware(...arr: Middleware[]): Array<Middleware> & (() => Middleware);
+export function non_interrupt_collection_middleware(...args: any[]): Array<Middleware> & (() => Middleware) {
     const arr: Middleware[] = Array.isArray(args[0]) ? args[0] : args;
 
-    const mwf = (): Middleware => Effect.fn("non_interrupt_harpoon_middleware")(
-        function* (message: Message, lcmd: LocalComputedMessageData) {
+    const mwf = (): Middleware => {
+        return async (message: Message) => {
             for (let a of arr) {
-                const mp = yield* a(message, lcmd);
-                if (mp === MiddlewareInterrupt) {
+                const mp = await a(message);
+                if (isMiddlewareInterrupt(mp)) {
                     return MiddlewareContinue;
                 }
             }
             return MiddlewareContinue;
-        });
+        }
+    }
 
     return new Proxy(mwf, {
         get(target, prop, receiver) {
@@ -99,68 +100,4 @@ export function non_interrupt_harpoon_middleware(...args: any[]): Array<Middlewa
             return Reflect.getOwnPropertyDescriptor(target, prop);
         }
     }) as Array<Middleware> & (() => Middleware);
-}
-
-export function collection_middleware(arr: Middleware[]): Middleware;
-export function collection_middleware(...arr: Middleware[]): Middleware;
-export function collection_middleware(...args: any[]): Middleware {
-    const arr: Middleware[] = Array.isArray(args[0]) ? args[0] : args;
-
-    return Effect.fn("collection_middleware")(
-        function* (message: Message, lcmd: LocalComputedMessageData) {
-            for (let a of arr) {
-                const mp = yield* a(message, lcmd);
-                if (mp === MiddlewareInterrupt) {
-                    return mp;
-                }
-            }
-        });
-}
-
-export function non_interrupt_collection_middleware(arr: Middleware[]): Middleware;
-export function non_interrupt_collection_middleware(...arr: Middleware[]): Middleware;
-export function non_interrupt_collection_middleware(...args: any[]): Middleware {
-    const arr: Middleware[] = Array.isArray(args[0]) ? args[0] : args;
-
-    return Effect.fn("non_interrupt_collection_middleware")(
-        function* (message: Message, lcmd: LocalComputedMessageData) {
-            for (let a of arr) {
-                const mp = yield* a(message, lcmd);
-                if (mp === MiddlewareInterrupt) {
-                    return MiddlewareContinue;
-                }
-            }
-        });
-}
-
-export function reverse_collection_middleware(arr: Middleware[]): Middleware;
-export function reverse_collection_middleware(...arr: Middleware[]): Middleware;
-export function reverse_collection_middleware(...args: any[]): Middleware {
-    const arr: Middleware[] = Array.isArray(args[0]) ? args[0] : args;
-
-    return Effect.fn("reverse_collection_middleware")(
-        function* (message: Message, lcmd: LocalComputedMessageData) {
-            for (let a of arr.reverse()) {
-                const mp = yield* a(message, lcmd);
-                if (mp === MiddlewareInterrupt) {
-                    return mp;
-                }
-            }
-        });
-}
-
-export function non_interrupt_reverse_collection_middleware(arr: Middleware[]): Middleware;
-export function non_interrupt_reverse_collection_middleware(...arr: Middleware[]): Middleware;
-export function non_interrupt_reverse_collection_middleware(...args: any[]): Middleware {
-    const arr: Middleware[] = Array.isArray(args[0]) ? args[0] : args;
-
-    return Effect.fn("non_interrupt_reverse_collection_middleware")(
-        function* (message: Message, lcmd: LocalComputedMessageData) {
-            for (let a of arr.reverse()) {
-                const mp = yield* a(message, lcmd);
-                if (mp === MiddlewareInterrupt) {
-                    return MiddlewareContinue;
-                }
-            }
-        });
 }

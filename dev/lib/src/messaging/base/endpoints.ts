@@ -1,16 +1,18 @@
-import { Effect, Equal, Option, pipe } from "effect";
+import { Effect, Equal, Option, pipe, flow } from "effect";
 import { Address } from "./address";
-import { AddressAlreadyInUseError, CommunicationChannel, MessageChannelTransmissionError } from "./communication_channel";
-import { CallbackRegistrationError } from "./errors/callback_registration";
-import { TransmittableMessage } from "./message";
+import { CommunicationChannel, InternalCommunicationChannel, toInternalCommunicationChannel } from "./communication_channel";
+import { AddressAlreadyInUseError } from "./errors/errors";
+import { AddressNotFound } from "./errors/anomalies";
 import { Middleware } from "./middleware";
-import { AddressNotFoundError, send } from "./send";
+import { HandledError } from "./errors/errors";
+import { callbackToEffectUnhandled } from "./errors/main";
+import { send } from "./send";
 
 export type Endpoint = {
     address: Address;
-    communicationChannel: CommunicationChannel;
+    communicationChannel: InternalCommunicationChannel;
     middlewares: Middleware[];
-    remove: Effect.Effect<void, never, never>;
+    remove: () => void;
 }
 
 const endpoints: Endpoint[] = [{
@@ -19,50 +21,35 @@ const endpoints: Endpoint[] = [{
     },
     communicationChannel: {
         address: Address.local_address,
-        send: Effect.fn("send")(function* (tm: TransmittableMessage) {
-            const msg = yield* tm.message;
-            return yield* send(msg)
-        }, e => e.pipe(
-            Effect.mapError(e => new MessageChannelTransmissionError({ err: e }))
-        )),
-        recieve_cb: () => Effect.void,
-        remove_cb: () => Effect.void
+        send: flow(send, Effect.ignore, Effect.runPromise),
+        recieve_cb: () => { },
+        remove_cb: () => { }
     },
     middlewares: [],
-    remove: Effect.void
+    remove: () => Promise.resolve()
 }];
 
 export const createEndpoint = Effect.fn("createEndpoint")(
     function* (communicationChannel: CommunicationChannel) {
-        const new_endpoint = {
+        const new_endpoint: Endpoint = {
             address: communicationChannel.address,
-            communicationChannel,
+            communicationChannel: toInternalCommunicationChannel(communicationChannel),
             middlewares: [],
-            remove: removeEndpoint(communicationChannel.address)
+            remove: () => removeEndpoint(communicationChannel.address)
         };
 
         yield* findEndpoint(communicationChannel.address).pipe(
             Option.match({
                 onNone: () => Effect.void,
-                onSome: () => Effect.fail(new AddressAlreadyInUseError({ address: communicationChannel.address }))
+                onSome: () => Effect.fail(new AddressAlreadyInUseError(communicationChannel.address))
             })
         );
 
         if (typeof communicationChannel.remove_cb == "function") {
-            yield* Effect.try(() => {
-                return communicationChannel.remove_cb!(new_endpoint.remove)
-            }).pipe(
-                Effect.catchAll(e => {
-                    const err = e instanceof Error ? e : new Error("Couldn't register remove callback");
-                    return Effect.all([
-                        new_endpoint.remove,
-                        Effect.fail(new CallbackRegistrationError({
-                            error: err,
-                            message: "Couldn't register remove callback"
-                        })),
-                    ])
-                })
-            );
+            yield* callbackToEffectUnhandled(
+                communicationChannel.remove_cb.bind(communicationChannel),
+                () => Promise.resolve(new_endpoint.remove())
+            )
         }
 
         endpoints.push(new_endpoint);
@@ -70,14 +57,12 @@ export const createEndpoint = Effect.fn("createEndpoint")(
     }
 )
 
-export const removeEndpoint = Effect.fn("removeEndpoint")(
-    function* (address: Address) {
-        const index = endpoints.findIndex(endpoint => Equal.equals(endpoint.address, address));
-        if (index > -1) {
-            endpoints.splice(index, 1);
-        }
+export function removeEndpoint(address: Address) {
+    const index = endpoints.findIndex(endpoint => Equal.equals(endpoint.address, address));
+    if (index > -1) {
+        endpoints.splice(index, 1);
     }
-);
+}
 
 export const findEndpoint = (address: Address): Option.Option<Endpoint> =>
     Option.fromNullable(
@@ -86,8 +71,8 @@ export const findEndpoint = (address: Address): Option.Option<Endpoint> =>
         endpoints.find(endpoint => Equal.equals(endpoint.address, address.as_generic()))
     )));
 
-export const findEndpointOrFail = (address: Address): Effect.Effect<Endpoint, AddressNotFoundError> =>
+export const findEndpointOrFail = (address: Address): Effect.Effect<Endpoint, HandledError> =>
     pipe(
         findEndpoint(address),
-        Effect.orElseFail(() => new AddressNotFoundError({ address }))
+        Effect.orElse(() => HandledError.handleA(new AddressNotFound(address)))
     )

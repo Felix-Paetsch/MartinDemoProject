@@ -1,19 +1,14 @@
-import { Context, Data, Effect, ParseResult, pipe, Schema } from "effect";
+import { Context, Effect, ParseResult, pipe, Schema } from "effect";
 import { Json } from "../../utils/json";
 import { Address } from "./address";
+import { MessageDeserializationError } from "./errors/anomalies";
 
 export class MessageT extends Context.Tag("MessageT")<
     MessageT,
     Message
 >() { }
 
-export class MessageSerializationError extends Data.TaggedError("MessageSerializationError")<{
-    message: Message
-}> { }
-export class MessageDeserializationError extends Data.TaggedError("MessageDeserializationError")<{}> { }
-
-export type SerializedMessage = string & { readonly __brand: "SerializedMessage" };
-export class SerializedMessageT extends Context.Tag("SerializedMessageT")<SerializedMessageT, SerializedMessage>() { }
+export type SerializedMessage = string;
 export type MessageContent = {
     serialized: string | null,
     deserialized: { [key: string]: Json } | null
@@ -27,6 +22,8 @@ const transform_message_content = Schema.parseJson(deserialized_schema);
 
 export class Message {
     private msg_content: MessageContent;
+    public local_data: LocalMessageData;
+    public from_external: boolean = false;
 
     constructor(
         public target: Address,
@@ -37,6 +34,13 @@ export class Message {
             this.msg_content = { serialized: content, deserialized: null };
         } else {
             this.msg_content = { serialized: null, deserialized: content };
+        }
+
+        this.local_data = {
+            direction: "outgoing",
+            at_target: false,
+            at_source: true,
+            current_address: Address.local_address
         }
     }
 
@@ -139,66 +143,24 @@ export class Message {
                 )
             )
     });
-
-    as_transmittable() {
-        return new TransmittableMessage(this);
-    }
 }
 
+export type TransmittableMessage = Message | SerializedMessage;
 
-export class TransmittableMessage {
-    constructor(
-        private msg: Message | SerializedMessage,
-        private addr: Address | null = null
-    ) { }
+export type LocalMessageData = {
+    direction: "incoming" | "outgoing" | "local";
+    at_target: boolean;
+    at_source: boolean;
+    current_address: Address;
 
-    content: Effect.Effect<{ [key: string]: Json }, MessageDeserializationError> =
-        this.message.pipe(Effect.flatMap(msg => msg.content));
-
-    has_deserialized_message(): boolean {
-        return this.msg instanceof Message;
-    }
-
-    static from_unknown(str: any): Effect.Effect<TransmittableMessage, MessageDeserializationError> {
-        return Effect.gen(function* () {
-            if (str instanceof Message || typeof str === "string") {
-                return new TransmittableMessage(str as Message | SerializedMessage);
-            }
-
-            return yield* new MessageDeserializationError();
-        })
-    }
-
-    get message(): Effect.Effect<Message, MessageDeserializationError> {
-        const self = this;
-        return Effect.gen(function* () {
-            if (self.msg instanceof Message) {
-                return self.msg;
-            }
-
-            self.msg = yield* Message.deserialize(self.msg);
-            return self.msg;
-        })
-    }
-
-    get string(): SerializedMessage {
-        if (this.msg instanceof Message) {
-            return this.msg.serialize();
-        }
-
-        return this.msg;
-    }
-
-    get address(): Effect.Effect<Address, MessageDeserializationError> {
-        const self = this;
-        return Effect.gen(function* () {
-            if (typeof self.msg === "string" && self.addr) {
-                return self.addr;
-            }
-
-            return yield* self.message.pipe(Effect.map(msg => msg.target));
-        })
-    }
+    [key: string]: any;
 }
 
-export class TransmittableMessageT extends Context.Tag("TransmittableMessageT")<TransmittableMessageT, TransmittableMessage>() { }
+export function JustRecievedLocalData(): LocalMessageData {
+    return {
+        at_target: false,
+        at_source: false,
+        current_address: Address.local_address,
+        direction: "incoming"
+    }
+}
