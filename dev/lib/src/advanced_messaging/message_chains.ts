@@ -1,11 +1,11 @@
 import { Context, Data, Deferred, Duration, Effect, Schedule, Schema } from "effect";
 import { v4 as uuidv4 } from 'uuid';
-import { Address } from "../base/address";
-import { Message } from "../base/message";
-import { Middleware, MiddlewareContinue, MiddlewareInterrupt, EffectToMiddleware } from "../base/middleware";
-import { send as kernel_send, SendEffect } from "../base/send";
-import { Json } from "../../utils/json";
-import { guard_at_target } from "./guard";
+import { Address } from "../messaging/base/address";
+import { Message } from "../messaging/base/message";
+import { Middleware, MiddlewareContinue, MiddlewareInterrupt, EffectToMiddleware } from "../messaging/base/middleware";
+import { send as kernel_send, SendEffect } from "../messaging/base/send";
+import { Json } from "../utils/json";
+import { guard_at_target } from "../messaging/middleware/guard";
 
 export const chain_message_schema = Schema.Struct({
     current_sender: Address.AddressFromString,

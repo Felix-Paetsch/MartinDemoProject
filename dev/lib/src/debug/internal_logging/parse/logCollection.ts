@@ -1,7 +1,7 @@
 import { Severity } from "../../internal_logging/logging/severity";
 import { Address } from "../../../messaging/base/address";
 import { Message } from "../../../messaging/base/message";
-import { DataLog, Log, MessageLog } from "../../../messaging/middleware/logging";
+import { DataLog, Log, MessageLog } from "../../../advanced_messaging/logging";
 import { DefaultFormatter, Formatter } from "../logging/parse/formatter";
 import { DataLogEntry, LogEntry, MessageLogEntry } from "./logEntry";
 import type LogInvestigator from "./logInverstigator";

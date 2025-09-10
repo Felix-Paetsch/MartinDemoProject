@@ -1,8 +1,20 @@
-export { Address, LocalAddress } from "./base/address";
-export { AddressAlreadyInUseError, MessageChannelTransmissionError } from "./base/communication_channel";
-export * from "./base/errors/callback_registration";
-export * from "./base/errors/message_errors";
-export { Message } from "./base/message";
 
-export { type LocalComputedMessageData } from "./base/local_computed_message_data";
-export { MiddlewareContinue, MiddlewareInterrupt, type Middleware, type MiddlewarePassthrough } from "./base/middleware";
+
+import { partition_middleware } from "./middleware/partition";
+import { collection_middleware } from "./middleware/collection";
+import { guard_middleware } from "./middleware/guard";
+import { empty_middleware } from "./middleware/empty";
+import { comsume_message } from "./middleware/consume";
+import { type Middleware as MW } from "./base/middleware";
+import {
+    MiddlewareInterrupt,
+    MiddlewareContinue,
+    MiddlewarePassthrough,
+    isMiddlewareContinue,
+    isMiddlewareInterrupt
+} from "./base/middleware";
+
+export namespace Middleware {
+    export type Middleware = MW;
+
+}
