@@ -1,7 +1,7 @@
 import { Deferred, Effect } from "effect";
-import { Address } from "../../../messaging/base/address";
-import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/base/lib/communication_channel";
-import { TransmittableMessage, TransmittableMessageT } from "../../../messaging/base/message";
+import { Address } from "../../../messaging/core/address";
+import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/core/lib/communication_channel";
+import { TransmittableMessage, TransmittableMessageT } from "../../../messaging/core/message";
 import { Json } from "../../../utils/json";
 import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_env/plugin_ident";
 

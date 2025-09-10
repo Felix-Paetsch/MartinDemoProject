@@ -1,7 +1,7 @@
 import { Effect } from "effect";
-import { Address } from "../../../messaging/base/address";
-import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/base/lib/communication_channel";
-import { TransmittableMessage, TransmittableMessageT } from "../../../messaging/base/message";
+import { Address } from "../../../messaging/core/address";
+import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/core/lib/communication_channel";
+import { TransmittableMessage, TransmittableMessageT } from "../../../messaging/core/message";
 import { callbackToEffect } from "../../../utils/boundary/callbacks";
 import { Json } from "../../../utils/json";
 import { PluginEnvironment } from "../../plugin_lib/plugin_env/plugin_env";

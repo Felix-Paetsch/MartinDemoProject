@@ -1,8 +1,8 @@
 import { Effect, Schema } from "effect";
 import { v4 as uuidv4 } from 'uuid';
-import { LocalComputedMessageData } from "../../../messaging/base/local_computed_message_data";
-import { Message } from "../../../messaging/base/message";
-import { Middleware, MiddlewareContinue } from "../../../messaging/base/middleware";
+import { LocalComputedMessageData } from "../../../messaging/core/local_computed_message_data";
+import { Message } from "../../../messaging/core/message";
+import { Middleware, MiddlewareContinue } from "../../../messaging/core/middleware";
 import { Json } from "../../../utils/json";
 
 export default function add_annotation_data(

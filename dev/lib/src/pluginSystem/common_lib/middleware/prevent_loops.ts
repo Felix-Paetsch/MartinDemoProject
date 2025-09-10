@@ -1,7 +1,7 @@
 import { Effect, Schema } from "effect";
-import { LocalComputedMessageData } from "../../../messaging/base/local_computed_message_data";
-import { Message } from "../../../messaging/base/message";
-import { MiddlewareInterrupt } from "../../../messaging/base/middleware";
+import { LocalComputedMessageData } from "../../../messaging/core/local_computed_message_data";
+import { Message } from "../../../messaging/core/message";
+import { MiddlewareInterrupt } from "../../../messaging/core/middleware";
 import { Json } from "../../../utils/json";
 
 export const prevent_loops = Effect.fn("prevent_loops")(function* (message: Message, local_data: LocalComputedMessageData) {

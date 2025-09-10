@@ -1,20 +1,62 @@
+import { Connection } from "./core/connection";
+import Port from "./core/port";
 
+import * as MW from "./core/middleware";
+import { Message } from "./core/message";
+import { Address, LocalAddress } from "./core/address";
 
-import { partition_middleware } from "./middleware/partition";
-import { collection_middleware } from "./middleware/collection";
-import { guard_middleware } from "./middleware/guard";
-import { empty_middleware } from "./middleware/empty";
-import { comsume_message } from "./middleware/consume";
-import { type Middleware as MW } from "./base/middleware";
-import {
-    MiddlewareInterrupt,
-    MiddlewareContinue,
-    MiddlewarePassthrough,
-    isMiddlewareContinue,
-    isMiddlewareInterrupt
-} from "./base/middleware";
+import * as Errors from "./core/errors/errors";
+import * as Anomalies from "./core/errors/anomalies";
+import * as ErrorsMain from "./core/errors/main";
+
+import { collection_middleware as cmw } from "./middlewares/collection";
+import { partition_middleware as pmw } from "./middlewares/partition";
+import { guard_middleware as gmw } from "./middlewares/guard";
+import { empty_middleware as emw } from "./middlewares/empty";
+import { comsume_message as cm } from "./middlewares/consume";
+
+export namespace Error {
+    export type MessagingError = Errors.MessagingError;
+    export type Anomaly = Anomalies.Anomaly;
+
+    export const PortClosedError = Errors.PortClosedError;
+    export const AddressAlreadyInUseError = Errors.AddressAlreadyInUseError;
+    export const CallbackError = Errors.CallbackError;
+    export const AddressNotFound = Anomalies.AddressNotFound;
+    export const MessageSerializationError = Anomalies.MessageSerializationError;
+    export const MessageDeserializationError = Anomalies.MessageDeserializationError;
+    export const MessageChannelTransmissionError = Anomalies.MessageChannelTransmissionError;
+    export const AddressDeserializationError = Anomalies.AddressDeserializationError;
+
+    export type ErrorHandler = ErrorsMain.ErrorHandler;
+    export type AnomalyHandler = ErrorsMain.AnomalyHandler;
+    export const getErrorHandler = ErrorsMain.getErrorHandler;
+    export const getAnomalyHandler = ErrorsMain.getAnomalyHandler;
+    export const setErrorHandler = ErrorsMain.setErrorHandler;
+    export const setAnomalyHandler = ErrorsMain.setAnomalyHandler;
+    export const clearErrorHandler = ErrorsMain.clearErrorHandler;
+    export const clearAnomalyHandler = ErrorsMain.clearAnomalyHandler;
+}
 
 export namespace Middleware {
-    export type Middleware = MW;
-
+    export type Middleware = MW.Middleware;
+    export const collection_middleware = cmw;
+    export const partition_middleware = pmw;
+    export const guard_middleware = gmw;
+    export const empty_middleware = emw;
+    export const comsume_message = cm;
+    export const register_global_middleware = MW.register_global_middleware;
+    export const clear_global_middleware = MW.clear_global_middleware;
+    export const Continue = MW.MiddlewareContinue;
+    export const Interrupt = MW.MiddlewareInterrupt;
+    export type Passthrough = MW.MiddlewarePassthrough;
+    export const isMiddlewareContinue = MW.isMiddlewareContinue;
+    export const isMiddlewareInterrupt = MW.isMiddlewareInterrupt;
 }
+
+export {
+    Connection,
+    Port,
+    Address,
+    LocalAddress,
+};

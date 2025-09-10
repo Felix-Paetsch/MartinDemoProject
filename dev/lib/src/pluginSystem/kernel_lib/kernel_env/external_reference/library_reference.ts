@@ -1,6 +1,6 @@
 import { Effect } from "effect";
-import { Address } from "../../../../messaging/base/address";
-import { Middleware } from "../../../../messaging/base/middleware";
+import { Address } from "../../../../messaging/core/address";
+import { Middleware } from "../../../../messaging/core/middleware";
 import { LibraryIdent } from "../../../../pluginSystem/library/library_environment";
 import { KernelEnvironment } from "../kernel_env";
 import { ExternalReference } from "./external_reference";

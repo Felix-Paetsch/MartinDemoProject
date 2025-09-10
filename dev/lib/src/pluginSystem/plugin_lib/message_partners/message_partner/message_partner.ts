@@ -1,6 +1,6 @@
 import { Context, Effect, Option, ParseResult, pipe, Schema } from "effect";
 import { v4 as uuidv4 } from "uuid";
-import { Address } from "../../../../messaging/base/address";
+import { Address } from "../../../../messaging/core/address";
 import { ProtocolError } from "../../../../messaging/protocols/base/protocol_errors";
 import { ResultPromise } from "../../../../utils/boundary/result";
 import { Json } from "../../../../utils/json";

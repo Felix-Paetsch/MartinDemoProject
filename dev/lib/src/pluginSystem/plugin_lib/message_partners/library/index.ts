@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { Address } from "../../../../messaging/base/address";
+import { Address } from "../../../../messaging/core/address";
 import { Json } from "../../../../utils/json";
 import { call_impl } from "../../../library/commands/call";
 import { get_exposed_functions_impl } from "../../../library/commands/exposes";

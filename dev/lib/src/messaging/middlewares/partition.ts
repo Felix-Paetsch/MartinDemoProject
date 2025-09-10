@@ -1,4 +1,4 @@
-import { Middleware } from "../base/middleware";
+import { Middleware } from "../core/middleware";
 import { collection_middleware } from "./collection";
 
 type ExtractPartitionKey<T> = T extends string

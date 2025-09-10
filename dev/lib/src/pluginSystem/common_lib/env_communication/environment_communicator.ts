@@ -1,7 +1,7 @@
 import { Effect } from "effect";
-import { Address } from "../../../messaging/base/address";
-import { Middleware } from "../../../messaging/base/middleware";
-import { PartitionMiddlewareKeys } from "../../../messaging/middleware/partition";
+import { Address } from "../../../messaging/core/address";
+import { Middleware } from "../../../messaging/core/middleware";
+import { PartitionMiddlewareKeys } from "../../../messaging/middlewares/partition";
 import { ProtocolError, ProtocolErrorN } from "../../../messaging/protocols/base/protocol_errors";
 import { Json } from "../../../utils/json";
 import { Environment } from "../messageEnvironments/environment";

@@ -1,17 +1,17 @@
-import { Address, LocalAddress, PortID } from "./address";
+import { Address, LocalAddress } from "./address";
 import { isMiddlewareContinue, Middleware, MiddlewareInterrupt } from "./middleware";
 import { Message, TransmittableMessage } from "./message";
 import { Effect, Schema } from "effect";
 import { HandledError, IgnoreHandled, PortClosedError } from "./errors/errors";
-import { applyMiddlewareEffect } from "./lib/apply_middleware_effect";
+import { applyMiddlewareEffect } from "./middleware";
 import { Connection, PortConnection } from "./connection";
-import { MessageFromString } from "./lib/message";
+import { MessageFromString } from "./message";
 import { callbackToEffect } from "./errors/main";
 import { MessageDeserializationError } from "./errors/anomalies";
-import { core_send } from "./lib/core_send";
+import { core_send } from "./core_send";
 
 export default class Port {
-    private _portID: PortID;
+    private _portID: Address.PortID;
     private _is_open: boolean;
     private _recieve!: (msg: Message) => void | Promise<void>;
     private middleware: Middleware[] = [];
@@ -21,7 +21,7 @@ export default class Port {
     static readonly connection: Connection;
 
     constructor(
-        portID: PortID,
+        portID: Address.PortID,
         recieve: (msg: Message) => void | Promise<void> = () => { }
     ) {
         this._portID = portID;
@@ -30,11 +30,11 @@ export default class Port {
         this.update_recieve(recieve);
     }
 
-    get id(): PortID {
+    get id(): Address.PortID {
         return this._portID;
     }
 
-    update_id(portID: PortID): void {
+    update_id(portID: Address.PortID): void {
         const is_open = this.is_open();
         this.close();
         this._portID = portID;
@@ -83,8 +83,7 @@ export default class Port {
     is_closed(): boolean { return !this._is_open; }
 
     async send(msg: Message): Promise<void> {
-        // Errors: PortClosedError 
-        // User sends a message through this port
+        // Errors: PortClosedError
         if (this.is_closed()) {
             throw new PortClosedError(this);
         }

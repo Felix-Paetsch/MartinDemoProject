@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { partition_middleware } from "../../../messaging/middleware/partition";
+import { partition_middleware } from "../../../messaging/middlewares/partition";
 import { Environment } from "../messageEnvironments/environment";
 
 export const registerDefaultEnvironmentMiddleware = Effect.fn("registerDefaultEnvironmentMiddleware")(

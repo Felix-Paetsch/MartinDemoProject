@@ -1,25 +1,25 @@
-import { Context, Effect, Equal, Hash, Schema } from "effect";
+import { Effect, Equal, Hash, Schema } from "effect";
 import { v4 as uuidv4 } from 'uuid';
-import { deserializeAddressFromUnknown, SerializedAddressSchema } from "./lib/address";
+import { AddressDeserializationError } from "./errors/anomalies";
 
-export class AddressT extends Context.Tag("AddressT")<AddressT, Address>() { }
+export namespace Address {
+    export type ProcessID = string;
+    export type PortID = string;
 
-export type ProcessID = string
-export type PortID = string
-
-export type SerializedAddress = {
-    process_id: ProcessID,
-    port: PortID
+    export type SerializedAddress = {
+        process_id: ProcessID;
+        port: PortID;
+    };
 }
 
 export class Address implements Equal.Equal {
-    private _process_id: ProcessID;
-    private _port: PortID;
-    static process_id: ProcessID = uuidv4();
+    private _process_id: Address.ProcessID;
+    private _port: Address.PortID;
+    static process_id: Address.ProcessID = uuidv4();
 
     constructor(
-        process_id: ProcessID = uuidv4(),
-        port: PortID = uuidv4()
+        process_id: Address.ProcessID = uuidv4(),
+        port: Address.PortID = uuidv4()
     ) {
         this._process_id = process_id;
         this._port = port;
@@ -37,7 +37,7 @@ export class Address implements Equal.Equal {
         return new Address(this.process_id, "*");
     }
 
-    static generic(process_id: ProcessID): Address {
+    static generic(process_id: Address.ProcessID): Address {
         return new Address(process_id, "*");
     }
 
@@ -56,18 +56,18 @@ export class Address implements Equal.Equal {
         return Hash.hash(this.port)
     }
 
-    serialize(): SerializedAddress {
+    serialize(): Address.SerializedAddress {
         return Schema.encodeSync(SerializedAddressSchema)(this);
     }
 
-    static deserialize(serialized: SerializedAddress): Address {
+    static deserialize(serialized: Address.SerializedAddress): Address {
         // Errors: AddressDeserializationError
         return deserializeAddressFromUnknown(serialized).pipe(
             Effect.runSync
         );
     }
 
-    static set_process_id(process_id: ProcessID) {
+    static set_process_id(process_id: Address.ProcessID) {
         Address.process_id = process_id;
     }
 
@@ -91,3 +91,17 @@ export class LocalAddress extends Address {
         return Address.process_id
     }
 }
+
+export const SerializedAddressSchema = Schema.Struct({
+    process_id: Schema.String,
+    port: Schema.String
+})
+
+export function deserializeAddressFromUnknown(serialized: unknown): Effect.Effect<Address, AddressDeserializationError> {
+    return Effect.gen(function* () {
+        const json = yield* Schema.decodeUnknown(SerializedAddressSchema)(serialized);
+        return new Address(json.process_id, json.port);
+    }).pipe(
+        Effect.mapError(() => new AddressDeserializationError({ address: serialized }))
+    )
+} 1

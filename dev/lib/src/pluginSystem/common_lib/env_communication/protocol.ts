@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { Address } from "../../../messaging/base/address";
+import { Address } from "../../../messaging/core/address";
 import { fail_as_protocol_error, ProtocolError, ProtocolErrorN } from "../../../messaging/protocols/base/protocol_errors";
 import { Json } from "../../../utils/json";
 import { MessageEnvironmentProtocol } from "../messageEnvironments/messageEnvironment_protocol";

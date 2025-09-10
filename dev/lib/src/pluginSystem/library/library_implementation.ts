@@ -1,4 +1,4 @@
-import { Message } from "../../messaging/base/message";
+import { Message } from "../../messaging/core/message";
 import { Json } from "../../utils/json";
 
 export abstract class AbstractLibraryImplementation {

@@ -1,7 +1,7 @@
 import { Effect, flow } from "effect";
-import { Middleware, MiddlewarePassthrough } from "../middleware";
-import { CallbackError } from "../errors/errors";
-import { Message } from "../message";
+import { Middleware, MiddlewarePassthrough } from "../messaging/core/middleware";
+import { CallbackError } from "../messaging/core/errors/errors";
+import { Message } from "../messaging/core/message";
 
 export type MiddlewareEffect = (message: Message) => Effect.Effect<MiddlewarePassthrough, CallbackError>;
 

@@ -1,7 +1,7 @@
 import { Effect } from "effect";
-import { Address } from "../../../../messaging/base/address";
-import { Middleware, useMiddleware } from "../../../../messaging/base/middleware";
-import { PartitionMiddlewareKeys } from "../../../../messaging/middleware/partition";
+import { Address } from "../../../../messaging/core/address";
+import { Middleware, useMiddleware } from "../../../../messaging/core/middleware";
+import { PartitionMiddlewareKeys } from "../../../../messaging/middlewares/partition";
 import { registerDefaultEnvironmentMiddleware } from "../../../common_lib/env_communication/default_middleware";
 import { KernelEnvironment } from "../kernel_env";
 import { defaultMiddleware } from "./middleware/default";

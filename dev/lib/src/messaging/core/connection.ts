@@ -6,9 +6,9 @@ import Port from "./port";
 import { AddressAlreadyInUseError, HandledError, IgnoreHandled } from "./errors/errors";
 import { MessageDeserializationError, MessageSerializationError } from "./errors/anomalies";
 import { Schema } from "effect";
-import { MessageFromString } from "./lib/message";
-import { applyMiddlewareEffect } from "./lib/apply_middleware_effect";
-import { core_send } from "./lib/core_send";
+import { MessageFromString } from "./message";
+import { applyMiddlewareEffect } from "./middleware";
+import { core_send } from "./core_send";
 import { callbackToEffect } from "./errors/main";
 
 export function createConnection(

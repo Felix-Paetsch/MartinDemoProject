@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Effect } from "effect";
-import { Middleware } from "../../messaging/base/middleware";
-import { empty_middleware } from "../../messaging/middleware/empty";
+import { Middleware } from "../../messaging/core/middleware";
+import { empty_middleware } from "../../messaging/middlewares/empty";
 import { log_external as log, log_messages, log_to_url } from '../../advanced_messaging/logging';
 import { Json } from "../../utils/json";
 

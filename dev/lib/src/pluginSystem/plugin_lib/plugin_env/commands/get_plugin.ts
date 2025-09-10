@@ -1,6 +1,6 @@
 import { Effect, Schema } from "effect";
 import { v4 as uuidv4 } from "uuid";
-import { Address } from "../../../../messaging/base/address";
+import { Address } from "../../../../messaging/core/address";
 import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
 import { EnvironmentT } from "../../../../pluginSystem/common_lib/messageEnvironments/environment";
 import { CallbackError, callbackToEffectFn } from "../../../../utils/boundary/callbacks";

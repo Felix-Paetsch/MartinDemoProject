@@ -1,6 +1,6 @@
 import { Severity } from "../../internal_logging/logging/severity";
-import { Address } from "../../../messaging/base/address";
-import { Message } from "../../../messaging/base/message";
+import { Address } from "../../../messaging/core/address";
+import { Message } from "../../../messaging/core/message";
 import { DataLog, Log, MessageLog } from "../../../advanced_messaging/logging";
 import { DefaultFormatter, Formatter } from "../logging/parse/formatter";
 import { DataLogEntry, LogEntry, MessageLogEntry } from "./logEntry";

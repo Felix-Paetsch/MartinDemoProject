@@ -1,6 +1,6 @@
 
-import { Message } from "../base/message";
-import { Middleware, MiddlewareContinue } from "../base/middleware";
+import { Message } from "../core/message";
+import { Middleware, MiddlewareContinue } from "../core/middleware";
 
 export function guard_middleware(
     middleware: Middleware,

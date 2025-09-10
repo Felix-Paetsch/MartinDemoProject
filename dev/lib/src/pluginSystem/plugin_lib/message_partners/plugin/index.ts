@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { Address } from "../../../../messaging/base/address";
+import { Address } from "../../../../messaging/core/address";
 import { Environment } from "../../../common_lib/messageEnvironments/environment";
 import { PluginIdentWithInstanceId } from "../../plugin_env/plugin_ident";
 import { MessagePartner } from "../message_partner/message_partner";

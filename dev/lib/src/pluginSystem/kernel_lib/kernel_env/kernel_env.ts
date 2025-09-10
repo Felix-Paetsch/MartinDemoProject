@@ -1,7 +1,7 @@
 import { Effect, Equal } from "effect";
 import { v4 as uuidv4 } from 'uuid';
-import { Address } from "../../../messaging/base/address";
-import { Middleware } from "../../../messaging/base/middleware";
+import { Address } from "../../../messaging/core/address";
+import { Middleware } from "../../../messaging/core/middleware";
 import { LibraryEnvironment, LibraryIdent } from "../../../pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../../../pluginSystem/library/library_implementation";
 import { Failure, ResultPromise, Success } from "../../../utils/boundary/result";

@@ -1,10 +1,10 @@
 import { Effect, ParseResult, Schema } from "effect";
 import { Json } from "../utils/exports";
-import { Address } from "../messaging/base/address";
-import { Message } from "../messaging/base/message";
-import { Middleware, MiddlewareContinue } from "../messaging/base/middleware";
-import { send } from "../messaging/base/lib/send";
-import { IgnoreHandled } from "../messaging/base/errors/errors";
+import { Address } from "../messaging/core/address";
+import { Message } from "../messaging/core/message";
+import { Middleware, MiddlewareContinue } from "../messaging/core/middleware";
+import { send } from "../messaging/core/lib/send";
+import { IgnoreHandled } from "../messaging/core/errors/errors";
 
 const MessageLogSchema = Schema.Struct({
     type: Schema.Literal("Message"),

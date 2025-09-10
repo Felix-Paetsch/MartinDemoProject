@@ -1,11 +1,11 @@
 import { Effect } from "effect";
-import { Address, LocalAddress } from "../../../messaging/base/address";
-import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/base/lib/communication_channel";
-import { LocalComputedMessageData } from "../../../messaging/base/local_computed_message_data";
-import { Message, MessageT, TransmittableMessage, TransmittableMessageT } from "../../../messaging/base/message";
-import { isMiddlewareInterrupt, Middleware, MiddlewareInterrupt, useMiddleware } from "../../../messaging/base/middleware";
-import { AddressNotFoundError } from "../../../messaging/base/lib/send";
-import { harpoon_middleware } from "../../../messaging/middleware/collection";
+import { Address, LocalAddress } from "../../../messaging/core/address";
+import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/core/lib/communication_channel";
+import { LocalComputedMessageData } from "../../../messaging/core/local_computed_message_data";
+import { Message, MessageT, TransmittableMessage, TransmittableMessageT } from "../../../messaging/core/message";
+import { isMiddlewareInterrupt, Middleware, MiddlewareInterrupt, useMiddleware } from "../../../messaging/core/middleware";
+import { AddressNotFoundError } from "../../../messaging/core/lib/send";
+import { harpoon_middleware } from "../../../messaging/middlewares/collection";
 import { Environment } from "./environment";
 
 export const createLocalEnvironment = Effect.fn("createLocalEnvironment")(

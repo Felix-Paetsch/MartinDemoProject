@@ -1,5 +1,5 @@
 import { Effect, Schema } from "effect";
-import { Address } from "../../../../messaging/base/address";
+import { Address } from "../../../../messaging/core/address";
 import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
 import { EffectToResult } from "../../../../utils/boundary/run";
 import { EnvironmentT } from "../../../common_lib/messageEnvironments/environment";

@@ -1,13 +1,13 @@
 import { Effect, Equal, Schema } from "effect";
-import { Address } from "../address";
-import { applyMiddlewareEffect } from "./apply_middleware_effect";
-import { TransmittableMessage } from "../message";
-import { isMiddlewareInterrupt } from "../middleware";
-import { HandledError, IgnoreHandled } from "../errors/errors";
-import { AddressNotFound, MessageDeserializationError } from "../errors/anomalies";
+import { Address } from "./address";
+import { applyMiddlewareEffect } from "./middleware";
+import { TransmittableMessage } from "./message";
+import { isMiddlewareInterrupt } from "./middleware";
+import { HandledError, IgnoreHandled } from "./errors/errors";
+import { AddressNotFound, MessageDeserializationError } from "./errors/anomalies";
 import { MessageFromString } from "./message";
-import { global_middleware } from "../middleware";
-import { Connection } from "../connection";
+import { global_middleware } from "./middleware";
+import { Connection } from "./connection";
 
 export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, never> = Effect.fn("send")(function* (msg: TransmittableMessage) {
     if (typeof msg === "string") {

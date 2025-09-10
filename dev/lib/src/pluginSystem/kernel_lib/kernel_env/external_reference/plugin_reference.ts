@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { v4 as uuidv4 } from "uuid";
-import { Address } from "../../../../messaging/base/address";
-import { Middleware } from "../../../../messaging/base/middleware";
+import { Address } from "../../../../messaging/core/address";
+import { Middleware } from "../../../../messaging/core/middleware";
 import { PluginIdent, PluginIdentWithInstanceId } from "../../../../pluginSystem/plugin_lib/plugin_env/plugin_ident";
 import { KernelEnvironment } from "../kernel_env";
 import { ExternalReference } from "./external_reference";

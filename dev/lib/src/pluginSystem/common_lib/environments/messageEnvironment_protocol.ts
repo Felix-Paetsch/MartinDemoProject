@@ -1,4 +1,4 @@
-import { Address } from "../../../messaging/base/address";
+import { Address } from "../../../messaging/core/address";
 import { Protocol } from "../../../messaging/protocols/protocol";
 import { Json } from "../../../utils/json";
 import { Environment } from "./environment";
