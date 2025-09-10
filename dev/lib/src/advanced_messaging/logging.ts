@@ -3,7 +3,7 @@ import { Json } from "../utils/exports";
 import { Address } from "../messaging/base/address";
 import { Message } from "../messaging/base/message";
 import { Middleware, MiddlewareContinue } from "../messaging/base/middleware";
-import { send } from "../messaging/base/send";
+import { send } from "../messaging/base/lib/send";
 import { IgnoreHandled } from "../messaging/base/errors/errors";
 
 const MessageLogSchema = Schema.Struct({

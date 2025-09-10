@@ -1,8 +1,4 @@
-import { Context, Effect, flow } from "effect";
-import { Address } from "./address";
-import { findEndpoint } from "./endpoints";
 import { Message } from "./message";
-import { CallbackError } from "./errors/errors";
 
 type MiddlewareInterrupt = false;
 type MiddlewareContinue = true | void | undefined;
@@ -19,42 +15,11 @@ export function isMiddlewareContinue(interrupt: MiddlewarePassthrough): interrup
 }
 
 export type Middleware = (message: Message) => MiddlewarePassthrough | Promise<MiddlewarePassthrough>;
-export type MiddlewareEffect = (message: Message) => Effect.Effect<MiddlewarePassthrough, CallbackError>;
 
-export type MiddlewareConf = {
-    readonly middleware: Middleware;
-    readonly address: Address;
+export const global_middleware: Middleware[] = [];
+export const register_global_middleware = (middleware: Middleware): void => {
+    global_middleware.push(middleware);
 }
-
-export class MiddlewareConfT extends Context.Tag("MiddlewareConfT")<
-    MiddlewareConfT,
-    MiddlewareConf
->() { }
-
-export const useMiddleware = Effect.fn("useMiddleware")(
-    function* (mwConf: MiddlewareConf) {
-        const {
-            middleware,
-            address
-        } = mwConf;
-
-        const endpoint = yield* findEndpoint(address);
-        endpoint.middlewares.push(middleware);
-    }
-);
-
-export const EffectToMiddleware = (middleware: MiddlewareEffect): Middleware => {
-    return flow(middleware, (e) => {
-        let err: CallbackError | undefined;
-        return e.pipe(
-            Effect.catchAll(e => {
-                err = e;
-                return Effect.succeed(true);
-            }),
-            Effect.runPromise
-        ).then((r) => {
-            if (err) throw err.error;
-            return r;
-        })
-    });
+export const clear_global_middleware = (): void => {
+    global_middleware.length = 0;
 }

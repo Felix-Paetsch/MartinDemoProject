@@ -1,7 +1,7 @@
 import { Context, Effect } from "effect";
 import { Address } from "../../../messaging/base/address";
 import { Middleware } from "../../../messaging/base/middleware";
-import { SendEffect } from "../../../messaging/base/send";
+import { SendEffect } from "../../../messaging/base/lib/send";
 
 export type Environment = {
     /** The address of the environment */

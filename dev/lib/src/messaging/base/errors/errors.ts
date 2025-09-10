@@ -2,6 +2,7 @@ import { Data, Effect } from "effect";
 import { Anomaly } from "./anomalies";
 import { applyAnomalyHandler, applyErrorHandler } from "./main";
 import { Address } from "../address";
+import Port from "../port";
 
 export class HandledError extends Data.TaggedError("HandledError")<{
     error: Error;
@@ -40,6 +41,12 @@ export function IgnoreHandled<R, S, T>(e: Effect.Effect<R, S, T>): Effect.Effect
             return Effect.fail(e as Exclude<S, HandledError>);
         })
     )
+}
+
+export class PortClosedError extends Error {
+    constructor(readonly port: Port) {
+        super("Port is currently closed: " + port.id.toString());
+    }
 }
 
 export class AddressAlreadyInUseError extends Error {

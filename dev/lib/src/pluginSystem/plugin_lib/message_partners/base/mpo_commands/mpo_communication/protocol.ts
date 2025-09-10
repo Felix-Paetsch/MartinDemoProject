@@ -1,5 +1,5 @@
 import { Effect, Schema } from "effect";
-import { SendEffectT } from "../../../../../../messaging/base/send";
+import { SendEffectT } from "../../../../../../messaging/base/lib/send";
 import { ProtocolCommunicationHandler, ProtocolCommunicationHandlerT } from "../../../../../../messaging/protocols/base/communicationHandler";
 import { fail_as_protocol_error, ProtocolError, ProtocolErrorN } from "../../../../../../messaging/protocols/base/protocol_errors";
 import { Json } from "../../../../../../utils/json";

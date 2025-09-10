@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { Address } from "../../../messaging/base/address";
 import { Middleware, useMiddleware } from "../../../messaging/base/middleware";
-import { send } from "../../../messaging/base/send";
+import { send } from "../../../messaging/base/lib/send";
 import { Environment } from "./environment";
 
 export const KernelEnv = {

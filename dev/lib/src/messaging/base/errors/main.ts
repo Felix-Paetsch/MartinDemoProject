@@ -23,7 +23,12 @@ export const applyErrorHandler = (e: MessagingError) => Effect.promise(
 export const callbackToEffectFnUnhandled = <R, Args extends any[]>(cb: (...args: Args) => R | Promise<R>) => (...args: Args) => Effect.tryPromise(
     {
         try: () => Promise.resolve(cb(...args)),
-        catch: (e) => new CallbackError(e as Error),
+        catch: (e) => {
+            if (e instanceof HandledError || e instanceof CallbackError) {
+                return e;
+            }
+            return new CallbackError(e as Error);
+        },
     }
 ).pipe(
     Effect.withSpan("callbackToEffectUnhandled"))

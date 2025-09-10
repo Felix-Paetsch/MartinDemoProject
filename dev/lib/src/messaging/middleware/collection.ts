@@ -1,6 +1,6 @@
 
 import { Message } from "../base/message";
-import { isMiddlewareContinue, isMiddlewareInterrupt, Middleware, MiddlewareContinue, MiddlewareInterrupt } from "../base/middleware";
+import { isMiddlewareInterrupt, Middleware, MiddlewareContinue } from "../base/middleware";
 
 export function collection_middleware(arr: Middleware[]): Array<Middleware> & (() => Middleware);
 export function collection_middleware(...arr: Middleware[]): Array<Middleware> & (() => Middleware);

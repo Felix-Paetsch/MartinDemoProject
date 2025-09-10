@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Address } from "../messaging/base/address";
 import { Message } from "../messaging/base/message";
 import { Middleware, MiddlewareContinue, MiddlewareInterrupt, EffectToMiddleware } from "../messaging/base/middleware";
-import { send as kernel_send, SendEffect } from "../messaging/base/send";
+import { send as kernel_send, SendEffect } from "../messaging/base/lib/send";
 import { Json } from "../utils/json";
 import { guard_at_target } from "../messaging/middleware/guard";
 

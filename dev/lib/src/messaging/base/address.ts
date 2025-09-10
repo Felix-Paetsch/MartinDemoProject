@@ -1,29 +1,25 @@
-import { Context, Data, Effect, Equal, Hash, Schema } from "effect";
+import { Context, Effect, Equal, Hash, Schema } from "effect";
 import { v4 as uuidv4 } from 'uuid';
-import { AddressDeserializationError } from "./errors/anomalies"
+import { deserializeAddressFromUnknown, SerializedAddressSchema } from "./lib/address";
 
 export class AddressT extends Context.Tag("AddressT")<AddressT, Address>() { }
 
 export type ProcessID = string
-export type Port = string
-
-const SerializedAddressSchema = Schema.Struct({
-    process_id: Schema.String,
-    port: Schema.String
-})
+export type PortID = string
 
 export type SerializedAddress = {
     process_id: ProcessID,
-    port: Port
+    port: PortID
 }
 
 export class Address implements Equal.Equal {
-    readonly _process_id: ProcessID;
-    readonly _port: Port;
+    private _process_id: ProcessID;
+    private _port: PortID;
+    static process_id: ProcessID = uuidv4();
 
     constructor(
         process_id: ProcessID = uuidv4(),
-        port: Port = uuidv4()
+        port: PortID = uuidv4()
     ) {
         this._process_id = process_id;
         this._port = port;
@@ -65,31 +61,18 @@ export class Address implements Equal.Equal {
     }
 
     static deserialize(serialized: SerializedAddress): Address {
-        return Address.deserializeE(serialized).pipe(
+        // Errors: AddressDeserializationError
+        return deserializeAddressFromUnknown(serialized).pipe(
             Effect.runSync
         );
     }
 
-    static deserializeE(serialized: unknown): Effect.Effect<Address, AddressDeserializationError> {
-        return Effect.gen(function* () {
-            const json = yield* Schema.decodeUnknown(SerializedAddressSchema)(serialized);
-            return new Address(json.process_id, json.port);
-        }).pipe(
-            Effect.mapError(() => new AddressDeserializationError({ address: serialized }))
-        )
-    }
-
-    private static _local_address: Address = new Address(uuidv4(), uuidv4());
-    static setLocalAddress(address: Address) {
-        if (address instanceof LocalAddress) {
-            this._local_address = new Address(address.process_id, address.port);
-            return;
-        }
-        this._local_address = address;
+    static set_process_id(process_id: ProcessID) {
+        Address.process_id = process_id;
     }
 
     static get local_address() {
-        return this._local_address;
+        return new LocalAddress("*");
     }
 
     static new_local_address = (port: string = uuidv4()) => {
@@ -105,6 +88,6 @@ export class LocalAddress extends Address {
     }
 
     get process_id() {
-        return Address.local_address.process_id
+        return Address.process_id
     }
 }

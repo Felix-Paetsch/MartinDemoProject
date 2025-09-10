@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { Address } from "../../../messaging/base/address";
-import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/base/communication_channel";
+import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/base/lib/communication_channel";
 import { TransmittableMessage, TransmittableMessageT } from "../../../messaging/base/message";
 import { callbackToEffect } from "../../../utils/boundary/callbacks";
 import { Json } from "../../../utils/json";
