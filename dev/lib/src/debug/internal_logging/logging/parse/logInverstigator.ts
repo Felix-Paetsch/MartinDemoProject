@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import path from "path";
-import { Log, recieveMessageLogs } from "../../../../advanced_messaging/logging";
+import { Log, recieveMessageLogs } from "../../../../middleware/logging";
 import { LogCollection } from "./logCollection";
 import { DataLogEntry, LogEntry, MessageLogEntry } from "./logEntry";
 

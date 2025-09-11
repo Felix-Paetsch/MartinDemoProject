@@ -59,4 +59,5 @@ export {
     Port,
     Address,
     LocalAddress,
+    Message
 };

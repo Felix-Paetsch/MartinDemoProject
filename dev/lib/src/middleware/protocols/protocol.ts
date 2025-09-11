@@ -4,7 +4,7 @@ import { Address } from "../base/address";
 import { Message } from "../base/message";
 import { send as kernel_send, SendEffect, SendEffectT } from "../base/send";
 import { guard_middleware } from "../middleware/guard";
-import { chain_middleware, ChainMessageResultT, make_message_chain } from "../middleware/message_chains";
+import { chain_middleware, ChainMessageResultT, make_message_chain } from "../message_chains";
 import { ProtocolCommunicationHandler } from "./base/communicationHandler";
 import { ProtocolError, ProtocolErrorN } from "./base/protocol_errors";
 import { get_protocol_meta_data, to_protocol_message } from "./base/protocol_message";

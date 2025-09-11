@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { Severity } from "../../../debug/exports";
 import { Address } from "../../../messaging/core/address";
-import { log } from "../../../advanced_messaging/logging";
+import { log } from "../../../middleware/logging";
 import { ProtocolError } from "../../../messaging/protocols/base/protocol_errors";
 import { MessagePartner } from "../../../pluginSystem/plugin_lib/message_partners/message_partner/message_partner";
 import { CallbackError } from "../../../utils/boundary/callbacks";

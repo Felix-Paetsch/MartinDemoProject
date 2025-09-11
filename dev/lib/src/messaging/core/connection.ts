@@ -6,7 +6,7 @@ import Port from "./port";
 import { AddressAlreadyInUseError, HandledError, IgnoreHandled } from "./errors/errors";
 import { MessageDeserializationError, MessageSerializationError } from "./errors/anomalies";
 import { Schema } from "effect";
-import { MessageFromString } from "./message";
+import { MessageFromString } from "../../messagingEffect/schemas";
 import { applyMiddlewareEffect } from "./middleware";
 import { core_send } from "./core_send";
 import { callbackToEffect } from "./errors/main";
@@ -122,7 +122,7 @@ export class Connection {
             return Equal.equals(c.address, this.address)
                 || Equal.equals(this.address, Address.local_address)
         })) {
-            throw new AddressAlreadyInUseError(this.address);
+            throw new AddressAlreadyInUseError({ address: this.address });
         }
 
         this._is_open = true;

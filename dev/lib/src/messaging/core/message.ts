@@ -1,6 +1,7 @@
-import { Effect, ParseResult, pipe, Schema } from "effect";
-import { Address, deserializeAddressFromUnknown } from "./address";
+import { Effect, Schema } from "effect";
+import { Address } from "./address";
 import { MessageDeserializationError, MessageSerializationError } from "./errors/anomalies";
+import { MessageFromString } from "../../messagingEffect/schemas";
 
 export type SerializedMessage = string;
 export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
@@ -24,7 +25,7 @@ export class Message {
     serialize(): SerializedMessage {
         // Errors: MessageSerializationError
         return Schema.encode(MessageFromString)(this).pipe(
-            Effect.mapError(() => new MessageSerializationError({ message: this })),
+            Effect.mapError(() => new MessageSerializationError({ msg: this })),
             Effect.runSync
         );
     }
@@ -49,43 +50,3 @@ export type LocalMessageData = {
 
     [key: string]: any;
 }
-
-export const MessageFromString = Schema.transformOrFail(Schema.String, Schema.instanceOf(Message), {
-    decode: (str: string, _, ast) =>
-        pipe(
-            Effect.try(() => JSON.parse(str)),
-            Effect.catchAll(e => {
-                return ParseResult.fail(
-                    new ParseResult.Type(ast, str, `Failed to parse JSON: ${e instanceof Error ? e.message : String(e)}`)
-                );
-            }),
-            Effect.andThen((json) => Effect.gen(function* () {
-                const content = yield* Schema.decode(Schema.Record({
-                    key: Schema.String,
-                    value: Schema.Any
-                }))(json.content);
-                const meta_data = yield* Schema.decode(Schema.Record({
-                    key: Schema.String,
-                    value: Schema.Any
-                }))(json.meta_data);
-                const target = yield* deserializeAddressFromUnknown(json.target);
-                return new Message(target, content, meta_data)
-            })),
-            Effect.catchAll(e => {
-                return ParseResult.fail(
-                    new ParseResult.Type(ast, str, `Failed deserializing message: ${e instanceof Error ? e.message : String(e)}`));
-            })
-        ),
-    encode: (msg: Message, _, ast) =>
-        Effect.try(() => JSON.stringify({
-            target: msg.target.serialize(),
-            content: msg.content,
-            meta_data: msg.meta_data
-        })).pipe(
-            Effect.catchAll(e => {
-                return ParseResult.fail(
-                    new ParseResult.Type(ast, msg, `Failed to stringify message: ${e instanceof Error ? e.message : String(e)}`)
-                );
-            }),
-        )
-});

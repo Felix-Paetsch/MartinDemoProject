@@ -2,14 +2,23 @@ import { Context, Data, Deferred, Duration, Effect, Schedule, Schema } from "eff
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from "../messaging/core/address";
 import { Message } from "../messaging/core/message";
-import { Middleware, MiddlewareContinue, MiddlewareInterrupt, EffectToMiddleware } from "../messaging/core/middleware";
-import { send as kernel_send, SendEffect } from "../messaging/core/lib/send";
+import { Middleware, MiddlewareContinue, MiddlewareInterrupt } from "../messaging/core/middleware";
+import { EffectToMiddleware } from "../messagingEffect/effect_middleware";
 import { Json } from "../utils/json";
 import { guard_at_target } from "../messaging/middlewares/guard";
+import { AddressFromString, cacheFun } from "./utils";
+import { Port } from "../messaging/exports";
+
+const CHAIN_PORT_ID = "logging";
+const chain_port = cacheFun(() => {
+    const port = new Port(CHAIN_PORT_ID);
+    port.open();
+    return port;
+});
 
 export const chain_message_schema = Schema.Struct({
-    current_sender: Address.AddressFromString,
-    current_reciever: Address.AddressFromString,
+    current_sender: AddressFromString,
+    current_reciever: AddressFromString,
     msg_chain_uid: Schema.String,
     current_msg_chain_length: Schema.Number,
     timeout: Schema.Number,
@@ -51,8 +60,7 @@ export type ChainContinueEffect = Effect.Effect<
 export type ResponseFunction = (
     content: { [key: string]: Json },
     meta_data: { [key: string]: Json },
-    new_timeout?: number,
-    send?: SendEffect
+    new_timeout?: number
 ) => ChainContinueEffect;
 
 export class ResponseFunctionT extends Context.Tag("ResponseFunctionT")<
@@ -180,8 +188,7 @@ const continue_chain_fn = (request_chain_message_meta_data: typeof chain_message
         function* (
             content: { [key: string]: Json },
             meta_data: { [key: string]: any } = {},
-            new_timeout?: number,
-            send: SendEffect = kernel_send
+            new_timeout?: number
         ) {
             const {
                 current_sender,
@@ -205,7 +212,7 @@ const continue_chain_fn = (request_chain_message_meta_data: typeof chain_message
             });
 
             const prom = yield* make_chain_message_promise(res, msg_chain_uid, new_timeout ?? timeout);
-            yield* send(res).pipe(Effect.ignore);
+            yield* Effect.promise(() => chain_port().send(res));
 
             return prom;
         });

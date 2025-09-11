@@ -5,7 +5,7 @@ import { TransmittableMessage } from "./message";
 import { isMiddlewareInterrupt } from "./middleware";
 import { HandledError, IgnoreHandled } from "./errors/errors";
 import { AddressNotFound, MessageDeserializationError } from "./errors/anomalies";
-import { MessageFromString } from "./message";
+import { MessageFromString } from "../../messagingEffect/schemas";
 import { global_middleware } from "./middleware";
 import { Connection } from "./connection";
 

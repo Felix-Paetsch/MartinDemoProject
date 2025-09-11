@@ -1,6 +1,6 @@
 import { Data } from "effect";
 import { Address } from "../address";
-import { Message, SerializedMessage } from "../message";
+import { Message, SerializedMessage, TransmittableMessage } from "../message";
 
 export class AddressNotFound extends Error {
     constructor(readonly address: Address) {
@@ -11,22 +11,28 @@ export class AddressNotFound extends Error {
 }
 
 export class MessageSerializationError extends Data.TaggedError("MessageSerializationError")<{
-    message: Message
+    msg: Message
 }> { }
 
 export class MessageDeserializationError extends Data.TaggedError("MessageDeserializationError")<{
     serialized: SerializedMessage
 }> { }
 
-export class MessageChannelTransmissionError extends Error {
-    constructor(readonly error: Error) {
-        super("Message Channel Transmission Error: " + error.message, { cause: error });
+export class MessageChannelTransmissionError extends Data.TaggedError("MessageChannelTransmissionError")<{
+    msg: TransmittableMessage,
+    cause: Error
+}> {
+    constructor(readonly error: Error, readonly msg: TransmittableMessage) {
+        super({
+            msg,
+            cause: error
+        });
     }
 }
 
 export class AddressDeserializationError extends Error {
     constructor(readonly address: any) {
-        super("Address not deserializable");
+        super("Address not deserializable", { cause: address });
     }
 }
 

@@ -5,7 +5,7 @@ import { Effect, Schema } from "effect";
 import { HandledError, IgnoreHandled, PortClosedError } from "./errors/errors";
 import { applyMiddlewareEffect } from "./middleware";
 import { Connection, PortConnection } from "./connection";
-import { MessageFromString } from "./message";
+import { MessageFromString } from "../../messagingEffect/schemas";
 import { callbackToEffect } from "./errors/main";
 import { MessageDeserializationError } from "./errors/anomalies";
 import { core_send } from "./core_send";
@@ -85,7 +85,7 @@ export default class Port {
     async send(msg: Message): Promise<void> {
         // Errors: PortClosedError
         if (this.is_closed()) {
-            throw new PortClosedError(this);
+            throw new PortClosedError({ port: this });
         }
 
         Object.assign(msg.local_data, {

@@ -1,29 +1,28 @@
 import { Effect } from "effect";
-import { Address } from "../base/address";
-import { Message } from "../base/message";
-import { Middleware, MiddlewareContinue, MiddlewareInterrupt, EffectToMiddleware } from "../base/middleware";
+import { Address, Message, Middleware } from "../messaging/exports";
+import { EffectToMiddleware } from "../messagingEffect/effect_middleware";
 
-export function block_address(address: Address, m: BlockingMethod): Middleware {
+export function block_address(address: Address, m: BlockingMethod): Middleware.Middleware {
     return EffectToMiddleware(Effect.fn("block_address")(
         function* (message: Message) {
             if (message.target !== address) {
-                return MiddlewareContinue;
+                return Middleware.Continue;
             }
             if (m(message)) {
-                return MiddlewareInterrupt;
+                return Middleware.Interrupt;
             }
-            return MiddlewareContinue;
+            return Middleware.Continue;
         }
     ));
 }
 
-export function block_all_communication(m: BlockingMethod): Middleware {
+export function block_all_communication(m: BlockingMethod): Middleware.Middleware {
     return EffectToMiddleware(Effect.fn("block_all_communication")(
         function* (message: Message) {
             if (m(message)) {
-                return MiddlewareInterrupt;
+                return Middleware.Interrupt;
             }
-            return MiddlewareContinue;
+            return Middleware.Continue;
         }
     ));
 }

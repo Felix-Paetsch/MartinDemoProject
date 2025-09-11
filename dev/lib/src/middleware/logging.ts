@@ -1,10 +1,16 @@
-import { Effect, ParseResult, Schema } from "effect";
+import { ParseResult, Schema } from "effect";
 import { Json } from "../utils/exports";
 import { Address } from "../messaging/core/address";
 import { Message } from "../messaging/core/message";
-import { Middleware, MiddlewareContinue } from "../messaging/core/middleware";
-import { send } from "../messaging/core/lib/send";
-import { IgnoreHandled } from "../messaging/core/errors/errors";
+import { Middleware, Port } from "../messaging/exports";
+import { cacheFun } from "./utils";
+
+const LOGGING_PORT_ID = "logging";
+const logging_port = cacheFun(() => {
+    const port = new Port(LOGGING_PORT_ID);
+    port.open();
+    return port;
+})
 
 const MessageLogSchema = Schema.Struct({
     type: Schema.Literal("Message"),
@@ -26,18 +32,11 @@ export const LogSchema = Schema.Union(MessageLogSchema, DataLogSchema);
 export type Log = Schema.Schema.Type<typeof LogSchema>;
 
 export const MessageToLog = Schema.transformOrFail(Schema.instanceOf(Message), MessageLogSchema, {
-    decode: (message, _, ast) => message.content.pipe(
-        Effect.andThen(content => {
-            return ParseResult.succeed({
-                type: "Message" as const,
-                content: content,
-                meta_data: message.meta_data
-            })
-        }),
-        Effect.catchAll(() => ParseResult.fail(
-            new ParseResult.Type(ast, message, "Couldn't decode content")
-        ))
-    ),
+    decode: (message, _, ast) => ParseResult.succeed({
+        type: "Message" as const,
+        content: message.content,
+        meta_data: message.meta_data
+    }),
     encode: (log, _, ast) => ParseResult.fail(new ParseResult.Forbidden(
         ast,
         log.content,
@@ -55,38 +54,33 @@ export const DataToLog = Schema.transform(Schema.Any, DataLogSchema, {
 
 export const ToLog = Schema.Union(MessageToLog, DataToLog);
 
-const isNoLoggingMessage = Effect.fn("isNoLoggingMessage")(
-    function* (message: Message) {
-        return !message.meta_data.message_logging;
-    }
-)
+const isNoLoggingMessage = function (message: Message) {
+    return !message.meta_data.message_logging;
+}
 
 export const log_messages = (
     log_message: (message: Message) => void | Promise<void>,
     should_log: (message: Message) => boolean | Promise<boolean> =
         () => true
-): Middleware => {
+): Middleware.Middleware => {
     return async (message: Message) => {
-        const b1 = await isNoLoggingMessage(message);
+        const b1 = isNoLoggingMessage(message);
         const b2 = await should_log(message);
         if (b1 && b2) {
             await log_message(message);
         }
-        return MiddlewareContinue;
+        return Middleware.Continue;
     }
 }
 
 export const log = (address: Address, data: Json) => {
-    const logMessage = new Message(address, Schema.decodeSync(ToLog)(data), {
+    const logMessage = new Message(address.forward_port(LOGGING_PORT_ID), Schema.decodeSync(ToLog)(data), {
         message_logging: {
             source_address: address.serialize()
         }
     });
 
-    return send(logMessage).pipe(
-        IgnoreHandled,
-        Effect.runPromise
-    );
+    return logging_port().send(logMessage);
 }
 
 export const log_external = (url: string, data: Json) => fetch(url, {
@@ -97,19 +91,16 @@ export const log_external = (url: string, data: Json) => fetch(url, {
     body: JSON.stringify(data)
 })
 
-export function log_to_address(address: Address): Middleware {
+export function log_to_address(address: Address): Middleware.Middleware {
     return (message: Message) => {
         const loggingContent = Schema.decodeSync(ToLog)(message);
-        const logMessage = new Message(address, loggingContent, {
+        const logMessage = new Message(address.forward_port(LOGGING_PORT_ID), loggingContent, {
             message_logging: {
                 source_address: message.target.serialize()
             }
         });
 
-        return send(logMessage).pipe(
-            IgnoreHandled,
-            Effect.runPromise
-        );
+        return logging_port().send(logMessage);
     }
 }
 
@@ -123,13 +114,13 @@ export function log_to_url(url: string) {
     }
 }
 
-export function recieveMessageLogs(cb: (message: Log) => void | Promise<void>): Middleware {
-    return (message: Message) => {
+export function recieveMessageLogs(cb: (message: Log) => void | Promise<void>) {
+    logging_port().register_middleware((message: Message) => {
         if (message.meta_data.message_logging) {
-            const content = message.content.pipe(Effect.runSync);
+            const content = message.content;
             const sanatized_content = Schema.decodeUnknownSync(LogSchema)(content);
             return cb(sanatized_content)
         }
-        return MiddlewareContinue;
-    }
+        return Middleware.Continue;
+    })
 }

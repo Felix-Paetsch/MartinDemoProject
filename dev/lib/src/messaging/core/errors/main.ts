@@ -27,7 +27,7 @@ export const callbackToEffectFnUnhandled = <R, Args extends any[]>(cb: (...args:
             if (e instanceof HandledError || e instanceof CallbackError) {
                 return e;
             }
-            return new CallbackError(e as Error);
+            return new CallbackError({ error: e as Error });
         },
     }
 ).pipe(

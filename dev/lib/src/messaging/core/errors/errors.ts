@@ -11,7 +11,7 @@ export class HandledError extends Data.TaggedError("HandledError")<{
         super({ error });
     }
 
-    static handleE(error: MessagingError) {
+    static handleE(error: MessagingError | HandledError) {
         return Effect.gen(function* () {
             if (error instanceof HandledError) {
                 return yield* Effect.fail(error);
@@ -21,7 +21,7 @@ export class HandledError extends Data.TaggedError("HandledError")<{
         })
     }
 
-    static handleA(error: Anomaly) {
+    static handleA(error: Anomaly | HandledError) {
         return Effect.gen(function* () {
             if (error instanceof HandledError) {
                 return yield* Effect.fail(error);
@@ -43,22 +43,16 @@ export function IgnoreHandled<R, S, T>(e: Effect.Effect<R, S, T>): Effect.Effect
     )
 }
 
-export class PortClosedError extends Error {
-    constructor(readonly port: Port) {
-        super("Port is currently closed: " + port.id.toString());
-    }
-}
+export class PortClosedError extends Data.TaggedError("PortClosedError")<{
+    port: Port
+}> { }
 
-export class AddressAlreadyInUseError extends Error {
-    constructor(readonly address: Address) {
-        super("Address Already In Use: " + address.toString(), { cause: address });
-    }
-}
+export class AddressAlreadyInUseError extends Data.TaggedError("AddressAlreadyInUseError")<{
+    address: Address
+}> { }
 
-export class CallbackError extends Error {
-    constructor(readonly error: Error) {
-        super("Callback Error: " + error.message, { cause: error });
-    }
-}
+export class CallbackError extends Data.TaggedError("CallbackError")<{
+    error: Error
+}> { }
 
 export type MessagingError = CallbackError;

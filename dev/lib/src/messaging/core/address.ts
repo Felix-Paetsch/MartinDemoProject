@@ -1,6 +1,7 @@
 import { Effect, Equal, Hash, Schema } from "effect";
 import { v4 as uuidv4 } from 'uuid';
-import { AddressDeserializationError } from "./errors/anomalies";
+import { deserializeAddressFromUnknown } from "../../messagingEffect/schemas";
+import { SerializedAddressSchema } from "../../messagingEffect/schemas";
 
 export namespace Address {
     export type ProcessID = string;
@@ -35,6 +36,10 @@ export class Address implements Equal.Equal {
 
     as_generic(): Address {
         return new Address(this.process_id, "*");
+    }
+
+    forward_port(port: Address.PortID): Address {
+        return new Address(this.process_id, port);
     }
 
     static generic(process_id: Address.ProcessID): Address {
@@ -90,18 +95,16 @@ export class LocalAddress extends Address {
     get process_id() {
         return Address.process_id
     }
+
+    as_generic(): Address {
+        return new LocalAddress("*");
+    }
+
+    forward_port(port: Address.PortID): Address {
+        return new LocalAddress(port);
+    }
+
+    static get local_address() {
+        return new LocalAddress("*");
+    }
 }
-
-export const SerializedAddressSchema = Schema.Struct({
-    process_id: Schema.String,
-    port: Schema.String
-})
-
-export function deserializeAddressFromUnknown(serialized: unknown): Effect.Effect<Address, AddressDeserializationError> {
-    return Effect.gen(function* () {
-        const json = yield* Schema.decodeUnknown(SerializedAddressSchema)(serialized);
-        return new Address(json.process_id, json.port);
-    }).pipe(
-        Effect.mapError(() => new AddressDeserializationError({ address: serialized }))
-    )
-} 1

@@ -4,7 +4,7 @@ import { Address } from "../../base/address";
 import { MessageTransmissionError } from "../../base/errors/message_errors";
 import { Message } from "../../base/message";
 import { SendEffect, SendEffectT } from "../../base/send";
-import { ChainMessageResult, ChainTimeout } from "../../middleware/message_chains";
+import { ChainMessageResult, ChainTimeout } from "../../message_chains";
 import { ProtocolError, ProtocolErrorN, ProtocolErrorR } from "./protocol_errors";
 
 type ProtocolMessageRespond = (data: Json, timeout?: number, is_error?: boolean) =>
