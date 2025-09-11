@@ -91,7 +91,7 @@ export const log_external = (url: string, data: Json) => fetch(url, {
     body: JSON.stringify(data)
 })
 
-export function log_to_address(address: Address): Middleware.Middleware {
+export function log_to_address(address: Address): (msg: Message) => Promise<void> {
     return (message: Message) => {
         const loggingContent = Schema.decodeSync(ToLog)(message);
         const logMessage = new Message(address.forward_port(LOGGING_PORT_ID), loggingContent, {
@@ -107,7 +107,7 @@ export function log_to_address(address: Address): Middleware.Middleware {
 export function log_to_url(url: string) {
     return (message: Message) => {
         const loggingContent = Schema.decodeSync(ToLog)(message);
-        return log_external(
+        log_external(
             url,
             loggingContent
         );

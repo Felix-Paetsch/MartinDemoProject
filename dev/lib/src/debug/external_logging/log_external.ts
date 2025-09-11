@@ -36,8 +36,5 @@ export function log_external(data: Json, url?: string) {
     log(
         url || default_logging_target,
         data
-    ).pipe(
-        Effect.ignore,
-        Effect.runPromise
     )
 }
