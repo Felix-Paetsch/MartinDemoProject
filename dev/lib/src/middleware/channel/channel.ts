@@ -15,7 +15,7 @@ export type MessageChannelProcessorName = string;
 export type ChannelMessage = Json;
 export type MessageChannelCloseReason = "PortIsClosed" | "ChannelLocallyClosed" | "ChannelRemotelyClosed" | "InactiveTimeout";
 
-export type MessageChannelProcessor = (m: MessageChannel) => Effect.Effect<void>;
+export type MessageChannelProcessor = (m: MessageChannel) => void | Promise<void>;
 
 export default class MessageChannel {
     private _is_open = true;
@@ -111,7 +111,7 @@ export default class MessageChannel {
         }));
     }
 
-    next(timeout?: number): Effect.Effect<ChannelMessage, ReciveMessageError> {
+    next(timeout?: number): Promise<ChannelMessage | ReciveMessageError> {
         return Effect.gen(this, function* () {
             if (this.message_queue.length > 0) {
                 return this.message_queue.shift()!;
@@ -150,7 +150,10 @@ export default class MessageChannel {
             )
 
             return yield* deferred_with_timeout;
-        })
+        }).pipe(
+            Effect.merge,
+            Effect.runPromise
+        )
     }
 
     static register_processor(name: MessageChannelProcessorName, processor: MessageChannelProcessor) {

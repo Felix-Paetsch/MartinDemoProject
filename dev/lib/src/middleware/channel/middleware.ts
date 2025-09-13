@@ -1,5 +1,5 @@
 import { Message, Middleware, Port, Failure } from "../../messaging/exports";
-import { Effect, Schema } from "effect";
+import { Schema } from "effect";
 import MessageChannel from "./channel";
 import { MessageData, MessageDataSchema } from "./schemas";
 import chalk from "chalk";
@@ -42,7 +42,7 @@ export const processMessageBody = (body: MessageData, port: Port) => {
             body.config
         );
         body.message && processMessageBody(body.message, port);
-        return processor(channel).pipe(Effect.runPromise);
+        return Promise.resolve(processor(channel));
     }
     const channel = MessageChannel.open_channels.find(c => {
         return (c.context.id === body.targetID) && c.port === port

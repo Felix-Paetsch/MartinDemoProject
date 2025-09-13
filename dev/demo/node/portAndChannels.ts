@@ -27,19 +27,24 @@ const WhoToWho: boolean[] = [
     const p1 = new Port("Test1").open();
     const p2 = new Port("Test2").open();
 
-    MessageChannel.register_processor("test", async (mc) => {
-        console.log("Registering processor");
+    (p1 as any)._id = "P1";
+    (p2 as any)._id = "P2";
 
+    MessageChannel.register_processor("test", async (mc: MessageChannel) => {
         for (let i = 0; i < WhoToWho.length; i++) {
             const who = WhoToWho[i];
             if (who) {
                 console.log(chalk.blue(`Sending MSG ${i}`));
-                mc.send(`MSG ${i}`);
+                await mc.send(`MSG ${i}`);
             } else {
-                console.log(chalk.greenBright(`Awaiting MSG ${i}`));
-                console.log(chalk.greenBright(await mc.next()));
+                console.log(chalk.bgBlue(`Awaiting MSG ${i}`));
+                console.log(chalk.bgBlue(
+                    await mc.next()
+                ));
             }
         }
+
+        console.log("Done A");
     });
 
     p2.use_middleware(processMessageChannelMessage)
@@ -49,18 +54,21 @@ const WhoToWho: boolean[] = [
         const mc = new MessageChannel(
             p2.address, p1,
             { target_processor: "test" },
-            { defaultMessageTimeout: 60000 }
+            { defaultMessageTimeout: 600000 }
         );
 
         for (let i = 0; i < WhoToWho.length; i++) {
             const who = WhoToWho[i];
             if (!who) {
                 console.log(chalk.green(`Sending MSG ${i}`));
-                mc.send(`MSG ${i}`);
+                await mc.send(`MSG ${i}`);
             } else {
-                console.log(chalk.blueBright(`Awaiting MSG ${i}`));
-                console.log(chalk.blueBright(await mc.next()));
+                console.log(chalk.bgGreen(`Awaiting MSG ${i}`));
+                console.log(chalk.bgGreen(
+                    await mc.next()
+                ));
             }
         }
+        console.log("Done B");
     }
 })();
