@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Effect, flow, pipe } from "effect";
 import path from "path";
 import { Log, recieveMessageLogs } from "../../../middleware/logging";
 import { LogCollection } from "./logCollection";
@@ -17,17 +17,20 @@ export default class LogInvestigator extends LogCollection {
         this.logs.forEach(log => (log as any).log_investigator = this);
     }
 
-    middleware() {
+    listen() {
         return recieveMessageLogs(
-            Effect.fn("recieveMessageLogs")(function* (
-                this: LogInvestigator, message: Log
-            ) {
-                if (message.type === "Message") {
-                    this.push(new MessageLogEntry(this, message));
-                } else {
-                    this.push(new DataLogEntry(this, message));
-                }
-            }).bind(this)
+            flow(
+                Effect.fn("recieveMessageLogs")(function* (
+                    this: LogInvestigator, message: Log
+                ) {
+                    if (message.type === "Message") {
+                        this.push(new MessageLogEntry(this, message));
+                    } else {
+                        this.push(new DataLogEntry(this, message));
+                    }
+                }).bind(this),
+                Effect.runPromise
+            )
         )
     }
 

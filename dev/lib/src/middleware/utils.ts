@@ -1,5 +1,5 @@
 import { Effect, ParseResult, Schema } from "effect";
-import { Address } from "pc-messaging-kernel/messaging/core/address";
+import { Address } from "../messaging/exports";
 
 export const cacheFun = <T>(fn: () => T) => {
     let called = false;
@@ -25,3 +25,10 @@ export const AddressFromString = Schema.transformOrFail(SerializedAddressSchema,
     ),
     encode: (a, _, ast) => ParseResult.succeed(a.serialize())
 });
+
+
+export const swap = <A, I, R>(schema: Schema.Schema<A, I, R>): Schema.Schema<I, A, R> =>
+    Schema.transformOrFail(Schema.typeSchema(schema), Schema.encodedSchema(schema), {
+        decode: ParseResult.encode(schema),
+        encode: ParseResult.decode(schema),
+    })

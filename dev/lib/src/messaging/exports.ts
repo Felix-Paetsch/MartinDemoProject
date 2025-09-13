@@ -15,9 +15,10 @@ import { guard_middleware as gmw } from "./middlewares/guard";
 import { empty_middleware as emw } from "./middlewares/empty";
 import { comsume_message as cm } from "./middlewares/consume";
 
-export namespace Error {
+export namespace Failure {
     export type MessagingError = Errors.MessagingError;
     export type Anomaly = Anomalies.Anomaly;
+    export const reportAnomaly = Anomalies.reportAnomaly;
 
     export const PortClosedError = Errors.PortClosedError;
     export const AddressAlreadyInUseError = Errors.AddressAlreadyInUseError;
@@ -27,6 +28,7 @@ export namespace Error {
     export const MessageDeserializationError = Anomalies.MessageDeserializationError;
     export const MessageChannelTransmissionError = Anomalies.MessageChannelTransmissionError;
     export const AddressDeserializationError = Anomalies.AddressDeserializationError;
+    export const ReportedAnomaly = Anomalies.ReportedAnomaly;
 
     export type ErrorHandler = ErrorsMain.ErrorHandler;
     export type AnomalyHandler = ErrorsMain.AnomalyHandler;

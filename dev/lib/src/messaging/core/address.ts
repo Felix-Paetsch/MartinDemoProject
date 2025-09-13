@@ -2,6 +2,7 @@ import { Effect, Equal, Hash, Schema } from "effect";
 import { v4 as uuidv4 } from 'uuid';
 import { deserializeAddressFromUnknown } from "../../messagingEffect/schemas";
 import { SerializedAddressSchema } from "../../messagingEffect/schemas";
+import { AddressDeserializationError } from "./errors/anomalies";
 
 export namespace Address {
     export type ProcessID = string;
@@ -57,6 +58,10 @@ export class Address implements Equal.Equal {
         return false
     }
 
+    equals(that: Address): boolean {
+        return Equal.equals(this, that);
+    }
+
     [Hash.symbol](): number {
         return Hash.hash(this.port)
     }
@@ -68,6 +73,13 @@ export class Address implements Equal.Equal {
     static deserialize(serialized: Address.SerializedAddress): Address {
         // Errors: AddressDeserializationError
         return deserializeAddressFromUnknown(serialized).pipe(
+            Effect.runSync
+        );
+    }
+
+    static deserialize_unknown(serialized: unknown): Address | AddressDeserializationError {
+        return deserializeAddressFromUnknown(serialized).pipe(
+            Effect.merge,
             Effect.runSync
         );
     }
@@ -89,7 +101,7 @@ export class LocalAddress extends Address {
     constructor(
         port: string = uuidv4()
     ) {
-        super(Address.local_address.process_id, port)
+        super(Address.process_id, port)
     }
 
     get process_id() {

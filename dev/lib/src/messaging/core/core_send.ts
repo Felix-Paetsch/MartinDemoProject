@@ -8,6 +8,7 @@ import { AddressNotFound, MessageDeserializationError } from "./errors/anomalies
 import { MessageFromString } from "../../messagingEffect/schemas";
 import { global_middleware } from "./middleware";
 import { Connection } from "./connection";
+import { UnblockFiberDeamon } from "../../utils/promisify";
 
 export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, never> = Effect.fn("send")(function* (msg: TransmittableMessage) {
     if (typeof msg === "string") {
@@ -46,5 +47,6 @@ export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, 
 
     yield* outConnection.__send_message(msg);
 }, e => e.pipe(
-    IgnoreHandled
+    IgnoreHandled,
+    UnblockFiberDeamon
 ))

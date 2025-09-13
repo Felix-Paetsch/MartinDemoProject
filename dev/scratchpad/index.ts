@@ -1,7 +1,21 @@
 import chalk from "chalk";
 import { Cause, Effect } from "effect";
 
+const p1 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve("Promise 1")
+    }, 5000);
+})
 
+let resolve: (value: string) => void;
+let reject: (reason?: any) => void;
+const p2 = new Promise((_resolve, _reject) => {
+    resolve = _resolve;
+    reject = _reject;
+})
+
+await Promise.race([p1, p2]);
+/*
 function hello_old_world() {
     Error.stackTraceLimit = Infinity;
     const fn = Effect.fn("test")(function* () {
@@ -33,7 +47,6 @@ function hello_old_world() {
 
 hello_old_world();
 
-/*
 Effect.gen(function* () {
     const cause = yield* Effect.cause(
         Effect.failCause(Cause.fail("Oh no!")).pipe(
@@ -111,7 +124,6 @@ stack
 //    cause: new Error("wha")
 //})
 // Cause, Message, Name, Stack
-console.log(chalk.green("========="))
 //console.log(prettyErr);
 //console.log(prettyErr.cause);
 

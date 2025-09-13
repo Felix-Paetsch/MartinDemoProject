@@ -15,10 +15,3 @@ export function UnblockFiber<R>(e: Effect.Effect<void, never, R>) {
         return yield* Effect.void;
     })
 }
-
-export function promisify<T>(value: T | Promise<T>): Promise<T> {
-    if (value instanceof Promise) {
-        return value;
-    }
-    return Promise.resolve(value);
-}

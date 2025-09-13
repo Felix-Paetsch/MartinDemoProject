@@ -115,7 +115,7 @@ export function log_to_url(url: string) {
 }
 
 export function recieveMessageLogs(cb: (message: Log) => void | Promise<void>) {
-    logging_port().register_middleware((message: Message) => {
+    logging_port().use_middleware((message: Message) => {
         if (message.meta_data.message_logging) {
             const content = message.content;
             const sanatized_content = Schema.decodeUnknownSync(LogSchema)(content);

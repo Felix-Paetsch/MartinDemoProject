@@ -1,9 +1,6 @@
 import { Data, Effect, Option, Schema } from "effect";
 import { Json } from "../../utils/json";
-import { Address } from "../base/address";
-import { Message } from "../base/message";
-import { send as kernel_send, SendEffect, SendEffectT } from "../base/send";
-import { guard_middleware } from "../middleware/guard";
+import { Address, Message, Middleware, Port } from "../../messaging/exports";
 import { chain_middleware, ChainMessageResultT, make_message_chain } from "../message_chains";
 import { ProtocolCommunicationHandler } from "./base/communicationHandler";
 import { ProtocolError, ProtocolErrorN } from "./base/protocol_errors";
@@ -20,6 +17,7 @@ const ProtocolMetaDataSchema = Schema.Struct({
 
 export abstract class Protocol<SenderResult, ReceiverResult> {
     constructor(
+        readonly port: Port,
         readonly protocol_name: string,
         readonly protocol_ident: Json,
         readonly protocol_version: string
@@ -32,7 +30,6 @@ export abstract class Protocol<SenderResult, ReceiverResult> {
     send_first_message(target_address: Address,
         data: Json,
         timeout?: number,
-        send: SendEffect = kernel_send,
         source_address: Address = Address.local_address
     ) {
         return Effect.gen(this, function* () {
@@ -43,7 +40,7 @@ export abstract class Protocol<SenderResult, ReceiverResult> {
             message.meta_data.protocol = this.protocol_meta_data;
             const responseE = yield* make_message_chain(message, timeout, source_address)
 
-            yield* send(message)
+            yield* Effect.tryPromise(() => this.port.send(message));
 
             return responseE.pipe(
                 Effect.andThen(response => to_protocol_message(response, this.protocol_meta_data)),
@@ -56,8 +53,7 @@ export abstract class Protocol<SenderResult, ReceiverResult> {
                     return yield* ProtocolErrorN({
                         error: e
                     })
-                })),
-                Effect.provideService(SendEffectT, send)
+                }))
             )
         }).pipe(Effect.withSpan("SendFirstMessage"))
     }
@@ -81,15 +77,13 @@ export abstract class Protocol<SenderResult, ReceiverResult> {
     /** The middleware to register on both sides to make this work */
 
     middleware(
-        this: Protocol<SenderResult, ReceiverResult>, send: SendEffect
+        this: Protocol<SenderResult, ReceiverResult>
     ) {
         const self = this;
         const on_first_msg = Effect.gen(
             function* () {
                 const res = yield* ChainMessageResultT;
-                const pm = yield* to_protocol_message(res, self.protocol_meta_data).pipe(
-                    Effect.provideService(SendEffectT, send)
-                );
+                const pm = yield* to_protocol_message(res, self.protocol_meta_data);
                 const phc = new ProtocolCommunicationHandler(pm);
                 return yield* self.on_first_request(phc);
             }

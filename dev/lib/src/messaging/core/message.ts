@@ -38,6 +38,17 @@ export class Message {
                 Effect.runSync
             )
     }
+
+    static deserialize_unknown(serialized: unknown): Message | MessageDeserializationError {
+        return Schema.decodeUnknown(MessageFromString)(serialized).pipe(
+            Effect.mapError(() => new MessageDeserializationError({
+                serialized: typeof serialized === "string" ?
+                    serialized : serialized?.toString() ?? "<Input is not a string>"
+            })),
+            Effect.merge,
+            Effect.runSync
+        )
+    }
 }
 
 export type TransmittableMessage = Message | SerializedMessage;

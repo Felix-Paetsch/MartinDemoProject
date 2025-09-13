@@ -1,6 +1,7 @@
-import { Data } from "effect";
+import { Data, Effect } from "effect";
 import { Address } from "../address";
 import { Message, SerializedMessage, TransmittableMessage } from "../message";
+import { applyAnomalyHandler } from "./main";
 
 export class AddressNotFound extends Error {
     constructor(readonly address: Address) {
@@ -36,4 +37,14 @@ export class AddressDeserializationError extends Error {
     }
 }
 
-export type Anomaly = AddressNotFound | MessageSerializationError | MessageDeserializationError | MessageChannelTransmissionError;
+export class ReportedAnomaly extends Error {
+    constructor(readonly anomaly: Error) {
+        super(anomaly.message, { cause: anomaly });
+    }
+}
+
+export type Anomaly = AddressNotFound | MessageSerializationError | MessageDeserializationError | MessageChannelTransmissionError | ReportedAnomaly;
+
+export function reportAnomaly(anomaly: Error) {
+    return applyAnomalyHandler(new ReportedAnomaly(anomaly)).pipe(Effect.runSync);
+}

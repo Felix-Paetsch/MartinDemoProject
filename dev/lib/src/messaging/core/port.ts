@@ -51,7 +51,7 @@ export default class Port {
         this._recieve = recieve;
     }
 
-    register_middleware(middleware: Middleware): void {
+    use_middleware(middleware: Middleware): void {
         this.middleware.push(middleware);
     }
 
@@ -68,15 +68,16 @@ export default class Port {
         this.connection.close();
     }
 
-    open(): void {
+    open(): this {
         // Errors: AddressAlreadyInUseError
         if (this.is_open()) {
-            return;
+            return this;
         }
 
         this.connection.open();
         this._is_open = true;
         Port.open_ports.push(this);
+        return this;
     }
 
     is_open(): boolean { return this._is_open; }
@@ -100,7 +101,7 @@ export default class Port {
             Effect.runPromise
         );
 
-        if (!isMiddlewareContinue(interrupt)) {
+        if (isMiddlewareContinue(interrupt)) {
             await core_send(msg).pipe(Effect.runPromise);
         }
     }

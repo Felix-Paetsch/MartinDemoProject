@@ -96,7 +96,7 @@ export class Connection {
         )
     }
 
-    register_middleware(middleware: Middleware): void {
+    use_middleware(middleware: Middleware): void {
         this.middleware.push(middleware);
     }
 

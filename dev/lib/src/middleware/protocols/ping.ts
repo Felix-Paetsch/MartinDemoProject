@@ -1,6 +1,6 @@
 import { Effect, Either } from "effect";
 import { Json } from "../../utils/json";
-import { Address } from "../base/address";
+import { Address } from "../../messaging/exports";
 import { ProtocolCommunicationHandler } from "./base/communicationHandler";
 import { ProtocolError, ProtocolErrorN } from "./base/protocol_errors";
 import { Protocol } from "./protocol";
