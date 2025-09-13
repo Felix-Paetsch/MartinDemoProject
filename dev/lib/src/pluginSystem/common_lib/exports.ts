@@ -1,5 +1,6 @@
-import { kernel_initializePlugin, MessageChannel as MessageChannelType } from "./initialization/kernelSide";
-import { plugin_initializePlugin } from "./initialization/pluginSide";
+import { initializeExternalPlugin_KernelSide } from "./initialization/kernelSide";
+import { initializeExternalPlugin_PluginSide } from "./initialization/pluginSide";
+import { PrimitiveMessageChannel as PrimitiveMessageChannelType } from "./initialization/synchronizer";
 import add_annotation_data from "./middleware/add_annotation_data";
 import { prevent_loops } from "./middleware/prevent_loops";
 
@@ -8,11 +9,8 @@ export const Middleware = {
     preventLoops: prevent_loops
 };
 
-export const Initialization = {
-    plugin: plugin_initializePlugin,
-    kernel: kernel_initializePlugin,
+export namespace InitializeExternal {
+    export const plugin = initializeExternalPlugin_PluginSide;
+    export const kernel = initializeExternalPlugin_KernelSide;
+    export type PrimitiveMessageChannel = PrimitiveMessageChannelType;
 };
-
-export { createLocalEnvironment } from "./messageEnvironments/localEnvironment";
-
-export type MessageChannel = MessageChannelType;

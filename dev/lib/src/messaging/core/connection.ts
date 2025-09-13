@@ -11,16 +11,6 @@ import { applyMiddlewareEffect } from "./middleware";
 import { core_send } from "./core_send";
 import { callbackToEffect } from "./errors/main";
 
-export function createConnection(
-    address: Address,
-    send: (msg: SerializedMessage) => void | Promise<void>
-): Connection {
-    return new Connection(
-        address,
-        flow(TransmittableMessageToSerializedMessage, send)
-    );
-}
-
 function TransmittableMessageToSerializedMessage(msg: TransmittableMessage): SerializedMessage {
     if (typeof msg === "string") {
         return msg;
@@ -48,6 +38,16 @@ export class Connection {
         this._is_open = false;
     }
 
+    static create(
+        address: Address,
+        send: (msg: SerializedMessage) => void | Promise<void>
+    ) {
+        return new Connection(
+            address,
+            flow(TransmittableMessageToSerializedMessage, send)
+        );
+    }
+
     get address(): Address {
         return this._address;
     }
@@ -70,6 +70,10 @@ export class Connection {
 
     recieve(msg: TransmittableMessage): Promise<void> {
         const e: Effect.Effect<void> = Effect.gen(this, function* (this: Connection) {
+            if (this.is_closed()) {
+                return;
+            }
+
             if (typeof msg === "string") {
                 msg = yield* Schema.decode(MessageFromString)(msg).pipe(
                     Effect.mapError(e => new MessageDeserializationError({ serialized: msg as string }))
@@ -112,10 +116,10 @@ export class Connection {
         Connection.open_connections.splice(Connection.open_connections.indexOf(this), 1);
     }
 
-    open(): void {
+    open(): this {
         // Errors: AddressAlreadyInUseError
         if (this.is_open()) {
-            return;
+            return this;
         }
 
         if (Connection.open_connections.some(c => {
@@ -127,6 +131,7 @@ export class Connection {
 
         this._is_open = true;
         Connection.open_connections.push(this);
+        return this;
     }
 
     is_open(): boolean { return this._is_open; }
@@ -167,12 +172,13 @@ export class PortConnection extends Connection {
         );
     }
 
-    open(): void {
+    open(): this {
         if (this.is_open()) {
-            return;
+            return this;
         }
         super.open();
         this.port.open();
+        return this;
     }
 
     close(): void {

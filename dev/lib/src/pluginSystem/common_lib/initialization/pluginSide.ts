@@ -1,125 +1,41 @@
 import { Effect } from "effect";
-import { Address } from "../../../messaging/core/address";
-import { CommunicationChannel, registerCommunicationChannel } from "../../../messaging/core/lib/communication_channel";
-import { TransmittableMessage, TransmittableMessageT } from "../../../messaging/core/message";
-import { callbackToEffect } from "../../../utils/boundary/callbacks";
-import { Json } from "../../../utils/json";
-import { PluginEnvironment } from "../../plugin_lib/plugin_env/plugin_env";
-import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_env/plugin_ident";
-import { KernelEnv } from "../messageEnvironments/kernelEnvironment";
-import type { MessageChannel } from "./kernelSide";
+import { Synchronizer } from "./synchronizer";
+import { Address, Connection, Json, Port } from "pc-messaging-kernel/messaging/exports";
+import { PluginIdentWithInstanceId } from "pc-messaging-kernel/pluginSystem/plugin_lib/plugin_env/plugin_ident";
+import { PrimitiveMessageChannel } from "./synchronizer";
 
-type PluginInitializationContext = {
-    on_message: Effect.Effect<void, never, TransmittableMessageT>;
-    kernelAddress: Address;
-    pluginAddress: Address;
-    sendOverPort: (message: Json) => void;
-    on_env_initialized: (plugin_env: PluginEnvironment) => Effect.Effect<void, Error, never>;
-    plugin: (env: PluginEnvironment) => Promise<void>;
-    initialize_request_recieved: boolean;
-    env: PluginEnvironment;
-    pluginIdent: PluginIdentWithInstanceId;
-};
-
-export function plugin_initializePlugin(
-    port: MessageChannel,
-    on_env_initialized: (plugin_env: PluginEnvironment) => Effect.Effect<void, Error, never>,
-    plugin: (env: PluginEnvironment) => Promise<void>
+export async function initializeExternalPlugin_PluginSide(
+    channel: PrimitiveMessageChannel,
+    run_plugin: (port: Port) => void | Promise<void>,
 ) {
-    const context: Partial<PluginInitializationContext> = {
-        sendOverPort: port.send,
-        on_env_initialized,
-        plugin,
-        initialize_request_recieved: false
-    }
+    return Effect.gen(function* () {
+        const synchronizer = new Synchronizer(channel);
 
-    port.recieve(data => {
-        return Effect.gen(function* () {
-            const type = (data as any)?.type
-            if (typeof type == "string" && type in MessageReactions && Object.keys(data!).includes("value")) {
-                return MessageReactions[type as keyof typeof MessageReactions](
-                    (data as any).value as Json, context
-                );
+        synchronizer.add_command(
+            "run_plugin",
+            async (data) => {
+                const _data = data as {
+                    pluginIdent: PluginIdentWithInstanceId;
+                    target_process_id: string;
+                    own_process_id: string;
+                };
+
+                const connection = Connection.create(
+                    Address.generic(_data.own_process_id),
+                    (msg) => synchronizer.call_command("send_message", msg)
+                ).open();
+
+                synchronizer.add_command("send_message", (data: Json) => {
+                    return connection.recieve(data as any);
+                });
+
+                Address.set_process_id(_data.target_process_id);
+                const port = new Port(_data.pluginIdent.instance_id).open();
+                await run_plugin(port);
+                synchronizer.call_command("on_plugin_executed");
             }
-        }).pipe(
-            Effect.runPromise
-        )
-    });
-
-    context.sendOverPort?.({
-        type: "ck-request-init-env",
-        value: {}
-    });
-};
-
-const MessageReactions = {
-    "ck-message": (data: any, context: Partial<PluginInitializationContext>) => {
-        TransmittableMessage.from_unknown(data).pipe(
-            Effect.andThen(message => context.on_message!.pipe(
-                Effect.provideService(TransmittableMessageT, message),
-                Effect.runPromise
-            )),
-            Effect.tapError(e => Effect.logError(e)),
-            Effect.ignore,
-            Effect.runPromise
         );
-    },
-    "ck-response-init-env": (data: any, context: Partial<PluginInitializationContext>) => {
-        if (context.initialize_request_recieved) return;
-        context.initialize_request_recieved = true;
 
-        Effect.gen(function* () {
-            context.kernelAddress = yield* Address.deserialize(data.kernelAddress);
-            context.pluginAddress = yield* Address.deserialize(data.pluginAddress);
-            context.pluginIdent = data.pluginIdent;
-
-            Address.setLocalAddress(context.pluginAddress);
-            const channel = yield* buildChannel(context);
-            yield* registerCommunicationChannel(channel);
-
-            const env = new PluginEnvironment(
-                KernelEnv,
-                context.kernelAddress,
-                context.pluginIdent!
-            );
-            context.env = env;
-            yield* context.on_env_initialized!(env);
-
-            context.sendOverPort?.({
-                type: "ck-env-loaded",
-                value: {}
-            });
-        }).pipe(Effect.runPromise)
-    },
-    "ck-request-execute": (_data: any, context: Partial<PluginInitializationContext>) => {
-        Effect.gen(function* () {
-            yield* callbackToEffect(context.plugin!, context.env!);
-
-            context.sendOverPort?.({
-                type: "ck-plugin-evaluated",
-                value: {}
-            });
-        }).pipe(Effect.runPromise)
-    },
-} as const;
-
-const buildChannel = (context: Partial<PluginInitializationContext>) => Effect.sync(() => {
-    const send: CommunicationChannel['send'] = Effect.fn("sendPluginSide")(
-        function* (tm: TransmittableMessage) {
-            context.sendOverPort!({
-                type: "ck-message",
-                value: tm.string
-            });
-        }
-    );
-
-    const recieve_cb: CommunicationChannel['recieve_cb'] = (recieve_effect) => {
-        context.on_message = recieve_effect;
-    };
-
-    return {
-        address: context.kernelAddress!.as_generic(),
-        send,
-        recieve_cb
-    } as CommunicationChannel;
-});
+        yield* Effect.promise(() => synchronizer.sync());
+    }).pipe(Effect.runPromise)
+}

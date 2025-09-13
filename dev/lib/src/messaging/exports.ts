@@ -11,7 +11,7 @@ import * as Anomalies from "./core/errors/anomalies";
 import * as ErrorsMain from "./core/errors/main";
 
 import { collection_middleware as cmw } from "./middlewares/collection";
-import { partition_middleware as pmw } from "./middlewares/partition";
+import { partition_middleware as pmw, PartitionMiddlewareKeys as _PartitionMiddlewareKeys } from "./middlewares/partition";
 import { guard_middleware as gmw } from "./middlewares/guard";
 import { empty_middleware as emw } from "./middlewares/empty";
 import { comsume_message as cm } from "./middlewares/consume";
@@ -45,6 +45,7 @@ export namespace Middleware {
     export type Middleware = MW.Middleware;
     export const collection_middleware = cmw;
     export const partition_middleware = pmw;
+    export type PartitionMiddlewareKeys<T> = _PartitionMiddlewareKeys<T>;
     export const guard_middleware = gmw;
     export const empty_middleware = emw;
     export const comsume_message = cm;

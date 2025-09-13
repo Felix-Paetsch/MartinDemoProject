@@ -1,8 +1,12 @@
 import { Middleware } from "../../../messaging/exports";
+import MessageChannel from "../../../middleware/channel";
 
-// TODO: Add by default middleware for channel processing
-export const defaultEnvironmentMiddleware = () => Middleware.partition_middleware([
-    "preprocessing",
-    "monitoring",
-    "listeners",
-] as const);
+export const defaultEnvironmentMiddleware = () => {
+    const mw = Middleware.partition_middleware([
+        "preprocessing",
+        "monitoring",
+        "listeners",
+    ] as const);
+    mw.listeners.push(MessageChannel.middleware);
+    return mw;
+};
