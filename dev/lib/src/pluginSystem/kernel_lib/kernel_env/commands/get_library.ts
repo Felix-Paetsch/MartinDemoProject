@@ -2,7 +2,7 @@ import { Effect, Schema } from "effect";
 import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
 import { ResultToEffect } from "../../../../utils/boundary/run";
 import { Json } from "../../../../utils/json";
-import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
+import { EnvironmentCommunicationHandler } from "../../../common_lib/environments/EnvironmentCommunicationHandler";
 import { libraryIdentSchema } from "../../../library/library_environment";
 import { LibraryReference } from "../external_reference/library_reference";
 import { KernelEnvironment } from "../kernel_env";

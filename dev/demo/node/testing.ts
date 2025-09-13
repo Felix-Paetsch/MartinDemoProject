@@ -1,8 +1,8 @@
-import { Port } from "../../lib/src/messaging/exports";
-import MessageChannel from "../../lib/src/middleware/channel/channel";
-import { processMessageChannelMessage } from "../../lib/src/middleware/channel/middleware";
+import { Json, Port } from "../../lib/src/messaging/exports";
+import MessageChannel from "../../lib/src/middleware/channel";
 import { Failure } from "../../lib/src/messaging/exports";
 import chalk from "chalk";
+import { executeProtocol, NoActor, NoResponder, Protocol, registerProtocol } from "../../lib/src/middleware/protocol";
 
 Failure.setAnomalyHandler((e) => {
     throw e;
@@ -23,44 +23,33 @@ const WhoToWho: boolean[] = [
     false
 ];
 
-(async () => {
-    const p1 = new Port("Test1").open();
-    const p2 = new Port("Test2").open();
+const ping: Protocol<NoActor, NoActor, string, null> = {
+    name: "ping",
+    initiate: async (mc: MessageChannel, initiator: NoActor) => {
+        return await mc.send_await_response("ping") as string;
+    },
+    respond: async (mc: MessageChannel, responder: NoActor) => {
+        const res = await mc.next();
+        mc.send(res as string);
+    },
+    findResponder: NoResponder
+};
 
-    MessageChannel.register_processor("test", async (mc) => {
-        console.log("Registering processor");
+const p1 = new Port("Test1").open();
+const p2 = new Port("Test2").open();
 
-        for (let i = 0; i < WhoToWho.length; i++) {
-            const who = WhoToWho[i];
-            if (who) {
-                console.log(chalk.blue(`Sending MSG ${i}`));
-                mc.send(`MSG ${i}`);
-            } else {
-                console.log(chalk.greenBright(`Awaiting MSG ${i}`));
-                console.log(chalk.greenBright(await mc.next()));
-            }
-        }
-    });
+p1.use_middleware(MessageChannel.middleware);
+p2.use_middleware(MessageChannel.middleware);
 
-    p2.use_middleware(processMessageChannelMessage)
-    p1.use_middleware(processMessageChannelMessage)
+registerProtocol(ping);
 
-    {
-        const mc = new MessageChannel(
-            p2.address, p1,
-            { target_processor: "test" },
-            { defaultMessageTimeout: 60000 }
-        );
-
-        for (let i = 0; i < WhoToWho.length; i++) {
-            const who = WhoToWho[i];
-            if (!who) {
-                console.log(chalk.green(`Sending MSG ${i}`));
-                mc.send(`MSG ${i}`);
-            } else {
-                console.log(chalk.blueBright(`Awaiting MSG ${i}`));
-                console.log(chalk.blueBright(await mc.next()));
-            }
-        }
-    }
-})();
+executeProtocol(
+    ping,
+    NoActor,
+    p2.address,
+    p1,
+    null,
+    null
+).then(r => {
+    console.log(r);
+});

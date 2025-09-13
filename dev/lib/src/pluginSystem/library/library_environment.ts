@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { Address } from "../../messaging/core/address";
-import { EnvironmentCommunicator } from "../common_lib/env_communication/environment_communicator";
+import { EnvironmentCommunicator } from "../common_lib/environments/environment_communicator";
 import { Environment } from "../common_lib/messageEnvironments/environment";
 import { MPOCommunicationProtocol } from "../plugin_lib/message_partners/base/mpo_commands/mpo_communication/protocol";
 import { register_call_command } from "./commands/call";

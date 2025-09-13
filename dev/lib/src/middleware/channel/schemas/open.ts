@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { MessageChannelInitializationContextWithIdSchema } from "./context";
 import { MessageChannelConfigSchema } from "./config";
-import { AddressFromString } from "../../utils";
+import { AddressFromString } from "../../../messagingEffect/schemas";
 import { SendMessageBodySchema } from "./send";
 
 export const OpenChannelBodySchema = Schema.Struct({

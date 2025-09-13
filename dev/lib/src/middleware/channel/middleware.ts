@@ -1,6 +1,6 @@
 import { Message, Middleware, Port, Failure } from "../../messaging/exports";
 import { Schema } from "effect";
-import MessageChannel from "./channel";
+import MessageChannel from ".";
 import { MessageData, MessageDataSchema } from "./schemas";
 import chalk from "chalk";
 

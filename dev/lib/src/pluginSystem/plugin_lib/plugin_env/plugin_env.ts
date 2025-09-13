@@ -7,7 +7,7 @@ import { MessagePartner } from "../../../pluginSystem/plugin_lib/message_partner
 import { CallbackError } from "../../../utils/boundary/callbacks";
 import { ResultPromise } from "../../../utils/boundary/result";
 import { Json } from "../../../utils/json";
-import { EnvironmentCommunicator } from "../../common_lib/env_communication/environment_communicator";
+import { EnvironmentCommunicator } from "../../common_lib/environments/environment_communicator";
 import { Environment } from "../../common_lib/messageEnvironments/environment";
 import { LibraryIdent } from "../../library/library_environment";
 import { MPOCommunicationProtocol } from "../message_partners/base/mpo_commands/mpo_communication/protocol";

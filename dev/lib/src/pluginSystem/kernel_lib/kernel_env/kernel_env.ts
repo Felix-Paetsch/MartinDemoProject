@@ -6,7 +6,7 @@ import { LibraryEnvironment, LibraryIdent } from "../../../pluginSystem/library/
 import { AbstractLibraryImplementation } from "../../../pluginSystem/library/library_implementation";
 import { Failure, ResultPromise, Success } from "../../../utils/boundary/result";
 import { EffectToResult } from "../../../utils/boundary/run";
-import { EnvironmentCommunicator } from "../../common_lib/env_communication/environment_communicator";
+import { EnvironmentCommunicator } from "../../common_lib/environments/environment_communicator";
 import { Environment } from "../../common_lib/messageEnvironments/environment";
 import { KernelEnv } from "../../common_lib/messageEnvironments/kernelEnvironment";
 import { createLocalEnvironment } from "../../common_lib/messageEnvironments/localEnvironment";

@@ -3,7 +3,7 @@ import { Json } from "../utils/exports";
 import { Address } from "../messaging/core/address";
 import { Message } from "../messaging/core/message";
 import { Middleware, Port } from "../messaging/exports";
-import { cacheFun } from "./utils";
+import { cacheFun } from "../messagingEffect/utils";
 
 const LOGGING_PORT_ID = "logging";
 const logging_port = cacheFun(() => {

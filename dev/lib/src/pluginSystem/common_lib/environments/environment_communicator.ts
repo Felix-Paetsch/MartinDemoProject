@@ -5,14 +5,18 @@ import { PartitionMiddlewareKeys } from "../../../messaging/middlewares/partitio
 import { ProtocolError, ProtocolErrorN } from "../../../messaging/protocols/base/protocol_errors";
 import { Json } from "../../../utils/json";
 import { Environment } from "../messageEnvironments/environment";
-import { registerDefaultEnvironmentMiddleware } from "./default_middleware";
+import { defaultEnvironmentMiddleware } from "./default_middleware";
 import { EnvironmentCommunicationHandler } from "./EnvironmentCommunicationHandler";
 import { EnvironmentCommunicationProtocol } from "./protocol";
+import { Port } from "../../../messaging/exports";
+import { processMessageChannelMessage } from "pc-messaging-kernel/middleware/channel/middleware";
+import MessageChannel from "../../../middleware/channel";
 
 type CommandPrefix = "BOTH" | "KERNEL" | "PLUGIN";
 type Command = `${CommandPrefix}::${string}`;
 
 export abstract class EnvironmentCommunicator {
+    protected port: Port;
     protected command_prefix: CommandPrefix;
     private static classCommands = new Map<Function, {
         [key: Command]: {
@@ -21,28 +25,25 @@ export abstract class EnvironmentCommunicator {
         }
     }>();
 
-    private partitionMiddleware!: Effect.Effect.Success<ReturnType<typeof registerDefaultEnvironmentMiddleware>>;
+    private partitionMiddleware!: ReturnType<typeof defaultEnvironmentMiddleware>;
     private communication_protocol!: EnvironmentCommunicationProtocol;
 
     constructor(
-        readonly env: Environment
+        port: string
     ) {
-        Effect.gen(this, function* () {
-            this.partitionMiddleware = yield* registerDefaultEnvironmentMiddleware(env);
-
-            this.communication_protocol = new EnvironmentCommunicationProtocol(this);
-            const mw = this.communication_protocol.middleware();
-            this.partitionMiddleware.listeners.push(mw);
-        }).pipe(Effect.runSync);
-
+        this.port = new Port(port);
+        this.port.open();
         this.command_prefix = "BOTH";
+
+        this.partitionMiddleware = defaultEnvironmentMiddleware();
+        this.port.use_middleware(this.partitionMiddleware());
     }
 
     get address(): Address {
-        return this.env.address;
+        return this.port.address;
     }
 
-    useMiddleware(
+    use_middleware(
         mw: Middleware,
         position: PartitionMiddlewareKeys<typeof this.partitionMiddleware>
     ) {
@@ -59,7 +60,11 @@ export abstract class EnvironmentCommunicator {
         Effect.Effect<EnvironmentCommunicationHandler, ProtocolError>,
         ProtocolError
     > {
-        return this.communication_protocol.run_command(target_address, this.command_prefix + "::" + command, data, timeout);
+        const new MessageChannel(
+            target_address, this.port,
+            { target_processor: "test" },
+            { defaultMessageTimeout: 600000 }
+        );
     }
 
     _receive_command = Effect.fn("receive_command")(

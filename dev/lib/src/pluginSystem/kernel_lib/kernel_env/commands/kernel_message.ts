@@ -1,7 +1,7 @@
 import { Effect, Schema } from "effect";
 import { callbackToEffect } from "../../../../utils/boundary/callbacks";
 import { Json } from "../../../../utils/json";
-import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
+import { EnvironmentCommunicationHandler } from "../../../common_lib/environments/EnvironmentCommunicationHandler";
 
 import { KernelEnvironment } from "../kernel_env";
 

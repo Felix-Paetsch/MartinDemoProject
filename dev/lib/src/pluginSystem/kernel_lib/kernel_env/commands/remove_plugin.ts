@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { ProtocolErrorN } from "../../../../messaging/protocols/base/protocol_errors";
-import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
+import { EnvironmentCommunicationHandler } from "../../../common_lib/environments/EnvironmentCommunicationHandler";
 import { KernelEnvironment } from "../kernel_env";
 
 export function register_remove_plugin_command(KEV: typeof KernelEnvironment) {

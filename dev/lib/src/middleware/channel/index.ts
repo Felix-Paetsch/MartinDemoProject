@@ -8,6 +8,7 @@ import { MessageChannelConfig, MessageChannelConfigEncoded, MessageChannelConfig
 import { OpenChannelBodySchema } from "./schemas/open";
 import { Json } from "../../utils/json";
 import { CloseMessageBodySchema } from "./schemas/close";
+import { processMessageChannelMessage } from "./middleware";
 
 export type ReciveMessageError = Error;
 
@@ -111,6 +112,11 @@ export default class MessageChannel {
         }));
     }
 
+    async send_await_response(data: ChannelMessage) {
+        await this.send(data);
+        return await this.next();
+    }
+
     next(timeout?: number): Promise<ChannelMessage | ReciveMessageError> {
         return Effect.gen(this, function* () {
             if (this.message_queue.length > 0) {
@@ -189,6 +195,10 @@ export default class MessageChannel {
         this.#closeWithReason("ChannelRemotelyClosed");
     }
 
+    static middleware = processMessageChannelMessage;
+
     // Compare Effect stream API
     // Compare Socket API
+    // Errors
+    // Direct responses to messages - and there errors (?)
 }

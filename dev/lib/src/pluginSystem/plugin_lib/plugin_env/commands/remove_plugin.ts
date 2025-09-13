@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { EnvironmentT } from "../../../../pluginSystem/common_lib/messageEnvironments/environment";
 import { callbackToEffect } from "../../../../utils/boundary/callbacks";
 import { Json } from "../../../../utils/json";
-import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
+import { EnvironmentCommunicationHandler } from "../../../common_lib/environments/EnvironmentCommunicationHandler";
 import { PluginEnvironment } from "../plugin_env";
 
 export function remove_self_impl(this: PluginEnvironment, data?: Json): Promise<void> {

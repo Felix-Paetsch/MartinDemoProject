@@ -2,18 +2,18 @@ import { Effect } from "effect";
 import { Message } from "./message";
 import { callbackToEffect } from "./errors/main";
 
-type MiddlewareInterrupt = false;
-type MiddlewareContinue = true | void | undefined;
+export const MiddlewareInterrupt = true as const;
+export const MiddlewareContinue = false as const;
+type MiddlewareInterrupt = typeof MiddlewareInterrupt;
+type MiddlewareContinue = typeof MiddlewareContinue | void | undefined;
 export type MiddlewarePassthrough = MiddlewareInterrupt | MiddlewareContinue;
-export const MiddlewareInterrupt: MiddlewareInterrupt = false;
-export const MiddlewareContinue: MiddlewareContinue = true;
 
 export function isMiddlewareInterrupt(interrupt: MiddlewarePassthrough): interrupt is MiddlewareInterrupt {
-    return interrupt === false;
+    return interrupt === MiddlewareInterrupt;
 }
 
 export function isMiddlewareContinue(interrupt: MiddlewarePassthrough): interrupt is MiddlewareContinue {
-    return interrupt !== false;
+    return interrupt !== MiddlewareInterrupt;
 }
 
 export type Middleware = (message: Message) => MiddlewarePassthrough | Promise<MiddlewarePassthrough>;

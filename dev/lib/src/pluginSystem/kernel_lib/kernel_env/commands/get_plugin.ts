@@ -1,7 +1,7 @@
 import { Effect, Schema } from "effect";
 import { ResultToEffect } from "../../../../utils/boundary/run";
 import { Json } from "../../../../utils/json";
-import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
+import { EnvironmentCommunicationHandler } from "../../../common_lib/environments/EnvironmentCommunicationHandler";
 
 import { pluginIdentSchema } from "../../../plugin_lib/plugin_env/plugin_ident";
 import { KernelEnvironment } from "../kernel_env";

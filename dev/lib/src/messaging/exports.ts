@@ -4,6 +4,7 @@ import Port from "./core/port";
 import * as MW from "./core/middleware";
 import { Message } from "./core/message";
 import { Address, LocalAddress } from "./core/address";
+import type { Json } from "../utils/json";
 
 import * as Errors from "./core/errors/errors";
 import * as Anomalies from "./core/errors/anomalies";
@@ -61,5 +62,6 @@ export {
     Port,
     Address,
     LocalAddress,
-    Message
+    Message,
+    type Json
 };

@@ -6,7 +6,7 @@ import { asyncCallbackToEffect } from "../../../utils/boundary/callbacks";
 import { EffectToResult } from "../../../utils/boundary/run";
 import { Json } from "../../../utils/json";
 import { promisify } from "../../../utils/promisify";
-import { EnvironmentCommunicationHandler } from "../../common_lib/env_communication/EnvironmentCommunicationHandler";
+import { EnvironmentCommunicationHandler } from "../../common_lib/environments/EnvironmentCommunicationHandler";
 import { LibraryEnvironment } from "../library_environment";
 
 export function get_exposed_functions_impl(this: LibraryMessagePartner) {

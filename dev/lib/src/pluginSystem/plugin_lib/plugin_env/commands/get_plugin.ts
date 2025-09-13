@@ -6,7 +6,7 @@ import { EnvironmentT } from "../../../../pluginSystem/common_lib/messageEnviron
 import { CallbackError, callbackToEffectFn } from "../../../../utils/boundary/callbacks";
 import { EffectToResult } from "../../../../utils/boundary/run";
 import { Json } from "../../../../utils/json";
-import { EnvironmentCommunicationHandler } from "../../../common_lib/env_communication/EnvironmentCommunicationHandler";
+import { EnvironmentCommunicationHandler } from "../../../common_lib/environments/EnvironmentCommunicationHandler";
 import { PluginMessagePartner } from "../../message_partners/plugin";
 import { PluginEnvironment } from "../plugin_env";
 import { PluginIdent, pluginIdentSchemaWithInstanceId } from "../plugin_ident";

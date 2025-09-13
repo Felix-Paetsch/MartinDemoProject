@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { EnvironmentCommunicationHandler } from "../../../pluginSystem/common_lib/env_communication/EnvironmentCommunicationHandler";
+import { EnvironmentCommunicationHandler } from "../../common_lib/environments/EnvironmentCommunicationHandler";
 import { LibraryEnvironment } from "../library_environment";
 import { callbackToEffect } from "../../../utils/boundary/callbacks";
 
