@@ -3,7 +3,7 @@ import { Address, Json, Middleware, Port } from "../../../messaging/exports";
 import { defaultEnvironmentMiddleware } from "./default_middleware";
 
 export abstract class EnvironmentCommunicator {
-    protected port: Port;
+    readonly port: Port;
     private partitionMiddleware: ReturnType<typeof defaultEnvironmentMiddleware>;
 
     constructor(

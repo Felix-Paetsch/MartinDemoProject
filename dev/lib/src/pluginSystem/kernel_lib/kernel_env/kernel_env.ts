@@ -1,38 +1,22 @@
-import { Effect, Equal } from "effect";
+import { Equal } from "effect";
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from "../../../messaging/core/address";
-import { Middleware } from "../../../messaging/core/middleware";
 import { LibraryEnvironment, LibraryIdent } from "../../../pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../../../pluginSystem/library/library_implementation";
 import { Failure, ResultPromise, Success } from "../../../utils/boundary/result";
-import { EffectToResult } from "../../../utils/boundary/run";
 import { EnvironmentCommunicator } from "../../common_lib/environments/environment_communicator";
-import { Environment } from "../../common_lib/messageEnvironments/environment";
-import { KernelEnv } from "../../common_lib/messageEnvironments/kernelEnvironment";
-import { createLocalEnvironment } from "../../common_lib/messageEnvironments/localEnvironment";
 import { PluginEnvironment } from "../../plugin_lib/plugin_env/plugin_env";
 import { PluginIdent, PluginIdentWithInstanceId } from "../../plugin_lib/plugin_env/plugin_ident";
-import { register_get_library_command } from "./commands/get_library";
-import { register_get_plugin_command as register_kernel_get_plugin_command } from "./commands/get_plugin";
-import { register_kernel_message_command } from "./commands/kernel_message";
-import { register_remove_plugin_command as register_kernel_remove_plugin_command } from "./commands/remove_plugin";
 import { LibraryReference } from "./external_reference/library_reference";
 import { PluginReference } from "./external_reference/plugin_reference";
+import { Port } from "../../../messaging/exports";
 
 export abstract class KernelEnvironment extends EnvironmentCommunicator {
     private registered_plugins: PluginReference[] = [];
     private registered_libraries: LibraryReference[] = [];
 
-    constructor(
-        readonly env: Environment = KernelEnv
-    ) {
-        super(env);
-        this.command_prefix = "KERNEL";
-        this.register_kernel_middleware();
-    }
-
-    get address() {
-        return this.env.address;
+    constructor(name: string = "kernel") {
+        super(name);
     }
 
     register_kernel_middleware(): void { }
@@ -41,47 +25,21 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     register_library_middleware(ref: LibraryReference): void { }
     register_local_library_middleware(env: LibraryEnvironment): void { }
 
-    use_middleware(middleware: Middleware): Promise<void> {
-        return this.env.useMiddleware(middleware).pipe(
-            Effect.runPromise
-        );
-    }
-
     start() {
         return this.get_plugin({
             name: "start"
         })
     }
 
-    create_local_plugin_environment(plugin_ident: PluginIdent, address: Address = Address.new_local_address("PLUGIN_" + uuidv4())): ResultPromise<{
-        env: PluginEnvironment,
-        ref: PluginReference
-    }, Error> {
-        return Effect.gen(this, function* () {
-            const Lenv = yield* createLocalEnvironment(address);
-            const uuid = uuidv4();
-            const ident = {
-                instance_id: uuid,
-                ...plugin_ident
-            }
+    create_local_plugin_environment(plugin_ident: PluginIdentWithInstanceId) {
+        // Errors: AddressAlreadyInUseError
+        const port = new Port(plugin_ident.instance_id);
+        port.open();
 
-            const plugin_env = new PluginEnvironment(Lenv, this.address, ident);
-            const ref = new PluginReference(
-                address,
-                ident,
-                this,
-                plugin_env.remove_self.bind(plugin_env),
-                (mw: Middleware) => Lenv.useSendMiddleware(mw).pipe(Effect.runSync)
-            )
-
-            return {
-                env: plugin_env,
-                ref: ref
-            }
-        }).pipe(
-            Effect.withSpan("KernelCreateLocalPluginEnvironment"),
-            EffectToResult
-        );
+        return {
+            ref: new PluginReference(port.connection, plugin_ident, this),
+            env: new PluginEnvironment(port, this.address, plugin_ident),
+        }
     }
 
     get_plugin(plugin_ident: PluginIdent): ResultPromise<PluginReference, Error> {
@@ -182,51 +140,17 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         }
     }
 
-    create_local_library(library_ident: LibraryIdent, implementation: AbstractLibraryImplementation): ResultPromise<LibraryReference, Error> {
-        return Effect.gen(this, function* () {
-            const Lenv = yield* createLocalEnvironment(Address.new_local_address("LIB_" + uuidv4()));
+    create_local_library(library_ident: LibraryIdent, implementation: AbstractLibraryImplementation, port_id: string = uuidv4()): LibraryReference {
+        // Errors: AddressAlreadyInUseError
+        const lib = new LibraryEnvironment(port_id, this.address, library_ident, implementation);
+        this.register_local_library_middleware(lib);
 
-            const lib = new LibraryEnvironment(Lenv, this.address, library_ident, implementation);
-            this.register_local_library_middleware(lib);
-            const ref = new LibraryReference(
-                Lenv.address,
-                library_ident,
-                this,
-                () => Lenv.remove.pipe(Effect.runPromise),
-                (mw: Middleware) => Lenv.useSendMiddleware(mw).pipe(Effect.runSync)
-            )
-
-            return ref;
-        }).pipe(
-            Effect.withSpan("KernelCreateLocalLibrary"),
-            EffectToResult
-        );
+        const ref = new LibraryReference(lib.port.connection, library_ident, this);
+        return ref;
     }
-
-    on_kernel_message(command: string, data: any, plugin_ident: PluginIdentWithInstanceId) { }
-
-    _send_remove_plugin_message(address: Address) {
-        return this._send_command(
-            address,
-            "remove_plugin"
-        ).pipe(
-            Effect.andThen(e => e),
-            Effect.ignore
-        );
-    };
-
-    _send_remove_library_message(address: Address) {
-        return this._send_command(
-            address,
-            "remove_library"
-        ).pipe(
-            Effect.andThen(e => e),
-            Effect.ignore
-        );
-    };
 }
 
-register_kernel_get_plugin_command(KernelEnvironment);
-register_kernel_message_command(KernelEnvironment);
-register_kernel_remove_plugin_command(KernelEnvironment);
-register_get_library_command(KernelEnvironment);
+//  register_kernel_get_plugin_command(KernelEnvironment);
+//	register_kernel_message_command(KernelEnvironment);
+//  register_kernel_remove_plugin_command(KernelEnvironment);
+//  register_get_library_command(KernelEnvironment);

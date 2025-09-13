@@ -2,7 +2,7 @@ import { Message } from "../../messaging/core/message";
 import { Json } from "../../utils/json";
 
 export abstract class AbstractLibraryImplementation {
-    private _disposed = false;
+    protected _disposed = false;
     abstract exposes(msg: Message): string[];
     abstract call(fn: string, args: readonly Json[], msg: Message): Json | Promise<Json>;
 
@@ -11,9 +11,6 @@ export abstract class AbstractLibraryImplementation {
     }
 
     dispose(): void {
-        if (this._disposed) {
-            throw new Error("Library already disposed");
-        }
         this._disposed = true;
     }
 
@@ -59,7 +56,8 @@ class ConcreteLibraryImplementation extends AbstractLibraryImplementation {
     }
 
     dispose(): void {
-        this.__dispose.bind(this)();
+        if (this._disposed) { return; }
         super.dispose();
+        this.__dispose.bind(this)();
     }
 }

@@ -1,50 +1,34 @@
-import { Effect } from "effect";
 import { Severity } from "../../../debug/exports";
 import { Address } from "../../../messaging/core/address";
 import { log } from "../../../middleware/logging";
-import { ProtocolError } from "../../../messaging/protocols/base/protocol_errors";
 import { MessagePartner } from "../../../pluginSystem/plugin_lib/message_partners/message_partner/message_partner";
-import { CallbackError } from "../../../utils/boundary/callbacks";
-import { ResultPromise } from "../../../utils/boundary/result";
 import { Json } from "../../../utils/json";
 import { EnvironmentCommunicator } from "../../common_lib/environments/environment_communicator";
-import { Environment } from "../../common_lib/messageEnvironments/environment";
-import { LibraryIdent } from "../../library/library_environment";
-import { MPOCommunicationProtocol } from "../message_partners/base/mpo_commands/mpo_communication/protocol";
-import { LibraryMessagePartner } from "../message_partners/library";
-import { PluginMessagePartner } from "../message_partners/plugin";
-import { get_library } from "./commands/get_library";
-import { _on_plugin_request_impl, get_plugin_impl, on_plugin_request_impl, register_get_plugin_command } from "./commands/get_plugin";
-import { send_kernel_message_impl } from "./commands/kernel_message";
-import { __remove_cb_impl, on_remove_impl, register_remove_plugin_command, remove_self_impl } from "./commands/remove_plugin";
-import { PluginIdent, PluginIdentWithInstanceId } from "./plugin_ident";
+import { PluginIdentWithInstanceId } from "./plugin_ident";
 
 export class PluginEnvironment extends EnvironmentCommunicator {
     constructor(
-        readonly env: Environment,
+        readonly port_id: string,
         readonly kernel_address: Address,
         readonly plugin_ident: PluginIdentWithInstanceId
     ) {
-        super(env);
-        this.command_prefix = "PLUGIN";
-
-        const mw = new MPOCommunicationProtocol(env).middleware();
-        this.useMiddleware(mw, "listeners");
+        super(port_id);
     }
 
     message_partners() {
         return MessagePartner.message_partners.filter(
-            mp => mp.env === this.env
+            mp => mp.port === this.port
         );
     }
 
     log(message: Json, severity: Severity = Severity.INFO) {
-        log(this.kernel_address, {
+        return log(this.kernel_address, {
             severity: severity,
             message: message
-        }).pipe(Effect.runPromise);
+        })
     }
 
+    /*
     get_library(library_ident: LibraryIdent): ResultPromise<LibraryMessagePartner, ProtocolError> {
         return get_library.call(this, library_ident);
     };
@@ -69,7 +53,8 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     __remove_cb(data: Json): Promise<void> {
         return __remove_cb_impl.call(this, data);
     };
+    */
 }
 
-register_get_plugin_command(PluginEnvironment);
-register_remove_plugin_command(PluginEnvironment);
+// register_get_plugin_command(PluginEnvironment);
+// register_remove_plugin_command(PluginEnvironment);

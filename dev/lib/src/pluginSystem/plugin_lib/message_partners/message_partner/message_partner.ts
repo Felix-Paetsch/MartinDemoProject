@@ -1,19 +1,18 @@
 import { Context, Effect, Option, ParseResult, pipe, Schema } from "effect";
 import { v4 as uuidv4 } from "uuid";
 import { Address } from "../../../../messaging/core/address";
-import { ProtocolError } from "../../../../messaging/protocols/base/protocol_errors";
 import { ResultPromise } from "../../../../utils/boundary/result";
 import { Json } from "../../../../utils/json";
-import { Environment, EnvironmentT } from "../../../common_lib/messageEnvironments/environment";
 import { MessagePartnerObject, MPOInitializationError } from "../base/message_partner_object";
 import { MPOCommunicationProtocol } from "../base/mpo_commands/mpo_communication/protocol";
 import { Bridge } from "../bridge/bridge";
 import { __branch_cb_impl, branch_impl, on_branch_impl, register_branch_command } from "./commands/branch";
 import { __bridge_cb_impl, bridge_impl, on_bridge_impl, register_bridge_command } from "./commands/bridge";
+import { Port } from "../../../../messaging/exports";
 
 export class MessagePartner extends MessagePartnerObject {
     static message_partners: MessagePartner[] = [];
-    static get_message_partner(uuid: string, env: Environment) {
+    static get_message_partner(uuid: string, port: Port) {
         return Option.fromNullable(MessagePartner.message_partners.find(
             mp => mp.uuid === uuid && !mp.is_removed() && mp.env === env
         ));
@@ -24,7 +23,7 @@ export class MessagePartner extends MessagePartnerObject {
 
     constructor(
         readonly address: Address,
-        readonly env: Environment,
+        readonly port: Port,
         uuid: string = uuidv4()
     ) {
         super(null as any, uuid);
@@ -100,10 +99,10 @@ export class MessagePartner extends MessagePartnerObject {
         );
     }
 
-    static makeLocalPair(env1: Environment, env2: Environment, uuid = uuidv4()): Effect.Effect<[MessagePartner, MessagePartner], MPOInitializationError> {
+    static makeLocalPair(p1: Port, p2: Port, uuid = uuidv4()): Effect.Effect<[MessagePartner, MessagePartner], MPOInitializationError> {
         return Effect.gen(this, function* () {
             for (const mp of this.message_partners) {
-                if (mp.uuid === uuid && (mp.env === env1 || mp.env === env2)) {
+                if (mp.uuid === uuid && (mp.port === p1 || mp.port === p2)) {
                     return yield* new MPOInitializationError({
                         message_partner_uuid: uuid,
                         uuid: uuid,

@@ -1,50 +1,33 @@
-import { Effect } from "effect";
-import { Address } from "../../../../messaging/core/address";
-import { Middleware, useMiddleware } from "../../../../messaging/core/middleware";
-import { PartitionMiddlewareKeys } from "../../../../messaging/middlewares/partition";
-import { registerDefaultEnvironmentMiddleware } from "../../../common_lib/environments/default_middleware";
-import { KernelEnvironment } from "../kernel_env";
+import { Address, Middleware } from "../../../../messaging/exports";
 import { defaultMiddleware } from "./middleware/default";
+import { Connection } from "../../../../messaging/exports";
 
 export class ExternalReference {
     public is_removed = false;
-    protected partitionMiddleware!: Effect.Effect.Success<ReturnType<typeof registerDefaultEnvironmentMiddleware>>;
+    protected partitionMiddleware!: ReturnType<typeof defaultMiddleware>;
 
     constructor(
-        readonly address: Address,
-        readonly kernel: KernelEnvironment,
-        readonly on_remove: () => void | Promise<void>,
-        registerOwnMiddlewareMethod?: (mw: Middleware) => void
+        readonly connection: Connection,
+        readonly on_remove: () => void | Promise<void> = () => Promise.resolve(),
     ) {
         this.partitionMiddleware = defaultMiddleware();
-        (registerOwnMiddlewareMethod || this.default_register_own_middleware).bind(this)(this.partitionMiddleware());
+        this.connection.use_middleware(this.partitionMiddleware());
     }
 
-    private default_register_own_middleware(mw: Middleware) {
-        useMiddleware({
-            middleware: mw,
-            address: this.address
-        }).pipe(
-            Effect.tapError(e => Effect.logError(e)),
-            Effect.ignore,
-            Effect.runPromise
-        );
+    get address(): Address {
+        return this.connection.address;
     }
 
-    useMiddleware(
-        mw: Middleware,
-        position: PartitionMiddlewareKeys<typeof this.partitionMiddleware>
+    use_middleware(
+        mw: Middleware.Middleware,
+        position: Middleware.PartitionMiddlewareKeys<typeof this.partitionMiddleware>
     ) {
         this.partitionMiddleware[position].push(mw);
-        return;
     }
 
-    remove() {
+    async remove() {
         if (this.is_removed) return Promise.resolve();
-        const r = this.on_remove();
-        if (r instanceof Promise) {
-            return r;
-        }
-        return Promise.resolve();
+        this.connection.close();
+        return await this.on_remove();
     }
 }
