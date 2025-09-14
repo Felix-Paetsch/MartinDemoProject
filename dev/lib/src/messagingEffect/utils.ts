@@ -1,4 +1,4 @@
-import { ParseResult, Schema } from "effect";
+import { Effect, ParseResult, Schema } from "effect";
 
 export const cacheFun = <T>(fn: () => T) => {
     let called = false;
@@ -17,3 +17,16 @@ export const swap = <A, I, R>(schema: Schema.Schema<A, I, R>): Schema.Schema<I, 
         decode: ParseResult.encode(schema),
         encode: ParseResult.decode(schema),
     })
+
+export const failOnError = <A, E, R>(e: Effect.Effect<A, E, R>): Effect.Effect<
+    Exclude<A, Error>, E | (A & Error), R
+> => {
+    return e.pipe(
+        Effect.flatMap(r => {
+            if (r instanceof Error) {
+                return Effect.fail(r as A & Error);
+            }
+            return Effect.succeed(r as Exclude<A, Error>);
+        })
+    )
+}

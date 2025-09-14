@@ -20,3 +20,7 @@ export class LibraryEnvironment extends EnvironmentCommunicator {
         super(port_id);
     }
 }
+
+// register_exposes_command(LibraryEnvironment);
+// register_call_command(LibraryEnvironment);
+// register_remove_library_command(LibraryEnvironment);

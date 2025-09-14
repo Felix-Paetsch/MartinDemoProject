@@ -15,7 +15,7 @@ export const ProtocolMap: Map<string, Protocol<any, any, any, any>[]> = new Map(
 export type ProtocolError = Error;
 export function NoResponder(): NoActor { return NoActor; }
 
-export function registerProtocol(protocol: Protocol<any, any, any>) {
+export function registerProtocol(protocol: Protocol<any, any, any, any>) {
     if (!ProtocolMap.has(protocol.name)) {
         ProtocolMap.set(protocol.name, []);
     }

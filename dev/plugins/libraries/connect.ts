@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { Middleware as DebugMiddleware } from "pc-messaging-kernel/debug";
-import { Middleware as CommonMiddleware, Initialization, MessageChannel } from "pc-messaging-kernel/pluginSystem/common";
-import { Plugin, PluginEnvironment } from "pc-messaging-kernel/pluginSystem/plugin";
-import { Json } from "pc-messaging-kernel/utils";
+import { Middleware as CommonMiddleware } from "../../lib/src/pluginSystem/common_lib/exports";
+import { Plugin, PluginEnvironment } from "../../lib/src/pluginSystem/plugin_lib/exports";
+import { Json } from "../../lib/src/utils/exports";
 
 console.log("EXECUTING");
 export default (plugin: Plugin) => {
