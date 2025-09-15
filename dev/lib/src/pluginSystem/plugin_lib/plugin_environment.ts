@@ -6,7 +6,7 @@ import { EnvironmentCommunicator } from "../common_lib/environments/environment_
 import PluginMessagePartner from "./message_partner/plugin_message_partner";
 import { PluginIdent, PluginIdentWithInstanceId } from "./plugin_ident";
 import { KernelEnvironment } from "../kernel_lib/kernel_env";
-import { executeProtocol, Protocol, ProtocolError } from "pc-messaging-kernel/middleware/protocol";
+import { executeProtocol, Protocol, ProtocolError } from "../../middleware/protocol";
 import { get_plugin_from_kernel, make_plugin_message_partner } from "../protocols/plugin_kernel/get_plugin";
 
 export type PluginDescriptor = {
@@ -16,6 +16,7 @@ export type PluginDescriptor = {
 
 export class PluginEnvironment extends EnvironmentCommunicator {
     static plugins: PluginEnvironment[] = [];
+    readonly plugin_message_partners: PluginMessagePartner[] = [];
     constructor(
         readonly port_id: string,
         readonly kernel_address: Address,
@@ -35,7 +36,7 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     async get_plugin(plugin_ident: PluginIdent): Promise<PluginMessagePartner | ProtocolError> {
         const res = await this.#execute_kernel_protocol(get_plugin_from_kernel, plugin_ident);
         if (res instanceof Error) return res;
-        return this.#execute_plugin_protocol(make_plugin_message_partner, res, {
+        return await this.#execute_plugin_protocol(make_plugin_message_partner, res, {
             address: res.address,
             plugin_ident: res.plugin_ident
         });
@@ -53,7 +54,7 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     };
 
     #execute_kernel_protocol<Result, InitData>(
-        protocol: Protocol<this, KernelEnvironment, Result, InitData>,
+        protocol: Protocol<this, KernelEnvironment, Result, InitData, null>,
         initData: InitData
     ): Promise<Result | ProtocolError> {
         return executeProtocol(
@@ -61,13 +62,13 @@ export class PluginEnvironment extends EnvironmentCommunicator {
             this,
             this.kernel_address,
             this.port,
-            "",
+            null,
             initData
         );
     }
 
     #execute_plugin_protocol<Result, InitData>(
-        protocol: Protocol<this, PluginEnvironment, Result, InitData>,
+        protocol: Protocol<PluginEnvironment, PluginEnvironment, Result, InitData, PluginIdentWithInstanceId>,
         pluginDescriptor: PluginDescriptor,
         initData: InitData
     ): Promise<Result | ProtocolError> {

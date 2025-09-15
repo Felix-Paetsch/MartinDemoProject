@@ -20,30 +20,32 @@ export const get_plugin_from_kernel: Protocol<
     PluginEnvironment,
     KernelEnvironment,
     typeof pluginData.Type | GetPluginError,
-    PluginIdent
+    PluginIdent,
+    null
 > = {
     name: "get_plugin_from_kernel",
     initiate: async (mc: MessageChannel, initiator: PluginEnvironment, plugin_ident: PluginIdent) => {
-        return Effect.promise(() => mc.send(plugin_ident)).pipe(
-            Effect.as(Effect.promise(() => mc.next())),
-            failOnError,
-            Schema.decodeUnknown(pluginData),
+        return Effect.gen(function* () {
+            yield* Effect.promise(() => mc.send(plugin_ident)).pipe(failOnError);
+            yield* Effect.promise(() => mc.next()).pipe(failOnError);
+            return yield* Schema.decodeUnknown(pluginData)(yield* Effect.promise(() => mc.next()));
+        }).pipe(
             Effect.merge,
             Effect.runPromise
         )
     },
     respond: async (mc: MessageChannel, responder: KernelEnvironment) => {
-        Effect.promise(() => mc.next()).pipe(
-            failOnError,
-            Schema.decodeUnknown(pluginIdentSchema),
-            Effect.andThen(r => Effect.promise(() => responder.get_plugin(r))),
-            failOnError,
-            Effect.andThen(r => Schema.encode(pluginData)({
-                address: r.address,
-                plugin_ident: r.plugin_ident
-            })),
-            Effect.andThen(r => mc.send(r)),
-            Effect.ignore,
+        await Effect.gen(function* () {
+            const data = yield* Effect.promise(() => mc.next()).pipe(failOnError);
+            const plugin_ident = yield* Schema.decodeUnknown(pluginIdentSchema)(data);
+            const plugin = yield* Effect.promise(() => responder.get_plugin(plugin_ident)).pipe(failOnError);
+            const plugin_data = yield* Schema.encode(pluginData)({
+                address: plugin.address,
+                plugin_ident: plugin.plugin_ident
+            });
+            yield* Effect.promise(() => mc.send(plugin_data)).pipe(failOnError);
+        }).pipe(
+            Effect.merge,
             Effect.runPromise
         )
     },
@@ -62,7 +64,8 @@ export const make_plugin_message_partner: Protocol<
     PluginEnvironment,
     PluginEnvironment,
     PluginMessagePartner | GetPluginError,
-    typeof pluginData.Type
+    typeof pluginData.Type,
+    typeof pluginData.Encoded
 > = {
     name: "create_plugin_message_partner",
     initiate: async (mc: MessageChannel, initiator: PluginEnvironment, plugin_ident: typeof pluginData.Type) => {

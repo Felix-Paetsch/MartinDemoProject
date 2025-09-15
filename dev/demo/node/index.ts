@@ -7,7 +7,9 @@ import { v4 as uuidv4 } from "uuid";
 import { LibraryReference } from "../../lib/src/pluginSystem/kernel_lib/external_references/library_reference";
 import { LibraryIdent } from "../../lib/src/pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../../lib/src/pluginSystem/library/library_implementation";
-import PluginMessagePartner from "../../lib/src/pluginSystem/plugin_lib/message_partner_objects/plugin_message_partner";
+import PluginMessagePartner from "../../lib/src/pluginSystem/plugin_lib/message_partner/plugin_message_partner";
+import { ProtocolError } from "../../lib/src/middleware/protocol";
+import Bridge from "../../lib/src/pluginSystem/plugin_lib/message_partner/bridge";
 
 const side_plugin = async (env: PluginEnvironment) => {
     console.log("<< STARTING SIDE PLUGIN >>");
@@ -38,12 +40,13 @@ const side_plugin = async (env: PluginEnvironment) => {
 
 const main_plugin = async (env: PluginEnvironment) => {
     console.log("<< STARTING MAIN PLUGIN >>")
-    const mp = await env.get_plugin({
+    const mp: PluginMessagePartner | ProtocolError = await env.get_plugin({
         name: "side",
         version: "1.0.0"
     });
 
     if (mp instanceof Error) {
+        console.log("THROWING");
         throw mp;
     }
 

@@ -40,12 +40,18 @@ const protocolProcessor: MessageChannelProcessor = async (mc: MessageChannel) =>
 
 MessageChannel.register_processor("protocol_processor", protocolProcessor);
 
-export async function executeProtocol<Initiator, Responder extends NonNullable<unknown>, Result, InitData>(
-    protocol: Protocol<Initiator, Responder, Result, InitData>,
+export async function executeProtocol<
+    Initiator,
+    Responder extends NonNullable<unknown>,
+    Result,
+    InitData,
+    ResponderIdentifier extends Json
+>(
+    protocol: Protocol<Initiator, Responder, Result, InitData, ResponderIdentifier>,
     initiator: Initiator,
     target: Address,
     port: Port,
-    responderIdentifier: Json,
+    responderIdentifier: ResponderIdentifier,
     initData: InitData
 ): Promise<Result | ProtocolError> {
     const mc = new MessageChannel(
