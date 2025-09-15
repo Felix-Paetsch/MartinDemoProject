@@ -1,4 +1,4 @@
-import { DataLog, MessageLog } from "../../../messaging/debug/logging/logging";
+import { DataLog, MessageLog } from "../../../messaging/debug/logging";
 import LogInvestigator from "./logInverstigator";
 
 export class DataLogEntry implements DataLog {

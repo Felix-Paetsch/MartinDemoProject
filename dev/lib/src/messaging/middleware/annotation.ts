@@ -1,15 +1,16 @@
 import { Effect, Schema } from "effect";
 import { v4 as uuidv4 } from 'uuid';
-import { Message } from "../../../messaging/core/message";
-import { Middleware, MiddlewareContinue } from "../../../messaging/core/middleware";
-import { Json } from "../../../utils/json";
-import { EffectToMiddleware } from "../../../messagingEffect/effect_middleware";
+import { Message } from "../core/message";
+import { Middleware, MiddlewareContinue } from "../core/middleware";
+import { Json } from "../../utils/json";
+import { EffectToMiddleware } from "../../messagingEffect/effect_middleware";
 
-export default function add_annotation_data(
-    computeData?: (message: Message, current_annotation: Record<string, Json>) => Record<string, Json>
+export type annotateCustomData = (message: Message, current_annotation: Record<string, Json>) => Record<string, Json>;
+export function annotation_middleware(
+    computeData?: annotateCustomData
 ): Middleware {
     return EffectToMiddleware(
-        Effect.fn("add_annotation_data_mw")(
+        Effect.fn("annotation_middleware")(
             function* (message: Message) {
                 const oldAnnotation = yield* Schema.decodeUnknown(
                     Schema.Record({
@@ -40,11 +41,13 @@ function computeStandardData(
 ): Record<string, Json> {
     const current_path = oldAnnotation.message_path && Array.isArray(oldAnnotation.message_path) ?
         oldAnnotation.message_path : [];
+    const new_path = current_path[current_path.length - 1] === message.local_data.current_address.serialize() ?
+        current_path : [...current_path, message.local_data.current_address.serialize()];
 
     return {
         message_id: uuidv4(),
         ...oldAnnotation,
-        message_path: [...current_path, message.local_data.current_address.serialize()],
+        message_path: new_path,
         source: oldAnnotation.source || message.local_data.current_address.serialize(),
         target: message.target.serialize(),
         at_target: message.local_data.at_target,

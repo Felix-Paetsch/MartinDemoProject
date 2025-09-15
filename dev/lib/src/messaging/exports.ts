@@ -15,8 +15,13 @@ import { partition_middleware as pmw, PartitionMiddlewareKeys as _PartitionMiddl
 import { guard_middleware as gmw } from "./middleware/guard";
 import { empty_middleware as emw } from "./middleware/empty";
 import { comsume_message as cm } from "./middleware/consume";
+import * as amw from "./middleware/annotation";
 
-import * as Logging from "./debug/logging/logging"
+import * as LoggingMain from "./debug/logging"
+import * as LoggingLog from "./debug/logging/log"
+import * as LoggingInvestigator from "./debug/logging/parse/logInverstigator";
+import * as LoggingCollection from "./debug/logging/parse/logCollection";
+import * as LoggingFormatter from "./debug/logging/parse/formatter";
 
 export namespace Failure {
     export type MessagingError = Errors.MessagingError;
@@ -50,7 +55,10 @@ export namespace Middleware {
     export type PartitionMiddlewareKeys<T> = _PartitionMiddlewareKeys<T>;
     export const guard_middleware = gmw;
     export const empty_middleware = emw;
-    export const comsume_message = cm;
+    export type annotateCustomData = amw.annotateCustomData;
+    export const annotation_middleware = amw.annotation_middleware;
+    export const consume_message = cm;
+
     export const register_global_middleware = MW.register_global_middleware;
     export const clear_global_middleware = MW.clear_global_middleware;
     export const Continue = MW.MiddlewareContinue;
@@ -60,8 +68,24 @@ export namespace Middleware {
     export const isMiddlewareInterrupt = MW.isMiddlewareInterrupt;
 }
 
-export namespace Debug {
-    export const set_logging_target = Logging.set_logging_target
+export namespace Logging {
+    export const set_logging_target = LoggingMain.set_logging_target;
+    export const log = LoggingMain.log;
+    export const log_middleware = LoggingMain.log_middleware;
+    export const process_logs = LoggingMain.process_logs;
+
+    export type LogProcessor = LoggingMain.LogProcessor;
+    export type Log = LoggingLog.Log;
+    export type MessageLog = LoggingLog.MessageLog;
+    export type DataLog = LoggingLog.DataLog;
+
+    export const LogInvestigator = LoggingInvestigator.default;
+    export const LogCollection = LoggingCollection.LogCollection;
+    export const MessageLogCollection = LoggingCollection.MessageLogCollection;
+    export const DataLogCollection = LoggingCollection.DataLogCollection;
+
+    export type LogFormatter = LoggingFormatter.Formatter;
+    export const DefaultLogFormatter = LoggingFormatter.DefaultFormatter;
 }
 
 export {
