@@ -49,7 +49,7 @@ export default class Bridge extends MessagePartner {
             this.plugin_partner.plugin_descriptor.address,
             this.plugin_partner.env.port,
             {
-                plugin_message_partner_uuid: this.uuid,
+                plugin_message_partner_uuid: this.plugin_partner.uuid,
                 plugin_instance_id: this.plugin_partner.plugin_descriptor.plugin_ident.instance_id,
                 bridge_uuid: this.uuid
             },

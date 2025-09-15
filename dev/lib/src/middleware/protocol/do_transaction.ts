@@ -54,7 +54,7 @@ export async function executeProtocol<
     responderIdentifier: ResponderIdentifier,
     initData: InitData
 ): Promise<Result | ProtocolError> {
-    console.log("Start Executing", protocol.name)
+    // console.log("Start Executing", protocol.name)
     const mc = new MessageChannel(
         target,
         port,
@@ -73,7 +73,7 @@ export async function executeProtocol<
         }));
     if (res !== "ok") return new Error("Failed to find responder");
     return protocol.initiate(mc, initiator, initData).then(r => {
-        console.log("End Executing", protocol.name)
+        // console.log("End Executing", protocol.name)
         return r;
     });
 }

@@ -44,7 +44,6 @@ export function findPluginMessagePartner(plugin_ident: unknown | {
     const plugin = PluginEnvironment.plugins.find(
         plugin => plugin.plugin_ident.instance_id === data.plugin_instance_id
     );
-    console.log("Plugin", plugin, data);
     if (!plugin) return null;
     return plugin.plugin_message_partners.find(
         mp => mp.uuid === data.plugin_message_partner_uuid
@@ -62,13 +61,11 @@ export function findBridge(bridge_ident: unknown | {
     plugin_instance_id: string,
     bridge_uuid: string
 }): Bridge | null {
-    console.log("==============================");
     const ident = Schema.decodeUnknown(bridgeData)(bridge_ident).pipe(
         Effect.orElse(() => Effect.succeed(null)),
         Effect.runSync
     );
     if (!ident) return null;
-    console.log(ident);
     const mp = findPluginMessagePartner(ident);
     if (!mp) return null;
     return mp.bridges.find(b => b.uuid === ident.bridge_uuid) || null;
