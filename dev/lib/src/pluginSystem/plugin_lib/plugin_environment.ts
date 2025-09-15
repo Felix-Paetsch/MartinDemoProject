@@ -8,6 +8,9 @@ import { PluginIdent, PluginIdentWithInstanceId } from "./plugin_ident";
 import { KernelEnvironment } from "../kernel_lib/kernel_env";
 import { executeProtocol, Protocol, ProtocolError } from "../../middleware/protocol";
 import { get_plugin_from_kernel, make_plugin_message_partner } from "../protocols/plugin_kernel/get_plugin";
+import { LibraryIdent } from "../library/library_environment";
+import LibraryMessagePartner from "./message_partner/library";
+import { get_library } from "../protocols/plugin_kernel/get_library";
 
 export type PluginDescriptor = {
     address: Address;
@@ -17,6 +20,7 @@ export type PluginDescriptor = {
 export class PluginEnvironment extends EnvironmentCommunicator {
     static plugins: PluginEnvironment[] = [];
     readonly plugin_message_partners: PluginMessagePartner[] = [];
+    readonly library_message_partners: LibraryMessagePartner[] = [];
     constructor(
         readonly port_id: string,
         readonly kernel_address: Address,
@@ -31,6 +35,10 @@ export class PluginEnvironment extends EnvironmentCommunicator {
             severity: severity,
             message: message
         })
+    }
+
+    async get_library(library_ident: LibraryIdent): Promise<LibraryMessagePartner | ProtocolError> {
+        return await this.#execute_kernel_protocol(get_library, library_ident);
     }
 
     async get_plugin(plugin_ident: PluginIdent): Promise<PluginMessagePartner | ProtocolError> {

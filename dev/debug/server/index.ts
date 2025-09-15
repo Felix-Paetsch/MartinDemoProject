@@ -10,7 +10,7 @@ app.use(express.json());
 app.post("/", (req, res) => {
     try {
         const jsonData = req.body;
-        fs.appendFileSync("debug/logs/external_logs.log", JSON.stringify(jsonData) + "\n");
+        fs.appendFileSync("debug/logs/external_logs.log", JSON.stringify(jsonData, null, 2) + "\n");
         res.json({ status: "ok" });
     } catch (err) {
         res.status(500).json({ error: "Failed to write data" });

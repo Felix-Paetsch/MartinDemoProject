@@ -11,6 +11,7 @@ export const libraryIdentSchema = Schema.Struct({
 export type LibraryIdent = Schema.Schema.Type<typeof libraryIdentSchema>;
 
 export class LibraryEnvironment extends EnvironmentCommunicator {
+    static libraries: LibraryEnvironment[] = [];
     constructor(
         readonly port_id: string,
         readonly kernel_address: Address,
@@ -18,5 +19,6 @@ export class LibraryEnvironment extends EnvironmentCommunicator {
         readonly implementation: AbstractLibraryImplementation
     ) {
         super(port_id);
+        LibraryEnvironment.libraries.push(this);
     }
 }

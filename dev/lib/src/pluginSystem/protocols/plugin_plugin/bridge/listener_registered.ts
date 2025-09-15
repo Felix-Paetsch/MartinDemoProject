@@ -1,14 +1,8 @@
-import { PluginEnvironment } from "../../../plugin_lib/plugin_environment";
 import { Protocol, registerProtocol } from "../../../../middleware/protocol";
-import { KernelEnvironment } from "../../../kernel_lib/kernel_env";
-import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../../plugin_lib/plugin_ident";
-import { findKernel, findPlugin, findPluginMessagePartner, findBridge } from "../../findResponder";
+import { findBridge } from "../../findResponder";
 import MessageChannel from "../../../../middleware/channel";
-import { Effect, Schema } from "effect";
-import { AddressFromString } from "../../../../messagingEffect/schemas";
-import { failOnError } from "../../../../messagingEffect/utils";
-import PluginMessagePartner, { PluginMessagePartnerID } from "../../../plugin_lib/message_partner/plugin_message_partner";
-import { v4 as uuidv4 } from "uuid";
+import { Effect } from "effect";
+import { PluginMessagePartnerID } from "../../../plugin_lib/message_partner/plugin_message_partner";
 import Bridge from "../../../plugin_lib/message_partner/bridge";
 
 export const trigger_on_listener_registered: Protocol<
@@ -22,7 +16,7 @@ export const trigger_on_listener_registered: Protocol<
         bridge_uuid: string
     }
 > = {
-    name: "send_bridge",
+    name: "bridge_listener_registered",
     initiate: async (mc: MessageChannel, initiator: Bridge) => {
         await mc.next();
     },

@@ -1,14 +1,9 @@
-import { PluginEnvironment } from "../../../plugin_lib/plugin_environment";
 import { Protocol, registerProtocol } from "../../../../middleware/protocol";
-import { KernelEnvironment } from "../../../kernel_lib/kernel_env";
-import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../../plugin_lib/plugin_ident";
-import { findKernel, findPlugin, findPluginMessagePartner, findBridge } from "../../findResponder";
+import { findBridge } from "../../findResponder";
 import MessageChannel from "../../../../middleware/channel";
-import { Effect, Schema } from "effect";
-import { AddressFromString } from "../../../../messagingEffect/schemas";
+import { Effect } from "effect";
 import { failOnError } from "../../../../messagingEffect/utils";
-import PluginMessagePartner, { PluginMessagePartnerID } from "../../../plugin_lib/message_partner/plugin_message_partner";
-import { v4 as uuidv4 } from "uuid";
+import { PluginMessagePartnerID } from "../../../plugin_lib/message_partner/plugin_message_partner";
 import Bridge from "../../../plugin_lib/message_partner/bridge";
 import { Json } from "pc-messaging-kernel/utils/json";
 

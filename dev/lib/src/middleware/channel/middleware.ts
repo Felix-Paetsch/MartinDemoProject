@@ -29,7 +29,6 @@ export const processMessageChannelMessage: Middleware.Middleware = (m: Message) 
 }
 
 export const processMessageBody = (body: MessageData, port: Port) => {
-    console.log(chalk.gray("MESSAGE:", body.type, (port as any)._id));
     if (body.type === "OpenNewChannel") {
         const processor = MessageChannel.get_processor(body.context.target_processor);
         if (!processor) {

@@ -4,7 +4,7 @@ import { Json } from "../../utils/json";
 export abstract class AbstractLibraryImplementation {
     protected _disposed = false;
     abstract exposes(msg: Message): string[];
-    abstract call(fn: string, args: readonly Json[], msg: Message): Json | Promise<Json>;
+    abstract call(fn: string, args: readonly Json[]): Json | Promise<Json>;
 
     is_disposed(): boolean {
         return this._disposed;
@@ -32,7 +32,7 @@ export abstract class AbstractLibraryImplementation {
 
     static from_methods(
         exposes: (msg: Message) => string[],
-        call: (fn: string, args: readonly Json[], msg: Message) => Json | Promise<Json>,
+        call: (fn: string, args: readonly Json[]) => Json | Promise<Json>,
         dispose: () => void = () => { }
     ): AbstractLibraryImplementation {
         return new ConcreteLibraryImplementation(
@@ -46,7 +46,7 @@ export abstract class AbstractLibraryImplementation {
 class ConcreteLibraryImplementation extends AbstractLibraryImplementation {
     constructor(
         readonly exposes: (msg: Message) => string[],
-        readonly call: (fn: string, args: readonly Json[], msg: Message) => Json | Promise<Json>,
+        readonly call: (fn: string, args: readonly Json[]) => Json | Promise<Json>,
         readonly __dispose: () => void
     ) {
         super();

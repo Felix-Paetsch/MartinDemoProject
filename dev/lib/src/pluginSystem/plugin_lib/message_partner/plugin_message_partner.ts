@@ -3,7 +3,7 @@ import { PluginDescriptor, PluginEnvironment } from "../plugin_environment";
 import { MessagePartner } from "./base";
 import Bridge from "./bridge";
 import { executeProtocol, Protocol, ProtocolError } from "../../../middleware/protocol";
-import { create_bridge_protocol } from "../../protocols/plugin_plugin/create_bridge";
+import { create_bridge_protocol } from "../../protocols/plugin_plugin/bridge/create_bridge";
 
 export type PluginMessagePartnerID = string;
 export default class PluginMessagePartner extends MessagePartner {

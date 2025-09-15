@@ -47,6 +47,6 @@ export class ReportedAnomaly extends Error {
 export type Anomaly = AddressNotFound | MessageSerializationError | MessageDeserializationError | MessageChannelTransmissionError | ReportedAnomaly;
 
 export function reportAnomaly(anomaly: Error): MiddlewarePassthrough {
-    applyAnomalyHandler(new ReportedAnomaly(anomaly)).pipe(Effect.runSync);
+    applyAnomalyHandler(new ReportedAnomaly(anomaly)).pipe(Effect.runPromise);
     return MiddlewareInterrupt;
 }

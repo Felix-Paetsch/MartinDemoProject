@@ -35,7 +35,7 @@ const protocolProcessor: MessageChannelProcessor = async (mc: MessageChannel) =>
         }
     }
 
-    Failure.reportAnomaly(new Error("Didn't find responder for protocol"));
+    Failure.reportAnomaly(new Error("Didn't find responder for protocol: " + name));
 }
 
 MessageChannel.register_processor("protocol_processor", protocolProcessor);
@@ -54,6 +54,7 @@ export async function executeProtocol<
     responderIdentifier: ResponderIdentifier,
     initData: InitData
 ): Promise<Result | ProtocolError> {
+    console.log("Start Executing", protocol.name)
     const mc = new MessageChannel(
         target,
         port,
@@ -71,5 +72,8 @@ export async function executeProtocol<
             name: protocol.name,
         }));
     if (res !== "ok") return new Error("Failed to find responder");
-    return protocol.initiate(mc, initiator, initData);
+    return protocol.initiate(mc, initiator, initData).then(r => {
+        console.log("End Executing", protocol.name)
+        return r;
+    });
 }

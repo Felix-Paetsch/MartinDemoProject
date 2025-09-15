@@ -27,8 +27,8 @@ export const get_plugin_from_kernel: Protocol<
     initiate: async (mc: MessageChannel, initiator: PluginEnvironment, plugin_ident: PluginIdent) => {
         return Effect.gen(function* () {
             yield* Effect.promise(() => mc.send(plugin_ident)).pipe(failOnError);
-            yield* Effect.promise(() => mc.next()).pipe(failOnError);
-            return yield* Schema.decodeUnknown(pluginData)(yield* Effect.promise(() => mc.next()));
+            const pd = yield* Effect.promise(() => mc.next()).pipe(failOnError);
+            return yield* Schema.decodeUnknown(pluginData)(pd);
         }).pipe(
             Effect.merge,
             Effect.runPromise
@@ -91,21 +91,22 @@ export const make_plugin_message_partner: Protocol<
         );
     },
     respond: async (mc: MessageChannel, responder: PluginEnvironment) => {
-        return Effect.promise(() => mc.next()).pipe(
-            failOnError,
-            Schema.decodeUnknown(getPluginMessageData),
-            Effect.map(r => new PluginMessagePartner(
+        return Effect.gen(function* () {
+            const data = yield* Effect.promise(() => mc.next()).pipe(failOnError);
+            const r = yield* Schema.decodeUnknown(getPluginMessageData)(data);
+            const mp = new PluginMessagePartner(
                 {
                     address: r.address,
                     plugin_ident: r.plugin_ident
                 },
                 r.mp_uuid,
                 responder
-            )),
-            Effect.andThen(r => Effect.tryPromise({
-                try: () => responder._trigger_on_plugin_request(r),
+            );
+            yield* Effect.tryPromise({
+                try: () => responder._trigger_on_plugin_request(mp),
                 catch: (e) => e as Error
-            })),
+            });
+        }).pipe(
             Effect.ignore,
             Effect.andThen(() => Effect.promise(() => mc.send("OK"))),
             Effect.runPromise

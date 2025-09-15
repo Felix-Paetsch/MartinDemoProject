@@ -6,6 +6,8 @@ import { Effect, Schema } from "effect";
 import { pluginIdentWithInstanceIdSchema } from "../plugin_lib/plugin_ident";
 import PluginMessagePartner, { PluginMessagePartnerID } from "../plugin_lib/message_partner/plugin_message_partner";
 import Bridge from "../plugin_lib/message_partner/bridge";
+import LibraryMessagePartner from "../plugin_lib/message_partner/library";
+import { libraryIdentSchema, LibraryIdent, LibraryEnvironment } from "../library/library_environment";
 
 export function findKernel(): KernelEnvironment | null {
     return KernelEnvironment.singleton;
@@ -42,6 +44,7 @@ export function findPluginMessagePartner(plugin_ident: unknown | {
     const plugin = PluginEnvironment.plugins.find(
         plugin => plugin.plugin_ident.instance_id === data.plugin_instance_id
     );
+    console.log("Plugin", plugin, data);
     if (!plugin) return null;
     return plugin.plugin_message_partners.find(
         mp => mp.uuid === data.plugin_message_partner_uuid
@@ -59,7 +62,25 @@ export function findBridge(bridge_ident: unknown | {
     plugin_instance_id: string,
     bridge_uuid: string
 }): Bridge | null {
-    const mp = findPluginMessagePartner(bridge_ident);
+    console.log("==============================");
+    const ident = Schema.decodeUnknown(bridgeData)(bridge_ident).pipe(
+        Effect.orElse(() => Effect.succeed(null)),
+        Effect.runSync
+    );
+    if (!ident) return null;
+    console.log(ident);
+    const mp = findPluginMessagePartner(ident);
     if (!mp) return null;
-    return mp.bridges.find(b => b.uuid === (bridge_ident as any).bridge_uuid) || null;
+    return mp.bridges.find(b => b.uuid === ident.bridge_uuid) || null;
+}
+
+export function findLibrary(library_ident: unknown | LibraryIdent): LibraryEnvironment | null {
+    const ident = Schema.decodeUnknown(libraryIdentSchema)(library_ident).pipe(
+        Effect.orElse(() => Effect.succeed(null)),
+        Effect.runSync
+    );
+    if (!ident) return null;
+    return LibraryEnvironment.libraries.find(
+        lib => lib.library_ident.name === ident.name && lib.library_ident.version === ident.version
+    ) || null;
 }

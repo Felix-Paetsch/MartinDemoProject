@@ -3,6 +3,7 @@ import { LibraryEnvironment, LibraryIdent } from "../library/library_environment
 import { AbstractLibraryImplementation } from "../library/library_implementation";
 import { PluginEnvironment } from "../plugin_lib/plugin_environment";
 import { PluginIdent, PluginIdentWithInstanceId } from "../plugin_lib/plugin_ident";
+import { GetLibraryError } from "../protocols/plugin_kernel/get_library";
 import { LibraryReference } from "./external_references/library_reference";
 import { PluginReference } from "./external_references/plugin_reference";
 import { v4 as uuidv4 } from "uuid";
@@ -47,7 +48,6 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         };
     }
 
-
     create_local_library_environment(library_ident: LibraryIdent, implementation: AbstractLibraryImplementation, port_id: string = uuidv4()): {
         ref: LibraryReference, env: LibraryEnvironment
     } {
@@ -69,6 +69,17 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     }
 
     async create_plugin(plugin_ident: PluginIdent): Promise<PluginReference | GetPluginError> {
+        return new Error("Not implemented!");
+    }
+
+    async get_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {
+        const existingLibrary = this.registered_libraries.find(library => library.library_ident.name === library_ident.name && library.library_ident.version === library_ident.version);
+        if (existingLibrary) { return existingLibrary; }
+
+        return await this.create_library(library_ident);
+    }
+
+    async create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {
         return new Error("Not implemented!");
     }
 }

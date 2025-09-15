@@ -24,7 +24,6 @@ export function kernelDebugLogging(logFile: string = path.join(
                 yield* createLogFile;
             }
 
-            // console.log("MESSAGE", message);
             const jsonMessage = yield* Schema.encode(Schema.parseJson(Schema.Any))(message);
             const logContent = jsonMessage + "\n";
             yield* Effect.tryPromise({
