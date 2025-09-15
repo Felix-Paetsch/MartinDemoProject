@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import { Effect } from "effect";
 import { Middleware } from "../../messaging/core/middleware";
-import { empty_middleware } from "../../messaging/middlewares/empty";
-import { log_external as log, log_messages, log_to_url } from '../../middleware/logging';
+import { empty_middleware } from "../../messaging/middleware/empty";
+import { log_external as log, log_messages, log_to_url } from '../../messaging/debug/logging/logging';
 import { Json } from "../../utils/json";
 
 const DEBUG = process.env.DEBUG_MODE === "true"

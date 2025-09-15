@@ -10,11 +10,13 @@ import * as Errors from "./core/errors/errors";
 import * as Anomalies from "./core/errors/anomalies";
 import * as ErrorsMain from "./core/errors/main";
 
-import { collection_middleware as cmw } from "./middlewares/collection";
-import { partition_middleware as pmw, PartitionMiddlewareKeys as _PartitionMiddlewareKeys } from "./middlewares/partition";
-import { guard_middleware as gmw } from "./middlewares/guard";
-import { empty_middleware as emw } from "./middlewares/empty";
-import { comsume_message as cm } from "./middlewares/consume";
+import { collection_middleware as cmw } from "./middleware/collection";
+import { partition_middleware as pmw, PartitionMiddlewareKeys as _PartitionMiddlewareKeys } from "./middleware/partition";
+import { guard_middleware as gmw } from "./middleware/guard";
+import { empty_middleware as emw } from "./middleware/empty";
+import { comsume_message as cm } from "./middleware/consume";
+
+import * as Logging from "./debug/logging/logging"
 
 export namespace Failure {
     export type MessagingError = Errors.MessagingError;
@@ -56,6 +58,10 @@ export namespace Middleware {
     export type Passthrough = MW.MiddlewarePassthrough;
     export const isMiddlewareContinue = MW.isMiddlewareContinue;
     export const isMiddlewareInterrupt = MW.isMiddlewareInterrupt;
+}
+
+export namespace Debug {
+    export const set_logging_target = Logging.set_logging_target
 }
 
 export {

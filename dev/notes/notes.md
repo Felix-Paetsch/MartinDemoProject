@@ -58,6 +58,7 @@ What is wierd about the usage:
 -   Different Protocols do very similar things...
 
 -   Bind things as early as you can
+- refactor protocols, move logging middleware to messaging 
 
 For result:
 
@@ -132,6 +133,9 @@ We first await (and reject) promise. Then we get around resolving it
 
 -   Debug
 -   Handle (log) the (currently) ignore wrong message format errors and the other errors
+- Better errors
+- Refactor protocol
+- Get other stuff to work (demo)
 
 -   Docs
 -   Flat errors

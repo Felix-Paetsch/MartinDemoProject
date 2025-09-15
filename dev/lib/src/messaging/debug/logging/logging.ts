@@ -1,9 +1,11 @@
 import { ParseResult, Schema } from "effect";
-import { Json } from "../utils/exports";
-import { Address } from "../messaging/core/address";
-import { Message } from "../messaging/core/message";
-import { Middleware, Port } from "../messaging/exports";
-import { cacheFun } from "../messagingEffect/utils";
+import { reportAnomaly } from "../../core/errors/anomalies";
+import { Json } from "../../../utils/exports";
+import { Address } from "../../core/address";
+import { Message } from "../../core/message";
+import Port from "../../core/port";
+import { Middleware, MiddlewareContinue, MiddlewareInterrupt } from "../../core/middleware";
+import { cacheFun } from "../../../messagingEffect/utils";
 
 const LOGGING_PORT_ID = "logging";
 const logging_port = cacheFun(() => {
@@ -11,6 +13,51 @@ const logging_port = cacheFun(() => {
     port.open();
     return port;
 })
+
+export type URL_string = string;
+let logging_target: URL_string | Address | null = null;
+export function set_logging_target(target: null | URL_string | Address) {
+    logging_target = target;
+}
+
+async function log_json(data: { [key: string]: Json }): Promise<void> {
+    if (!logging_target) return Promise.resolve();
+    if (logging_target instanceof Address) {
+        const logMessage = new Message(
+            logging_target.forward_port(LOGGING_PORT_ID),
+            data,
+            {
+                message_logging: {
+                    source_address: logging_target.serialize()
+                }
+            }
+        );
+
+        const p = logging_port();
+        if (p.is_open()) {
+            await p.send(logMessage);
+        } else {
+            reportAnomaly(new Error("Logging port is closed."));
+        }
+        return;
+    }
+
+    await fetch(logging_target, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    }).catch(() => {
+        reportAnomaly(new Error("Failed to post data to server."))
+    });
+}
+
+export function log(data: Json) {
+    return log_json(
+        Schema.decodeSync(DataToLog)(data)
+    )
+}
 
 const MessageLogSchema = Schema.Struct({
     type: Schema.Literal("Message"),
@@ -58,60 +105,14 @@ const isNoLoggingMessage = function (message: Message) {
     return !message.meta_data.message_logging;
 }
 
-export const log_messages = (
-    log_message: (message: Message) => void | Promise<void>,
-    should_log: (message: Message) => boolean | Promise<boolean> =
-        () => true
-): Middleware.Middleware => {
-    return async (message: Message) => {
-        const b1 = isNoLoggingMessage(message);
-        const b2 = await should_log(message);
-        if (b1 && b2) {
-            await log_message(message);
-        }
-        return Middleware.Continue;
+export const log_middleware: Middleware = async (message: Message) => {
+    if (isNoLoggingMessage(message)) {
+        return MiddlewareContinue;
     }
-}
-
-export const log = (address: Address, data: Json) => {
-    const logMessage = new Message(address.forward_port(LOGGING_PORT_ID), Schema.decodeSync(ToLog)(data), {
-        message_logging: {
-            source_address: address.serialize()
-        }
-    });
-
-    return logging_port().send(logMessage);
-}
-
-export const log_external = (url: string, data: Json) => fetch(url, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data)
-})
-
-export function log_to_address(address: Address): (msg: Message) => Promise<void> {
-    return (message: Message) => {
-        const loggingContent = Schema.decodeSync(ToLog)(message);
-        const logMessage = new Message(address.forward_port(LOGGING_PORT_ID), loggingContent, {
-            message_logging: {
-                source_address: message.target.serialize()
-            }
-        });
-
-        return logging_port().send(logMessage);
-    }
-}
-
-export function log_to_url(url: string) {
-    return (message: Message) => {
-        const loggingContent = Schema.decodeSync(ToLog)(message);
-        log_external(
-            url,
-            loggingContent
-        );
-    }
+    await log_json(
+        Schema.decodeSync(ToLog)(message)
+    );
+    return MiddlewareInterrupt;
 }
 
 export function recieveMessageLogs(cb: (message: Log) => void | Promise<void>) {
@@ -121,6 +122,7 @@ export function recieveMessageLogs(cb: (message: Log) => void | Promise<void>) {
             const sanatized_content = Schema.decodeUnknownSync(LogSchema)(content);
             return cb(sanatized_content)
         }
-        return Middleware.Continue;
+        return MiddlewareContinue;
     })
 }
+
