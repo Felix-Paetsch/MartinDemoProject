@@ -9,7 +9,7 @@ import { cacheFun } from "../../../messagingEffect/utils";
 import { Log, LogSchema } from "./log";
 import { ToLog } from "./log";
 import { collection_middleware } from "../../middleware/collection";
-import { annotation_middleware } from "pc-messaging-kernel/messaging/middleware/annotation";
+import { annotation_middleware } from "../../middleware/annotation";
 
 const LOGGING_PORT_ID = "_logging";
 const logging_port = cacheFun(() => {

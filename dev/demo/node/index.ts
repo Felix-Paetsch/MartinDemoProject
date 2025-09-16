@@ -1,5 +1,3 @@
-import { Severity } from "../../lib/src/debug/exports";
-import { clear_external_logs, log_external_mw } from "../../lib/src/debug/external_logging/log_external";
 import { PluginEnvironment } from "../../lib/src/pluginSystem/plugin_lib/plugin_environment";
 import { KernelEnvironment } from "../../lib/src/pluginSystem/kernel_lib/kernel_env";
 import { PluginIdent } from "../../lib/src/pluginSystem/plugin_lib/plugin_ident";
@@ -10,8 +8,8 @@ import { AbstractLibraryImplementation } from "../../lib/src/pluginSystem/librar
 import PluginMessagePartner from "../../lib/src/pluginSystem/plugin_lib/message_partner/plugin_message_partner";
 import { ProtocolError } from "../../lib/src/middleware/protocol";
 import Bridge from "../../lib/src/pluginSystem/plugin_lib/message_partner/bridge";
-import { PluginReference } from "../../lib/src/pluginSystem/kernel_lib/external_references/plugin_reference";
-import { Failure } from "../../lib/src/messaging/exports";
+import { Failure, Logging } from "../../lib/src/messaging/exports";
+import { Severity } from "../../lib/src/pluginSystem/debug/severity"
 
 Failure.setAnomalyHandler((e) => {
     throw e;
@@ -33,7 +31,7 @@ const side_plugin = async (env: PluginEnvironment) => {
             });
         });
 
-        env.log("Hello from side plugin", Severity.INFO);
+        // env.log("Hello from side plugin", Severity.INFO);
     });
 
     const lib = await env.get_library({
@@ -77,7 +75,7 @@ class KernelImpl extends KernelEnvironment {
     register_kernel_middleware() {
         //this.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
         //this.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
-        this.use_middleware(log_external_mw(), "monitoring");
+        this.use_middleware(Logging.log_middleware, "monitoring");
         //this.useMiddleware(DebugMiddleware.kernel("debug/logs/internal_logs.log"), "monitoring");
     }
 
@@ -85,19 +83,19 @@ class KernelImpl extends KernelEnvironment {
         //ref.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
         ref.use_middleware(log_external_mw(), "monitoring");
         //ref.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
-    }*/
-
+        
+    
     register_local_plugin_middleware(env: PluginEnvironment) {
         // env.use_middleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        env.use_middleware(log_external_mw(), "monitoring");
+        env.use_middleware(Logging.log_middleware, "monitoring");
         //env.use_middleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
     register_local_library_middleware(env: LibraryEnvironment) {
         //env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        env.use_middleware(log_external_mw(), "monitoring");
+        env.use_middleware(Logging.log_middleware, "monitoring");
         //env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
-    }
+    }*/
 
     async create_library(library_ident: LibraryIdent) {
         const lib = AbstractLibraryImplementation.from_object({
@@ -131,5 +129,4 @@ clear_external_logs()?.then(
     () => kernel.start()
 ).then(r => {
     // kernel.remove_library(lib_ref!)
-});
-
+})

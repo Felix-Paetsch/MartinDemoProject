@@ -1,6 +1,5 @@
 import { Severity } from "../../debug/exports";
 import { Address } from "../../messaging/exports";
-import { log } from "../../middleware/logging";
 import { Json } from "../../utils/json";
 import { EnvironmentCommunicator } from "../common_lib/environments/environment_communicator";
 import PluginMessagePartner from "./message_partner/plugin_message_partner";
@@ -11,6 +10,7 @@ import { get_plugin_from_kernel, make_plugin_message_partner } from "../protocol
 import { LibraryIdent } from "../library/library_environment";
 import LibraryMessagePartner from "./message_partner/library";
 import { get_library } from "../protocols/plugin_kernel/get_library";
+import { Logging } from "../../messaging/exports"
 
 export type PluginDescriptor = {
     address: Address;
@@ -30,11 +30,11 @@ export class PluginEnvironment extends EnvironmentCommunicator {
         PluginEnvironment.plugins.push(this);
     }
 
-    log(message: Json, severity: Severity = Severity.INFO) {
-        return log(this.kernel_address, {
-            severity: severity,
-            message: message
-        })
+    log(data: Json, severity: Severity = Severity.INFO) {
+        return Logging.log({
+            data,
+            severity
+        });
     }
 
     async get_library(library_ident: LibraryIdent): Promise<LibraryMessagePartner | ProtocolError> {

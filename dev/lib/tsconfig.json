@@ -12,9 +12,6 @@
         "isolatedModules": true,
         "outDir": "dist",
         "declaration": true,
-        "paths": {
-            "pc-messaging-kernel/*": ["./src/*"]
-        },
         "plugins": [
             {
                 "name": "@effect/language-service"
