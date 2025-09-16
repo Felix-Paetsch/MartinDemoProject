@@ -8,12 +8,13 @@ import PluginMessagePartner, { PluginMessagePartnerID } from "../plugin_lib/mess
 import Bridge from "../plugin_lib/message_partner/bridge";
 import LibraryMessagePartner from "../plugin_lib/message_partner/library";
 import { libraryIdentSchema, LibraryIdent, LibraryEnvironment } from "../library/library_environment";
+import { MessagePartner } from "../plugin_lib/message_partner/base";
 
 export function findKernel(): KernelEnvironment | null {
     return KernelEnvironment.singleton;
 }
 
-export function findPlugin(plugin_ident: unknown | string | PluginIdentWithInstanceId | Json): PluginEnvironment | null {
+export function findPlugin(plugin_ident: string | PluginIdentWithInstanceId | Json): PluginEnvironment | null {
     let instance_id: string | undefined;
     if (typeof plugin_ident === "string") {
         instance_id = plugin_ident;
@@ -32,7 +33,7 @@ const pluginMessagePartnerData = Schema.Struct({
     plugin_instance_id: Schema.String
 })
 
-export function findPluginMessagePartner(plugin_ident: unknown | {
+export function findPluginMessagePartner(plugin_ident: {
     plugin_message_partner_uuid: PluginMessagePartnerID,
     plugin_instance_id: string
 }): PluginMessagePartner | null {
@@ -50,25 +51,16 @@ export function findPluginMessagePartner(plugin_ident: unknown | {
     ) || null;
 }
 
-const bridgeData = Schema.Struct({
-    plugin_message_partner_uuid: Schema.String,
-    plugin_instance_id: Schema.String,
-    bridge_uuid: Schema.String
-})
-
-export function findBridge(bridge_ident: unknown | {
+export function findBridge(ident: {
     plugin_message_partner_uuid: PluginMessagePartnerID,
     plugin_instance_id: string,
     bridge_uuid: string
 }): Bridge | null {
-    const ident = Schema.decodeUnknown(bridgeData)(bridge_ident).pipe(
-        Effect.orElse(() => Effect.succeed(null)),
-        Effect.runSync
-    );
-    if (!ident) return null;
     const mp = findPluginMessagePartner(ident);
     if (!mp) return null;
-    return mp.bridges.find(b => b.uuid === ident.bridge_uuid) || null;
+    return (MessagePartner.message_partners.find(
+        b => (b.uuid === ident.bridge_uuid) && (b.root_message_partner === mp)
+    ) as Bridge | undefined) || null;
 }
 
 export function findLibrary(library_ident: unknown | LibraryIdent): LibraryEnvironment | null {

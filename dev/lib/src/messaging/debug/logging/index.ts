@@ -39,7 +39,7 @@ async function log_json(data: { [key: string]: Json }): Promise<void> {
 
         const p = logging_port();
         if (p.is_open()) {
-            await p.send(logMessage);
+            p.send(logMessage);
         } else {
             reportAnomaly(new Error("Logging port is closed."));
         }
@@ -62,19 +62,20 @@ export function log(data: Json) {
 }
 
 const shouldLogMessage = function (message: Message) {
-    return !!message.meta_data.message_logging && message.local_data.at_source;
+    return !message.meta_data.message_logging;
 }
 
-export const log_middleware: Middleware = collection_middleware(
-    annotation_middleware(),
-    async (message: Message) => {
-        if (!shouldLogMessage(message)) {
+export function log_middleware(lp: LogProcessor = log_json): Middleware {
+    return collection_middleware(
+        annotation_middleware(),
+        async (message: Message) => {
+            if (shouldLogMessage(message)) {
+                await lp(Schema.decodeSync(ToLog)(message));
+            }
             return MiddlewareContinue;
         }
-        await log_json(Schema.decodeSync(ToLog)(message));
-        return MiddlewareInterrupt;
-    }
-)()
+    )()
+}
 
 export type LogProcessor = (log: Log) => void | Promise<void>;
 export function process_logs(cb: LogProcessor) {

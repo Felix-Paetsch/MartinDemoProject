@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import { Logging, Failure } from "../../../messaging/exports";
+import { Logging, Failure } from "../../messaging/exports";
 
 export function start_kernel_log_to_file(logFile: string = path.join(
     process.cwd(), "logs.log")
@@ -18,8 +18,15 @@ export function start_kernel_log_to_file(logFile: string = path.join(
 
     const logMessage: Logging.LogProcessor = async (log: Logging.Log) => {
         if (!(await logFileCreated)) return;
-        await fs.appendFile(logFile, JSON.stringify(log)).catch(() => { });
+        await fs.appendFile(logFile, JSON.stringify(log) + "\n").catch(() => { });
     };
 
     Logging.process_logs(logMessage);
+}
+
+export async function init_external_logging() {
+    Logging.set_logging_target("http://localhost:4000/");
+    await fetch("http://localhost:4000/clear", {
+        method: "POST",
+    });
 }

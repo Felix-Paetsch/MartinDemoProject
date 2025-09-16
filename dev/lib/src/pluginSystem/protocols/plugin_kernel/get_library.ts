@@ -1,56 +1,48 @@
 import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
-import { Protocol, registerProtocol } from "../../../middleware/protocol";
+import { protocol, receive_transcoded, SchemaTranscoder, send_await_response_transcoded, send_transcoded, AnythingTranscoder } from "../../../middleware/protocol";
 import { KernelEnvironment } from "../../kernel_lib/kernel_env";
 import { findKernel } from "../findResponder";
 import MessageChannel from "../../../middleware/channel";
-import { Effect, Schema } from "effect";
+import { Schema } from "effect";
 import { AddressFromString } from "../../../messagingEffect/schemas";
-import { failOnError } from "../../../messagingEffect/utils";
 import { libraryIdentSchema, LibraryIdent } from "../../library/library_environment";
 import LibraryMessagePartner from "../../plugin_lib/message_partner/library";
+import { v4 as uuidv4 } from "uuid";
 
 const libraryData = Schema.Struct({
     address: AddressFromString,
-    library_ident: libraryIdentSchema
+    library_ident: libraryIdentSchema,
+    uuid: Schema.String
 })
 
 export type GetLibraryError = Error;
-export const get_library: Protocol<
-    PluginEnvironment,
-    KernelEnvironment,
-    LibraryMessagePartner | GetLibraryError,
-    LibraryIdent,
-    null
-> = {
-    name: "get_library",
-    initiate: async (mc: MessageChannel, initiator: PluginEnvironment, library_ident: LibraryIdent) => {
-        return Effect.gen(function* () {
-            yield* Effect.promise(() => mc.send(library_ident)).pipe(failOnError);
-            const libData = yield* Effect.promise(() => mc.next()).pipe(failOnError);
-            const res = yield* Schema.decodeUnknown(libraryData)(libData);
-            if (res instanceof Error) return res;
-            return new LibraryMessagePartner(res, initiator);
-        }).pipe(
-            Effect.merge,
-            Effect.runPromise
-        )
-    },
-    respond: async (mc: MessageChannel, responder: KernelEnvironment) => {
-        await Effect.gen(function* () {
-            const data = yield* Effect.promise(() => mc.next()).pipe(failOnError);
-            const library_ident = yield* Schema.decodeUnknown(libraryIdentSchema)(data);
-            const library = yield* Effect.promise(() => responder.get_library(library_ident)).pipe(failOnError);
-            const library_data = yield* Schema.encode(libraryData)({
-                address: library.address,
-                library_ident: library.library_ident
-            });
-            yield* Effect.promise(() => mc.send(library_data)).pipe(failOnError);
-        }).pipe(
-            Effect.merge,
-            Effect.runPromise
-        )
-    },
-    findResponder: findKernel
-}
+export const get_library = protocol(
+    "get_library",
+    AnythingTranscoder,
+    findKernel,
+    async (mc: MessageChannel, initiator: PluginEnvironment, library_ident: LibraryIdent) => {
+        const res = await send_await_response_transcoded(
+            mc,
+            SchemaTranscoder(libraryIdentSchema),
+            library_ident,
+            SchemaTranscoder(libraryData)
+        );
 
-registerProtocol(get_library);
+        if (res instanceof Error) return res;
+        return new LibraryMessagePartner({
+            address: res.address,
+            library_ident: res.library_ident
+        }, initiator, res.uuid);
+    },
+    async (mc: MessageChannel, responder: KernelEnvironment) => {
+        const data = await receive_transcoded(mc, SchemaTranscoder(libraryIdentSchema));
+        if (data instanceof Error) return;
+        const library = await responder.get_library(data);
+        if (library instanceof Error) return;
+        await send_transcoded(mc, SchemaTranscoder(libraryData), {
+            address: library.address,
+            library_ident: library.library_ident,
+            uuid: uuidv4()
+        });
+    },
+);

@@ -177,7 +177,7 @@ export default class MessageChannel {
     #send_message(body: MessageDataEncoded) {
         if (!this.is_open()) { return Promise.resolve(); }
         return this.port.send(new Message(this.partner, body, {
-            "message_channel_middleware": true,
+            "message_channel_middleware": this.context.id,
         }));
     }
 

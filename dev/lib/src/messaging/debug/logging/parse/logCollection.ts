@@ -53,7 +53,20 @@ export class LogCollection {
         );
     }
 
-    #new_log_collection(logs: Log[]): LogCollection {
+    group_by<Key>(cb: (l: Log) => Key) {
+        const map: Map<Key, LogCollection> = new Map();
+        for (let log of this.logs) {
+            const key = cb(log);
+            if (map.has(key)) {
+                map.get(key)?.push(log)
+            } else {
+                map.set(key, this.#new_log_collection([log]));
+            }
+        }
+        return map;
+    }
+
+    #new_log_collection(logs: Log[]) {
         return new LogCollection(this.investigator, logs, this.formatter);
     }
 }
@@ -73,6 +86,19 @@ export class MessageLogCollection extends LogCollection {
 
     filter(predicate: (log: MessageLog) => boolean): MessageLogCollection {
         return this.#new_log_collection(this.logs.filter(predicate));
+    }
+
+    group_by<Key>(cb: (l: MessageLog) => Key) {
+        const map: Map<Key, MessageLogCollection> = new Map();
+        for (let log of this.logs) {
+            const key = cb(log);
+            if (map.has(key)) {
+                map.get(key)?.push(log)
+            } else {
+                map.set(key, this.#new_log_collection([log]));
+            }
+        }
+        return map;
     }
 
     from(a: Address) {
@@ -137,6 +163,19 @@ export class DataLogCollection extends LogCollection {
 
     filter(predicate: (log: DataLog) => boolean): DataLogCollection {
         return this.#new_log_collection(this.logs.filter(predicate));
+    }
+
+    group_by<Key>(cb: (l: DataLog) => Key) {
+        const map: Map<Key, DataLogCollection> = new Map();
+        for (let log of this.logs) {
+            const key = cb(log);
+            if (map.has(key)) {
+                map.get(key)?.push(log)
+            } else {
+                map.set(key, this.#new_log_collection([log]));
+            }
+        }
+        return map;
     }
 
     #new_log_collection(logs: DataLog[]): DataLogCollection {

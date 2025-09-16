@@ -6,10 +6,12 @@ import { LibraryReference } from "../../lib/src/pluginSystem/kernel_lib/external
 import { LibraryEnvironment, LibraryIdent } from "../../lib/src/pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../../lib/src/pluginSystem/library/library_implementation";
 import PluginMessagePartner from "../../lib/src/pluginSystem/plugin_lib/message_partner/plugin_message_partner";
-import { ProtocolError } from "../../lib/src/middleware/protocol";
+import { ProtocolError } from "../../lib/src/middleware/_protocol/index";
 import Bridge from "../../lib/src/pluginSystem/plugin_lib/message_partner/bridge";
-import { Failure, Logging } from "../../lib/src/messaging/exports";
-import { Severity } from "../../lib/src/pluginSystem/debug/severity"
+import { Failure, Logging, Address } from "../../lib/src/messaging/exports";
+import { init_external_logging, start_kernel_log_to_file } from "../../lib/src/pluginSystem/debug/logging";
+import { PluginReference } from "../../lib/src/pluginSystem/kernel_lib/external_references/plugin_reference";
+import { Severity } from "../../lib/src/pluginSystem/debug/severity";
 
 Failure.setAnomalyHandler((e) => {
     throw e;
@@ -31,7 +33,7 @@ const side_plugin = async (env: PluginEnvironment) => {
             });
         });
 
-        // env.log("Hello from side plugin", Severity.INFO);
+        env.log("Hello from side plugin", Severity.INFO);
     });
 
     const lib = await env.get_library({
@@ -71,31 +73,34 @@ const main_plugin = async (env: PluginEnvironment) => {
 
 let lib_ref: LibraryReference | null = null;
 
+
+Logging.set_logging_target(Address.local_address);
+start_kernel_log_to_file("./debug/logs/internal_logs.log");
 class KernelImpl extends KernelEnvironment {
     register_kernel_middleware() {
         //this.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
         //this.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
-        this.use_middleware(Logging.log_middleware, "monitoring");
+        this.use_middleware(Logging.log_middleware(), "monitoring");
         //this.useMiddleware(DebugMiddleware.kernel("debug/logs/internal_logs.log"), "monitoring");
     }
 
-    /*register_plugin_middleware(ref: PluginReference) {
+    register_plugin_middleware(ref: PluginReference) {
         //ref.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        ref.use_middleware(log_external_mw(), "monitoring");
+        ref.use_middleware(Logging.log_middleware(), "monitoring");
         //ref.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
-        
-    
+    }
+
     register_local_plugin_middleware(env: PluginEnvironment) {
         // env.use_middleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        env.use_middleware(Logging.log_middleware, "monitoring");
+        env.use_middleware(Logging.log_middleware(), "monitoring");
         //env.use_middleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
     register_local_library_middleware(env: LibraryEnvironment) {
         //env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        env.use_middleware(Logging.log_middleware, "monitoring");
+        env.use_middleware(Logging.log_middleware(), "monitoring");
         //env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
-    }*/
+    }
 
     async create_library(library_ident: LibraryIdent) {
         const lib = AbstractLibraryImplementation.from_object({
@@ -105,6 +110,7 @@ class KernelImpl extends KernelEnvironment {
             lib_ref = null;
         });
         const { ref } = this.create_local_library_environment(library_ident, lib);
+        this.register_library_middleware(ref);
         return ref;
     }
 
@@ -118,6 +124,7 @@ class KernelImpl extends KernelEnvironment {
         const plugin = name === "start" ? main_plugin : side_plugin;
 
         const { env, ref } = this.create_local_plugin_environment(ident_with_id);
+        this.register_plugin_middleware(ref);
 
         await plugin(env);
         return ref;
@@ -125,8 +132,4 @@ class KernelImpl extends KernelEnvironment {
 }
 
 const kernel = new KernelImpl();
-clear_external_logs()?.then(
-    () => kernel.start()
-).then(r => {
-    // kernel.remove_library(lib_ref!)
-})
+kernel.start();

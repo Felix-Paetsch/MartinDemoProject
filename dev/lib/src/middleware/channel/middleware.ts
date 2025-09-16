@@ -2,10 +2,9 @@ import { Message, Middleware, Port, Failure } from "../../messaging/exports";
 import { Schema } from "effect";
 import MessageChannel from ".";
 import { MessageData, MessageDataSchema } from "./schemas";
-import chalk from "chalk";
 
 export function isMessageChannelMessage(m: Message): boolean {
-    return (m.meta_data["message_channel_middleware"] === true) && m.local_data.at_target;
+    return (typeof m.meta_data["message_channel_middleware"] == "string") && m.local_data.at_target;
 }
 
 export const processMessageChannelMessage: Middleware.Middleware = (m: Message) => {

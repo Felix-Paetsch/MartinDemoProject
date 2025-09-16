@@ -2,18 +2,18 @@ import { Json } from "../../../utils/json";
 import { PluginDescriptor, PluginEnvironment } from "../plugin_environment";
 import { MessagePartner } from "./base";
 import Bridge from "./bridge";
-import { executeProtocol, Protocol, ProtocolError } from "../../../middleware/protocol";
+import { Protocol } from "../../../middleware/protocol";
 import { create_bridge_protocol } from "../../protocols/plugin_plugin/bridge/create_bridge";
 
 export type PluginMessagePartnerID = string;
 export default class PluginMessagePartner extends MessagePartner {
-    readonly bridges: Bridge[] = [];
     constructor(
         readonly plugin_descriptor: PluginDescriptor,
         readonly uuid: PluginMessagePartnerID,
         readonly env: PluginEnvironment,
     ) {
-        super();
+        super(uuid, null as any);
+        (this as any).root_message_partner = this;
         env.plugin_message_partners.push(this);
     }
 
@@ -33,22 +33,26 @@ export default class PluginMessagePartner extends MessagePartner {
     };
 
     #execute_plugin_message_partner_protocol<Result, InitData>(
-        protocol: Protocol<PluginMessagePartner, PluginMessagePartner, Result, InitData, {
-            plugin_message_partner_uuid: PluginMessagePartnerID,
-            plugin_instance_id: string
-        }>,
+        protocol: Protocol<
+            PluginMessagePartner,
+            PluginMessagePartner,
+            InitData, {
+                plugin_message_partner_uuid: PluginMessagePartnerID,
+                plugin_instance_id: string
+            },
+            Result
+        >,
         initData: InitData
-    ): Promise<Result | ProtocolError> {
-        return executeProtocol(
-            protocol,
+    ): Promise<Result | Error> {
+        return protocol(
             this,
-            this.plugin_descriptor.address,
             this.env.port,
+            this.plugin_descriptor.address,
+            initData,
             {
                 plugin_message_partner_uuid: this.uuid,
                 plugin_instance_id: this.plugin_descriptor.plugin_ident.instance_id
-            },
-            initData
+            }
         );
     }
 }

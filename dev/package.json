@@ -8,6 +8,7 @@
         "scratch": "tsx watch scratchpad/index.ts",
         "dev:node": "tsx watch demo/node/index.ts",
         "dev:node2": "tsx watch demo/node/testing.ts",
+        "dev:log": "tsx watch debug/logInv.ts",
         "dev:external": "tsx watch debug/server/index.ts",
         "dev:kernel": "cross-env BROWSER=true vite",
         "dev:plugin:iframe": "tsx watch plugins/iframe_plugins/index.ts",

@@ -3,7 +3,7 @@ import { Address } from "../../../messaging/exports";
 import { LibraryEnvironment, LibraryIdent } from "../../library/library_environment";
 import { PluginEnvironment } from "../plugin_environment";
 import { Json } from "../../../utils/json";
-import { executeProtocol, Protocol } from "../../../middleware/protocol";
+import { Protocol } from "../../../middleware/protocol";
 import { call_protocol } from "../../protocols/plugin_library/call";
 
 export type LibraryDescriptor = {
@@ -15,8 +15,10 @@ export default class LibraryMessagePartner extends MessagePartner {
     constructor(
         readonly library_descriptor: LibraryDescriptor,
         readonly env: PluginEnvironment,
+        readonly uuid: string
     ) {
-        super();
+        super(uuid, null as any);
+        (this as any).root_message_partner = this;
         env.library_message_partners.push(this);
     }
 
@@ -28,19 +30,18 @@ export default class LibraryMessagePartner extends MessagePartner {
         protocol: Protocol<
             LibraryMessagePartner,
             LibraryEnvironment,
-            Result,
             InitData,
-            LibraryIdent
+            LibraryIdent,
+            Result
         >,
         initData: InitData
     ): Promise<Result | Error> {
-        return executeProtocol(
-            protocol,
+        return protocol(
             this,
-            this.library_descriptor.address,
             this.env.port,
-            this.library_descriptor.library_ident,
-            initData
+            this.library_descriptor.address,
+            initData,
+            this.library_descriptor.library_ident
         );
     }
 }
