@@ -10,7 +10,7 @@ import { Json } from "../../utils/json";
 import { CloseMessageBodySchema } from "./schemas/close";
 import { processMessageChannelMessage } from "./middleware";
 
-export type ReciveMessageError = Error;
+export type ReceiveMessageError = Error;
 
 export type MessageChannelProcessorName = string;
 export type ChannelMessage = Json;
@@ -117,7 +117,7 @@ export default class MessageChannel {
         return await this.next();
     }
 
-    next(timeout?: number): Promise<ChannelMessage | ReciveMessageError> {
+    next(timeout?: number): Promise<ChannelMessage | ReceiveMessageError> {
         return Effect.gen(this, function* () {
             if (this.message_queue.length > 0) {
                 return this.message_queue.shift()!;
@@ -128,7 +128,7 @@ export default class MessageChannel {
             }
 
             const key = uuidv4();
-            const deferred = yield* Deferred.make<ChannelMessage, ReciveMessageError>();
+            const deferred = yield* Deferred.make<ChannelMessage, ReceiveMessageError>();
             const effectiveTimeout = Math.min(timeout || this.config.defaultMessageTimeout || 2000, 60000);
             const timeout_duration = Duration.millis(effectiveTimeout);
             const deferred_with_timeout = Deferred.await(deferred).pipe(

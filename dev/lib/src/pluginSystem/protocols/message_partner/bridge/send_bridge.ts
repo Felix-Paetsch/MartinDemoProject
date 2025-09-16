@@ -1,21 +1,12 @@
-import { findBridge } from "../../findResponder";
 import MessageChannel from "../../../../middleware/channel";
 import Bridge from "../../../plugin_lib/message_partner/bridge";
 import { Json } from "../../../../utils/json";
-import { SchemaTranscoder } from "../../../../middleware/protocol";
-import { Schema } from "effect";
-import { protocol } from "../../../../middleware/protocol";
+import { message_partner_protocol } from "../message_partner_protocol";
 
 export type CreateBridgeError = Error;
 
-export const send_bridge_protocol = protocol(
+export const send_bridge_protocol = message_partner_protocol(
     "send_bridge",
-    SchemaTranscoder(Schema.Struct({
-        plugin_message_partner_uuid: Schema.String,
-        plugin_instance_id: Schema.String,
-        bridge_uuid: Schema.String
-    })),
-    findBridge,
     async (mc: MessageChannel, initiator: Bridge, data: Json) => {
         return await mc.send(data);
     },

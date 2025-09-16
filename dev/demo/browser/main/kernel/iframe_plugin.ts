@@ -46,18 +46,18 @@ export const createIframePlugin = Effect.fn("createIframePlugin")(
 export function registerChannelKernel(iframe: HTMLIFrameElement) {
     return Effect.async<{
         send: (data: Json) => void,
-        recieve: (cb: (data: Json) => void) => void
+        receive: (cb: (data: Json) => void) => void
     }, TimeoutException>((resume) => {
         const { port1: mainPort, port2: iframePort } = new MessageChannel();
         mainPort.start();
 
         const send = (data: Json) => { mainPort.postMessage(data); }
-        const recieve = (cb: (data: Json) => void) => {
+        const receive = (cb: (data: Json) => void) => {
             mainPort.onmessage = (event) => cb(event.data || {});
         }
         add_port_init_event_listener(iframe, iframePort, () => resume(Effect.succeed({
             send,
-            recieve
+            receive
         })));
 
         return Effect.never;

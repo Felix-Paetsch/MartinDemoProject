@@ -54,10 +54,10 @@ export async function send_await_response_transcoded<R, S>(mc: MessageChannel, t
 export type Protocol<Initiator, Responder, InitData, IdentData, Result> = (sender: Initiator, port: Port, target: Address, with_data: InitData, ident_data: IdentData) => Promise<Result | Error>;
 export function protocol<
     Initiator,
+    Responder,
     IdentData,
     EncodedIdentData,
     InitData,
-    Responder,
     Result
 >(
     protocol_name: string,

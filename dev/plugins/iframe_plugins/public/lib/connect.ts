@@ -35,7 +35,7 @@ export default function execute_plugin(
 function registerChannelPlugin() {
     return Effect.async<{
         send: (data: Json) => void,
-        recieve: (cb: (data: Json) => void) => void
+        receive: (cb: (data: Json) => void) => void
     }, TimeoutException>((resume) => {
         let pluginPort: MessagePort | null = null;
 
@@ -43,7 +43,7 @@ function registerChannelPlugin() {
             pluginPort!.postMessage(data);
         }
 
-        const recieve = (cb: (data: Json) => void) => {
+        const receive = (cb: (data: Json) => void) => {
             pluginPort!.onmessage = (event) => cb(event.data || {});
         }
 
@@ -71,7 +71,7 @@ function registerChannelPlugin() {
                 window.removeEventListener('message', portListener);
                 resume(Effect.succeed({
                     send,
-                    recieve
+                    receive
                 }));
             }
         };

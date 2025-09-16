@@ -13,7 +13,7 @@ import { core_send } from "./core_send";
 export default class Port {
     private _portID: Address.PortID;
     private _is_open: boolean;
-    private _recieve!: (msg: Message) => void | Promise<void>;
+    private _receive!: (msg: Message) => void | Promise<void>;
     private middleware: Middleware[] = [];
     readonly connection: PortConnection;
 
@@ -22,12 +22,12 @@ export default class Port {
 
     constructor(
         portID: Address.PortID,
-        recieve: (msg: Message) => void | Promise<void> = () => { }
+        receive: (msg: Message) => void | Promise<void> = () => { }
     ) {
         this._portID = portID;
         this._is_open = false;
         this.connection = new PortConnection(this);
-        this.update_recieve(recieve);
+        this.update_receive(receive);
     }
 
     get id(): Address.PortID {
@@ -47,8 +47,8 @@ export default class Port {
         return new LocalAddress(this._portID);
     }
 
-    update_recieve(recieve: (msg: Message) => void | Promise<void>): void {
-        this._recieve = recieve;
+    update_receive(receive: (msg: Message) => void | Promise<void>): void {
+        this._receive = receive;
     }
 
     use_middleware(middleware: Middleware): void {
@@ -106,7 +106,7 @@ export default class Port {
         }
     }
 
-    __recieve_message(msg: TransmittableMessage): Promise<void> {
+    __receive_message(msg: TransmittableMessage): Promise<void> {
         const e: Effect.Effect<void> = Effect.gen(this, function* (this: Port) {
             if (typeof msg === "string") {
                 msg = yield* Schema.decode(MessageFromString)(msg).pipe(
@@ -122,7 +122,7 @@ export default class Port {
             });
             const res = yield* applyMiddlewareEffect(msg, this.middleware);
             if (isMiddlewareContinue(res)) {
-                yield* callbackToEffect(this._recieve, msg);
+                yield* callbackToEffect(this._receive, msg);
             }
         }).pipe(
             Effect.catchAll(HandledError.handleA),

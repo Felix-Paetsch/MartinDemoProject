@@ -6,10 +6,9 @@ import { LibraryReference } from "../../lib/src/pluginSystem/kernel_lib/external
 import { LibraryEnvironment, LibraryIdent } from "../../lib/src/pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../../lib/src/pluginSystem/library/library_implementation";
 import PluginMessagePartner from "../../lib/src/pluginSystem/plugin_lib/message_partner/plugin_message_partner";
-import { ProtocolError } from "../../lib/src/middleware/_protocol/index";
 import Bridge from "../../lib/src/pluginSystem/plugin_lib/message_partner/bridge";
 import { Failure, Logging, Address } from "../../lib/src/messaging/exports";
-import { init_external_logging, start_kernel_log_to_file } from "../../lib/src/pluginSystem/debug/logging";
+import { start_kernel_log_to_file } from "../../lib/src/pluginSystem/debug/logging";
 import { PluginReference } from "../../lib/src/pluginSystem/kernel_lib/external_references/plugin_reference";
 import { Severity } from "../../lib/src/pluginSystem/debug/severity";
 
@@ -50,7 +49,7 @@ const side_plugin = async (env: PluginEnvironment) => {
 
 const main_plugin = async (env: PluginEnvironment) => {
     console.log("<< STARTING MAIN PLUGIN >>")
-    const mp: PluginMessagePartner | ProtocolError = await env.get_plugin({
+    const mp = await env.get_plugin({
         name: "side",
         version: "1.0.0"
     });

@@ -1,4 +1,4 @@
-import { MessagePartner } from "./base";
+import { MessagePartner, MessagePartnerPairDistinguisher } from "./base";
 import { Address } from "../../../messaging/exports";
 import { LibraryEnvironment, LibraryIdent } from "../../library/library_environment";
 import { PluginEnvironment } from "../plugin_environment";
@@ -18,7 +18,11 @@ export default class LibraryMessagePartner extends MessagePartner {
         readonly uuid: string
     ) {
         super(uuid, null as any);
+
+        const own_part_distinguisher: MessagePartnerPairDistinguisher = true;
+        (this as any).pair_distinguisher = own_part_distinguisher;
         (this as any).root_message_partner = this;
+
         env.library_message_partners.push(this);
     }
 

@@ -68,7 +68,7 @@ export class Connection {
         this._send = send;
     }
 
-    recieve(msg: TransmittableMessage): Promise<void> {
+    receive(msg: TransmittableMessage): Promise<void> {
         const e: Effect.Effect<void> = Effect.gen(this, function* (this: Connection) {
             if (this.is_closed()) {
                 return;
@@ -168,7 +168,7 @@ export class PortConnection extends Connection {
     ) {
         super(
             port.address,
-            (m: TransmittableMessage) => port.__recieve_message(m)
+            (m: TransmittableMessage) => port.__receive_message(m)
         );
     }
 

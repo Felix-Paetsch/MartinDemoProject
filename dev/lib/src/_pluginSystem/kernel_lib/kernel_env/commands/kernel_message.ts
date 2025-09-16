@@ -8,7 +8,7 @@ import { KernelEnvironment } from "../kernel_env";
 export function register_kernel_message_command(KEV: typeof KernelEnvironment) {
     KEV.add_plugin_command({
         command: "send_kernel_message",
-        on_command: Effect.fn("recieve_kernel_message")(
+        on_command: Effect.fn("receive_kernel_message")(
             function* (communicator: KernelEnvironment, handler: EnvironmentCommunicationHandler, _data: Json) {
                 const { command, data } = yield* Schema.decodeUnknown(Schema.Struct({
                     command: Schema.String,

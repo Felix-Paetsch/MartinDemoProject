@@ -2,7 +2,7 @@ import { Json } from "../../../utils/json";
 
 export type PrimitiveMessageChannel = {
     send: (data: Json) => void;
-    recieve: (cb: (data: Json) => void) => void;
+    receive: (cb: (data: Json) => void) => void;
 }
 
 export class Synchronizer {
@@ -15,7 +15,7 @@ export class Synchronizer {
     };
 
     constructor(private channel: PrimitiveMessageChannel) {
-        this.channel.recieve(this.#recieve as any);
+        this.channel.receive(this.#receive as any);
         this.otherSideExists = new Promise((resolve) => {
             if (this.otherSideExistsHelperBool === true) resolve();
             this.resolveOtherSideExists = () => {
@@ -54,7 +54,7 @@ export class Synchronizer {
         return this.triggerMap.get(name)?.(args);
     }
 
-    #recieve(data: {
+    #receive(data: {
         type: string;
         data: Json
     }) {

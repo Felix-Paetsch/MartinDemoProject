@@ -10,9 +10,9 @@ export default (plugin: Plugin) => {
         send: (msg: Json) => {
             (globalThis as any)._send_message(msg);
         },
-        recieve: (cb: (data: Json) => void) => {
+        receive: (cb: (data: Json) => void) => {
             (globalThis as any)._on_message = (arg: Json) => {
-                console.log("Recieved msg: ", arg);
+                console.log("received msg: ", arg);
                 cb(arg);
             }
         }

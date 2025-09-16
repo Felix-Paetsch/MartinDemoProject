@@ -65,7 +65,7 @@ export class MessagePartnerObject {
         return this.message_partner.MPOCommunication.run_mpo(this, protocol, data, timeout);
     }
 
-    _recieve_mpo_message(protocol_name: string, data: Json, ich: MPOCommunicationHandler): Effect.Effect<void, ProtocolError> {
+    _receive_mpo_message(protocol_name: string, data: Json, ich: MPOCommunicationHandler): Effect.Effect<void, ProtocolError> {
         const command = (this.constructor as typeof MessagePartnerObject).get_command(protocol_name);
         if (command) {
             return command.on_first_request(this, ich, data);

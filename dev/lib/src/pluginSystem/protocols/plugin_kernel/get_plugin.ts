@@ -65,6 +65,7 @@ export const make_plugin_message_partner = protocol(
         if (res instanceof Error) return res;
         return new PluginMessagePartner(
             plugin_ident,
+            true,
             mp_uuid,
             initiator
         );
@@ -77,6 +78,7 @@ export const make_plugin_message_partner = protocol(
                 address: data.address,
                 plugin_ident: data.plugin_ident
             },
+            false,
             data.mp_uuid,
             responder
         );

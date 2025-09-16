@@ -64,7 +64,7 @@ export class MPOCommunicationProtocol extends MessageEnvironmentProtocol<Effect.
                 Effect.provideService(ProtocolCommunicationHandlerT, ch)
             );
 
-            yield* mpo._recieve_mpo_message(
+            yield* mpo._receive_mpo_message(
                 data.mpo_message_protocol_name,
                 data.protocol_data,
                 ch

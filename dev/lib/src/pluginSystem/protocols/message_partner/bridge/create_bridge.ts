@@ -1,19 +1,14 @@
-import { protocol, SchemaTranscoder, AnythingTranscoder, send_await_response_transcoded, receive_transcoded, send_transcoded } from "../../../../middleware/protocol";
-import { findPluginMessagePartner } from "../../findResponder";
+import { SchemaTranscoder, AnythingTranscoder, send_await_response_transcoded, receive_transcoded, send_transcoded } from "../../../../middleware/protocol";
 import MessageChannel from "../../../../middleware/channel";
 import { Schema } from "effect";
 import PluginMessagePartner from "../../../plugin_lib/message_partner/plugin_message_partner";
 import { v4 as uuidv4 } from "uuid";
 import Bridge from "../../../plugin_lib/message_partner/bridge";
+import { message_partner_protocol } from "../message_partner_protocol";
 
 export type CreateBridgeError = Error;
-export const create_bridge_protocol = protocol(
+export const create_bridge_protocol = message_partner_protocol(
     "create_bridge",
-    SchemaTranscoder(Schema.Struct({
-        plugin_message_partner_uuid: Schema.String,
-        plugin_instance_id: Schema.String
-    })),
-    findPluginMessagePartner,
     async (mc: MessageChannel, initiator: PluginMessagePartner) => {
         const uuid = uuidv4();
         const b = new Bridge(initiator, uuid);

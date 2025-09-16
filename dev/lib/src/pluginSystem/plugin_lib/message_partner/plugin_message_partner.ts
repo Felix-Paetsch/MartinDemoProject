@@ -1,21 +1,27 @@
 import { Json } from "../../../utils/json";
 import { PluginDescriptor, PluginEnvironment } from "../plugin_environment";
-import { MessagePartner } from "./base";
+import { MessagePartner, MessagePartnerPairDistinguisher } from "./base";
 import Bridge from "./bridge";
 import { Protocol } from "../../../middleware/protocol";
-import { create_bridge_protocol } from "../../protocols/plugin_plugin/bridge/create_bridge";
+import { create_bridge_protocol } from "../../protocols/message_partner/bridge/create_bridge";
 
 export type PluginMessagePartnerID = string;
 export default class PluginMessagePartner extends MessagePartner {
     constructor(
         readonly plugin_descriptor: PluginDescriptor,
+        pair_distinguisher: MessagePartnerPairDistinguisher,
         readonly uuid: PluginMessagePartnerID,
         readonly env: PluginEnvironment,
     ) {
         super(uuid, null as any);
+
+        (this as any).pair_distinguisher = pair_distinguisher;
         (this as any).root_message_partner = this;
+
         env.plugin_message_partners.push(this);
     }
+
+
 
     bridge(): Promise<Bridge | Error> {
         return this.#execute_plugin_message_partner_protocol(create_bridge_protocol, null);
