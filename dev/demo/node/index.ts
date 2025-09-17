@@ -29,6 +29,11 @@ const side_plugin = async (env: PluginEnvironment) => {
             });
             bridge.on_listener_registered(async (bridge) => {
                 await bridge.send("I am here");
+
+                env.on_remove(() => {
+                    console.log("Removing self");
+                });
+                env.remove_self();
             });
         });
 

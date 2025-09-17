@@ -52,7 +52,7 @@ const protocolProcessor: MessageChannelProcessor = async (mc: MessageChannel) =>
         }
     }
 
-    console.log(protocols, name);
+    console.log(protocols, name, ident);
     Failure.reportAnomaly(new Error("Didn't find responder for protocol: " + name));
 }
 
