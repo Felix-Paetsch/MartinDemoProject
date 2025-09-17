@@ -57,7 +57,7 @@ export function protocol<
     Initiator,
     Responder,
     IdentData,
-    EncodedIdentData,
+    EncodedIdentData extends Json,
     InitData,
     Result
 >(

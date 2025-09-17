@@ -21,7 +21,7 @@ export function start_kernel_log_to_file(logFile: string = path.join(
         await fs.appendFile(logFile, JSON.stringify(log) + "\n").catch(() => { });
     };
 
-    Logging.process_logs(logMessage);
+    Logging.process_middleware_logs_using(logMessage);
 }
 
 export async function init_external_logging() {

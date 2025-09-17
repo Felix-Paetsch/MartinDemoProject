@@ -1,4 +1,4 @@
-import { executeProtocol, Protocol, ProtocolError } from "../../../middleware/protocol";
+import { Protocol, } from "../../../middleware/protocol";
 import { Address, Json, Middleware, Port } from "../../../messaging/exports";
 import { defaultEnvironmentMiddleware } from "./default_middleware";
 
@@ -28,17 +28,16 @@ export abstract class EnvironmentCommunicator {
         return;
     }
 
-    execute_protocol<Responder extends NonNullable<unknown>, Result, InitData>(
-        protocol: Protocol<this, Responder, Result, InitData>,
+    execute_protocol<Responder extends NonNullable<unknown>, IdentData, InitData, Result>(
+        protocol: Protocol<this, Responder, IdentData, InitData, Result>,
         target: Address,
         initData: InitData,
-        responderIdentifier: Json
-    ): Promise<Result | ProtocolError> {
-        return executeProtocol(
-            protocol,
+        responderIdentifier: IdentData
+    ): Promise<Result | Error> {
+        return protocol(
             this,
-            target,
             this.port,
+            target,
             responderIdentifier,
             initData
         );

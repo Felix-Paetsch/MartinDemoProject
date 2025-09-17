@@ -1,9 +1,8 @@
 import { Schema } from "effect";
 import { Protocol, protocol, SchemaTranscoder } from "../../../middleware/protocol";
-import { MessagePartner } from "../../plugin_lib/message_partner/base";
+import { type MessagePartner } from "../../plugin_lib/message_partner/base";
 import { findMessagePartner } from "../findResponder";
 import MessageChannel from "../../../middleware/channel";
-import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
 import { Address } from "../../../messaging/exports";
 
 export type MessagePartnerProtocol<Initiator extends MessagePartner, Responder extends MessagePartner, InitData, Result> = (sender: Initiator, with_data: InitData) => Promise<Result | Error>;
@@ -26,16 +25,10 @@ export function message_partner_protocol<
     );
 
     return (sender: Initiator, with_data: InitData) => {
-        let address: Address;
-        if (sender.root_message_partner instanceof PluginMessagePartner) {
-            address = sender.root_message_partner.plugin_descriptor.address;
-        } else {
-            address = sender.root_message_partner.library_descriptor.address;
-        }
         return P(
             sender,
             sender.root_message_partner.env.port,
-            address,
+            sender.root_message_partner.address,
             with_data,
             sender.other_uuid
         );

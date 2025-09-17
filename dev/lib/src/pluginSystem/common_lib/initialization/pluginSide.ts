@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { Synchronizer } from "./synchronizer";
 import { Address, Connection, Json, Port } from "../../../messaging/exports";
-import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_env/plugin_ident";
 import { PrimitiveMessageChannel } from "./synchronizer";
+import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_ident";
 
 export async function initializeExternalPlugin_PluginSide(
     channel: PrimitiveMessageChannel,

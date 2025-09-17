@@ -69,6 +69,16 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     remove_self() {
         return this.#send_kernel_message("remove_self");
     }
+    _on_remove_cb: () => Promise<void> = Promise.resolve;
+    on_remove(remove_cb: () => Promise<void> | void) {
+        this._on_remove_cb = () => Promise.resolve(remove_cb());
+    }
+    async _trigger_remove_environment() {
+        await this._on_remove_cb().catch(() => { });
+        await Promise.all(
+            this.plugin_message_partners.map(pm => pm.remove())
+        );
+    }
 
     #send_kernel_message(msg: Json) {
         this.#execute_kernel_protocol(send_kernel_message, msg);

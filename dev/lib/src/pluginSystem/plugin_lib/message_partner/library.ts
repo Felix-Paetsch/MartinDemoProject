@@ -26,6 +26,10 @@ export default class LibraryMessagePartner extends MessagePartner {
         env.library_message_partners.push(this);
     }
 
+    get address() {
+        return this.library_descriptor.address;
+    }
+
     call(fn: string, ...args: Json[]) {
         return this.#execute_library_protocol(call_protocol, { fn, args });
     }
