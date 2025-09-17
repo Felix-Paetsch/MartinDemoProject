@@ -1,3 +1,6 @@
+Errors with specific types
+Give some primitive types we use in the outside world type names which make sence
+
 Return errors aren't handled correctly with ptotocols
 Allow getting libraries (and plugins) from address
 In the filter method in debug: If there is an error, just think of it as false

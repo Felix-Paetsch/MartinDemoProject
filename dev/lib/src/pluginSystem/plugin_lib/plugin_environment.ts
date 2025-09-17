@@ -11,6 +11,7 @@ import { LibraryIdent } from "../library/library_environment";
 import LibraryMessagePartner from "./message_partner/library";
 import { get_library } from "../protocols/plugin_kernel/get_library";
 import { Logging } from "../../messaging/exports"
+import { send_kernel_message } from "../protocols/plugin_kernel/kernel_message";
 
 export type PluginDescriptor = {
     address: Address;
@@ -64,6 +65,14 @@ export class PluginEnvironment extends EnvironmentCommunicator {
             return e as Error;
         }
     };
+
+    remove_self() {
+        return this.#send_kernel_message("remove_self");
+    }
+
+    #send_kernel_message(msg: Json) {
+        this.#execute_kernel_protocol(send_kernel_message, msg);
+    }
 
     #execute_kernel_protocol<Result, InitData>(
         protocol: Protocol<

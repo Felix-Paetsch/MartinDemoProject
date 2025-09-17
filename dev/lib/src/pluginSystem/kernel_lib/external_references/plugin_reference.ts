@@ -15,8 +15,8 @@ export class PluginReference extends ExternalReference {
         this.kernel.registered_plugins.push(this);
     }
 
-    remove() {
-        const sremove = super.remove.bind(this);
-        return sremove();
+    async remove() {
+
+        await super.remove.bind(this);
     }
 }

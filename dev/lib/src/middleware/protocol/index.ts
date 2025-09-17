@@ -2,23 +2,24 @@ import { Effect, Schema } from "effect";
 import { Address, Port } from "../../messaging/exports";
 import MessageChannel from "../channel";
 import { registerProtocol } from "./respond";
+import { Json } from "../../utils/json";
 
 export const TransactionInitDataSchema = Schema.Struct({
     ident: Schema.Any,
     name: Schema.String,
 });
 
-export type Transcoder<Decoded, Encoded> = {
+export type Transcoder<Decoded, Encoded extends Json> = {
     decode: (data: unknown) => Promise<Error | Decoded>;
     encode: (data: unknown) => Promise<Error | Encoded>;
 }
 
 export const AnythingTranscoder: Transcoder<null, null> = {
-    decode: async (data) => null,
-    encode: async (data) => null,
+    decode: async () => null,
+    encode: async () => null,
 }
 
-export function SchemaTranscoder<Decoded, Encoded>(schema: Schema.Schema<Decoded, Encoded>): Transcoder<Decoded, Encoded> {
+export function SchemaTranscoder<Decoded>(schema: Schema.Schema<Decoded, any>): Transcoder<Decoded, Json> {
     return {
         decode: async (data: unknown) => Schema.decodeUnknown(schema)(data).pipe(
             Effect.merge,

@@ -7,6 +7,7 @@ import { GetLibraryError } from "../protocols/plugin_kernel/get_library";
 import { LibraryReference } from "./external_references/library_reference";
 import { PluginReference } from "./external_references/plugin_reference";
 import { v4 as uuidv4 } from "uuid";
+import { Json } from "../../messaging/core/message";
 
 export type GetPluginError = Error;
 
@@ -68,6 +69,18 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         return await this.create_plugin(plugin_ident);
     }
 
+    get_plugin_reference(ident: string | PluginIdentWithInstanceId | PluginReference): PluginReference | null {
+        if (ident instanceof PluginReference) {
+            return ident;
+        }
+
+        if (typeof ident === "string") {
+            return this.registered_plugins.find(p => p.plugin_ident.instance_id === ident) || null;
+        }
+
+        return this.get_plugin_reference(ident.instance_id);
+    }
+
     async create_plugin(plugin_ident: PluginIdent): Promise<PluginReference | GetPluginError> {
         return new Error("Not implemented!");
     }
@@ -82,4 +95,20 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     async create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {
         return new Error("Not implemented!");
     }
-}
+
+    async remove_plugin(p: PluginReference) {
+        await p.remove();
+        const index = this.registered_plugins.findIndex(q => q.plugin_ident.instance_id !== p.plugin_ident.instance_id);
+        if (index < 0) return;
+        this.registered_plugins.splice(index, 1);
+    }
+
+    async recieve_plugin_message(msg: Json, plugin: PluginIdentWithInstanceId) {
+        if (msg === "remove_self") {
+            const ref = this.get_plugin_reference(plugin);
+            if (!ref) return;
+
+            this.remove_plugin(ref);
+        }
+    }
+ }
