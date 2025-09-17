@@ -24,29 +24,37 @@ export function set_logging_target(target: null | URL_string | Address) {
     logging_target = target;
 }
 
-async function log_json(data: { [key: string]: Json }): Promise<void> {
+async function log_json(data: Log): Promise<void> {
     if (!logging_target) return Promise.resolve();
     if (logging_target instanceof Address) {
-        const logMessage = new Message(
-            logging_target.forward_port(LOGGING_PORT_ID),
-            data,
-            {
-                message_logging: {
-                    source_address: logging_target.serialize()
-                }
-            }
-        );
-
-        const p = logging_port();
-        if (p.is_open()) {
-            p.send(logMessage);
-        } else {
-            reportAnomaly(new Error("Logging port is closed."));
-        }
-        return;
+        return log_to_address(logging_target)(data);
     }
 
-    await fetch(logging_target, {
+    return log_to_url(logging_target)(data);
+}
+
+export const log_to_address = (address: Address): LogProcessor => async (data: Log) => {
+    const logMessage = new Message(
+        address.forward_port(LOGGING_PORT_ID),
+        data,
+        {
+            message_logging: {
+                source_address: address.serialize()
+            }
+        }
+    );
+
+    const p = logging_port();
+    if (p.is_open()) {
+        p.send(logMessage);
+    } else {
+        reportAnomaly(new Error("Logging port is closed."));
+    }
+    return;
+}
+
+export const log_to_url = (url: string): LogProcessor => async (data: Log) => {
+    await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -57,8 +65,16 @@ async function log_json(data: { [key: string]: Json }): Promise<void> {
     });
 }
 
-export function log(data: Json) {
-    return log_json(Schema.decodeSync(ToLog)(data))
+export function log(data: Json, to: string | Address | null = null) {
+    const log = Schema.decodeSync(ToLog)(data);
+    if (to) {
+        if (to instanceof Address) {
+            return log_to_address(to)(log);
+        } else {
+            return log_to_url(to)(log);
+        }
+    }
+    return log_json(log)
 }
 
 const shouldLogMessage = function (message: Message) {
@@ -78,7 +94,7 @@ export function log_middleware(lp: LogProcessor = log_json): Middleware {
 }
 
 export type LogProcessor = (log: Log) => void | Promise<void>;
-export function process_logs(cb: LogProcessor) {
+export function process_middleware_logs_using(cb: LogProcessor) {
     logging_port().clear_middleware();
     logging_port().use_middleware(async (message: Message) => {
         if (message.meta_data.message_logging && message.local_data.at_target) {

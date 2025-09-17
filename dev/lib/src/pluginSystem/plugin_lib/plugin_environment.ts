@@ -70,7 +70,7 @@ export class PluginEnvironment extends EnvironmentCommunicator {
             PluginEnvironment,
             KernelEnvironment,
             InitData,
-            "ok",
+            null,
             Result
         >,
         initData: InitData
@@ -80,7 +80,7 @@ export class PluginEnvironment extends EnvironmentCommunicator {
             this.port,
             this.kernel_address,
             initData,
-            "ok"
+            null
         );
     }
 

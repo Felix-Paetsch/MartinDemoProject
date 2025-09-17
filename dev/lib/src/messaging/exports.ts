@@ -70,9 +70,12 @@ export namespace Middleware {
 
 export namespace Logging {
     export const set_logging_target = LoggingMain.set_logging_target;
-    export const log = LoggingMain.log;
     export const log_middleware = LoggingMain.log_middleware;
-    export const process_logs = LoggingMain.process_logs;
+    export const process_middleware_logs_using = LoggingMain.process_middleware_logs_using;
+    export const log = LoggingMain.log;
+
+    export const log_to_address = LoggingMain.log_to_address;
+    export const log_to_url = LoggingMain.log_to_url;
 
     export type LogProcessor = LoggingMain.LogProcessor;
     export type Log = LoggingLog.Log;

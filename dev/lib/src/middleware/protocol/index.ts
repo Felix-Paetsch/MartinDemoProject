@@ -13,9 +13,9 @@ export type Transcoder<Decoded, Encoded> = {
     encode: (data: unknown) => Promise<Error | Encoded>;
 }
 
-export const AnythingTranscoder: Transcoder<"ok", "ok"> = {
-    decode: async (data) => "ok",
-    encode: async (data) => "ok",
+export const AnythingTranscoder: Transcoder<null, null> = {
+    decode: async (data) => null,
+    encode: async (data) => null,
 }
 
 export function SchemaTranscoder<Decoded, Encoded>(schema: Schema.Schema<Decoded, Encoded>): Transcoder<Decoded, Encoded> {
