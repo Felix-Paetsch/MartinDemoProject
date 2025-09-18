@@ -20,7 +20,7 @@ export class Address implements Equal.Equal {
     static process_id: Address.ProcessID = uuidv4();
 
     constructor(
-        process_id: Address.ProcessID = uuidv4(),
+        process_id: Address.ProcessID = Address.process_id,
         port: Address.PortID = uuidv4()
     ) {
         this._process_id = process_id;
@@ -33,6 +33,10 @@ export class Address implements Equal.Equal {
 
     get port(): string {
         return this._port;
+    }
+
+    toString() {
+        return `${this.process_id}::${this.port}`
     }
 
     as_generic(): Address {
@@ -118,5 +122,9 @@ export class LocalAddress extends Address {
 
     static get local_address() {
         return new LocalAddress("*");
+    }
+
+    static set_process_id(process_id: Address.ProcessID): void {
+        Address.set_process_id(process_id);
     }
 }

@@ -1,5 +1,6 @@
-import { Bridge, PluginEnvironment } from "../../../../../lib/src/pluginSystem/plugin_lib/exports";
-import execute_plugin from "../../lib/connect";
+import { execute_plugin } from "../../lib/connect";
+import { PluginEnvironment } from "../../../../../lib/src/pluginSystem/plugin_lib/plugin_environment";
+import Bridge from "../../../../../lib/src/pluginSystem/plugin_lib/message_partner/bridge";
 
 const closeButton = document.getElementById("close")!;
 const closeRightButton = document.getElementById("close-right")!;
@@ -21,7 +22,7 @@ execute_plugin(async (env: PluginEnvironment) => {
         });
     });
 
-    env.on_remove(async (data) => {
+    env.on_remove(async () => {
         console.log("Plugin::on remove");
         if (main_plugin_bridge) {
             await main_plugin_bridge.send("close");

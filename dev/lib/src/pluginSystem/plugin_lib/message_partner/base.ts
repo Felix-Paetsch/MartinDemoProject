@@ -3,7 +3,7 @@ import LibraryMessagePartner from "./library";
 import PluginMessagePartner from "./plugin_message_partner";
 import { Json } from "./../../../utils/json";
 import { send_message } from "../../protocols/message_partner/send_message";
-import { promisify } from "util";
+import { promisify } from "../../../utils/promisify";
 
 export type MessagePartnerPairDistinguisher = boolean;
 

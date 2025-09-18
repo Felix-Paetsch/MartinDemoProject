@@ -88,12 +88,6 @@ class KernelImpl extends KernelEnvironment {
         //this.useMiddleware(DebugMiddleware.kernel("debug/logs/internal_logs.log"), "monitoring");
     }
 
-    register_plugin_middleware(ref: PluginReference) {
-        //ref.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        ref.use_middleware(Logging.log_middleware(), "monitoring");
-        //ref.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
-    }
-
     register_local_plugin_middleware(env: PluginEnvironment) {
         // env.use_middleware(CommonMiddleware.addAnnotationData(), "preprocessing");
         env.use_middleware(Logging.log_middleware(), "monitoring");
@@ -114,7 +108,6 @@ class KernelImpl extends KernelEnvironment {
             lib_ref = null;
         });
         const { ref } = this.create_local_library_environment(library_ident, lib);
-        this.register_library_middleware(ref);
         return ref;
     }
 
@@ -128,7 +121,6 @@ class KernelImpl extends KernelEnvironment {
         const plugin = name === "start" ? main_plugin : side_plugin;
 
         const { env, ref } = this.create_local_plugin_environment(ident_with_id);
-        this.register_plugin_middleware(ref);
 
         await plugin(env);
         return ref;

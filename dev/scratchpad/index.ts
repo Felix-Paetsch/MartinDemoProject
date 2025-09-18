@@ -1,4 +1,3 @@
-import chalk from "chalk";
 import { Cause, Effect } from "effect";
 
 const p1 = new Promise((resolve, reject) => {

@@ -5,6 +5,7 @@ import { PluginEnvironment } from "../plugin_environment";
 import { Json } from "../../../utils/json";
 import { Protocol } from "../../../middleware/protocol";
 import { call_protocol } from "../../protocols/plugin_library/call";
+import { get_exposed_protocol } from "../../protocols/plugin_library/exposed";
 
 export type LibraryDescriptor = {
     address: Address;
@@ -32,6 +33,10 @@ export default class LibraryMessagePartner extends MessagePartner {
 
     call(fn: string, ...args: Json[]) {
         return this.#execute_library_protocol(call_protocol, { fn, args });
+    }
+
+    exposed_functions() {
+        return this.#execute_library_protocol(get_exposed_protocol, null);
     }
 
     #execute_library_protocol<Result, InitData>(

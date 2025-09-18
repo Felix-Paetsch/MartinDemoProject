@@ -2,7 +2,7 @@ import { Port } from "../../lib/src/messaging/exports";
 import MessageChannel from "../../lib/src/middleware/channel";
 import { processMessageChannelMessage } from "../../lib/src/middleware/channel/middleware";
 import { Failure } from "../../lib/src/messaging/exports";
-import chalk from "chalk";
+import chalk from "../../lib/src/utils/chalk";
 
 Failure.setAnomalyHandler((e) => {
     throw e;

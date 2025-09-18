@@ -25,6 +25,10 @@ export default class PluginMessagePartner extends MessagePartner {
         return this.plugin_descriptor.address;
     }
 
+    get plugin_ident() {
+        return this.plugin_descriptor.plugin_ident
+    }
+
     bridge(): Promise<Bridge | Error> {
         return this.#execute_plugin_message_partner_protocol(create_bridge_protocol, null);
     }

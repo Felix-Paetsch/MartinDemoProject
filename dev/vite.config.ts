@@ -7,7 +7,6 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            "@": "/demo",
             "quickjs-emscripten":
                 process.env.BROWSER === "true"
                     ? "https://esm.sh/quickjs-emscripten@0.31.0"

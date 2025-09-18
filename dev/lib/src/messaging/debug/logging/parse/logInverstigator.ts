@@ -1,7 +1,7 @@
 import { LogCollection } from "./logCollection";
 import { Log } from "../log";
 
-export default class LogInvestigator extends LogCollection {
+export class LogInvestigator extends LogCollection {
     constructor(logs: Log[] = []) {
         super(null as any, logs);
         (this as any).investigator = this;

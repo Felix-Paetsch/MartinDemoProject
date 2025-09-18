@@ -82,7 +82,8 @@ export namespace Logging {
     export type MessageLog = LoggingLog.MessageLog;
     export type DataLog = LoggingLog.DataLog;
 
-    export const LogInvestigator = LoggingInvestigator.default;
+    export type LogInvestigator = LoggingInvestigator.LogInvestigator;
+    export const LogInvestigator = LoggingInvestigator.LogInvestigator;
     export const LogCollection = LoggingCollection.LogCollection;
     export const MessageLogCollection = LoggingCollection.MessageLogCollection;
     export const DataLogCollection = LoggingCollection.DataLogCollection;

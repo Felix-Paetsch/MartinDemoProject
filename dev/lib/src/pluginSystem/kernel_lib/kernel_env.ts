@@ -18,19 +18,19 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     readonly registered_plugins: PluginReference[] = [];
     readonly registered_libraries: LibraryReference[] = [];
 
-    constructor(name: string = "kernel") {
+    constructor() {
         if (KernelEnvironment.singleton) {
             throw new Error("KernelEnvironment already exists");
         }
-        super(name);
+        super("kernel");
         KernelEnvironment.singleton = this;
+        this.register_kernel_middleware(this);
     }
 
     get address() { return this.port.address }
 
-    register_plugin_middleware(ref: PluginReference) { }
+    register_kernel_middleware(ker: this) { }
     register_local_plugin_middleware(env: PluginEnvironment) { }
-    register_library_middleware(ref: LibraryReference) { }
     register_local_library_middleware(env: LibraryEnvironment) { }
 
     start() {
@@ -40,8 +40,8 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     }
 
     create_local_plugin_environment(plugin_ident: PluginIdentWithInstanceId) {
-        const env = new PluginEnvironment(plugin_ident.instance_id, this.address, plugin_ident);
-        const ref = new PluginReference(env.port.connection, plugin_ident, this);
+        const env = new PluginEnvironment(Address.process_id, plugin_ident);
+        const ref = new PluginReference(env.address, plugin_ident, this);
         this.register_local_plugin_middleware(env);
 
         return {
@@ -56,7 +56,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         const lib = new LibraryEnvironment(port_id, this.address, library_ident, implementation);
         this.register_local_library_middleware(lib);
 
-        const ref = new LibraryReference(lib.port.connection, library_ident, this);
+        const ref = new LibraryReference(lib.address, library_ident, this);
         return {
             ref: ref,
             env: lib
@@ -124,12 +124,13 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         this.registered_plugins.splice(index, 1);
     }
 
-    async recieve_plugin_message(msg: Json, plugin: PluginIdentWithInstanceId) {
+    // The boolean says if we processed this message already (true)
+    async recieve_plugin_message(msg: Json, plugin: PluginIdentWithInstanceId): Promise<boolean> {
         if (msg === "remove_self") {
             const ref = this.get_plugin_reference(plugin);
-            if (!ref) return;
-
-            this.remove_plugin(ref);
+            if (ref) await this.remove_plugin(ref);
+            return true;
         }
+        return false;
     }
  }

@@ -32,15 +32,13 @@ export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, 
     if (isMiddlewareInterrupt(interrupt)) {
         return yield* Effect.void;
     }
-
     let outConnection = Connection.open_connections.find(c => Equal.equals(c.address, msg.target));
     if (!outConnection) {
         const generic_target = msg.target.as_generic();
         outConnection = Connection.open_connections.find(c => {
-            c.address.as_generic() === generic_target;
+            return c.address.as_generic().equals(generic_target);
         });
     }
-
     if (!outConnection) {
         return yield* HandledError.handleA(new AddressNotFound(msg.target));
     }

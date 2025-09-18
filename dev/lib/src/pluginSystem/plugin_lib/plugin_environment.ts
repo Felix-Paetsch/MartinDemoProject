@@ -13,6 +13,8 @@ import { get_library } from "../protocols/plugin_kernel/get_library";
 import { Logging } from "../../messaging/exports"
 import { send_kernel_message } from "../protocols/plugin_kernel/kernel_message";
 
+export type Plugin = (env: PluginEnvironment) => void | Promise<void>;
+
 export type PluginDescriptor = {
     address: Address;
     plugin_ident: PluginIdentWithInstanceId;
@@ -23,12 +25,18 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     readonly plugin_message_partners: PluginMessagePartner[] = [];
     readonly library_message_partners: LibraryMessagePartner[] = [];
     constructor(
-        readonly port_id: string,
-        readonly kernel_address: Address,
+        readonly kernel_process_id: string,
         readonly plugin_ident: PluginIdentWithInstanceId
     ) {
-        super(port_id);
+        super(plugin_ident.instance_id);
         PluginEnvironment.plugins.push(this);
+    }
+
+    get kernel_address() {
+        return new Address(
+            this.kernel_process_id,
+            "kernel"
+        )
     }
 
     log(data: Json, severity: Severity = Severity.INFO) {
@@ -67,7 +75,7 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     };
 
     remove_self() {
-        return this.#send_kernel_message("remove_self");
+        return this._send_kernel_message("remove_self");
     }
     _on_remove_cb: () => Promise<void> = () => Promise.resolve();
     on_remove(remove_cb: () => Promise<void> | void) {
@@ -80,7 +88,7 @@ export class PluginEnvironment extends EnvironmentCommunicator {
         );
     }
 
-    #send_kernel_message(msg: Json) {
+    _send_kernel_message(msg: Json) {
         this.#execute_kernel_protocol(send_kernel_message, msg);
     }
 

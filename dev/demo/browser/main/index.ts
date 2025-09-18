@@ -1,21 +1,24 @@
 import { Effect } from "effect";
-import { LogInvestigator } from "../../../lib/src/debug/exports";
+import { Connection, Logging } from "../../../lib/src/messaging/exports";
 import { LocalAddress } from "../../../lib/src/messaging/exports";
-import { createLocalEnvironment } from "../../../lib/src/pluginSystem/common_lib/exports";
 import { EffectToResult, ResultToEffect } from "../../../lib/src/utils/boundary/run";
 import "../local_plugins/main.css";
 import { KernelImpl } from "./kernel/index";
+import { Failure } from "../../../lib/src/messaging/exports";
 
 declare global {
-    var logInverstigator: LogInvestigator;
+    var logInverstigator: Logging.LogInvestigator
 }
 
-Effect.gen(function* () {
-    const kernel_address = new LocalAddress("KERNEL");
-    const kernel_env = yield* createLocalEnvironment(kernel_address);
-    const kernel = new KernelImpl(kernel_env);
-    yield* ResultToEffect(kernel.start());
-}).pipe(
-    Effect.catchAll(e => Effect.succeed(console.log(e))),
-    EffectToResult
-)
+Failure.setAnomalyHandler((e) => {
+    console.log(e);
+    throw e;
+});
+Failure.setErrorHandler((e) => {
+    console.log(e);
+    throw e;
+});
+
+globalThis.logInverstigator = new Logging.LogInvestigator();
+const kernel = new KernelImpl();
+kernel.start().then(r => console.log(r));

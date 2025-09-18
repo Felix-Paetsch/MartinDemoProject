@@ -15,7 +15,7 @@ export class Synchronizer {
     };
 
     constructor(private channel: PrimitiveMessageChannel) {
-        this.channel.receive(this.#receive as any);
+        this.channel.receive(this.#receive.bind(this) as any);
         this.otherSideExists = new Promise((resolve) => {
             if (this.otherSideExistsHelperBool === true) resolve();
             this.resolveOtherSideExists = () => {
@@ -60,11 +60,14 @@ export class Synchronizer {
     }) {
         const type = data.type;
         if (type === "ping") {
-            return this.#on_ping();
+            this.#on_ping();
+            return;
         } else if (type === "pong") {
-            return this.#on_pong();
+            this.#on_pong();
+            return;
         } else if (type === "call") {
-            return this.#call((data.data as any)?.name, (data.data as any)?.args!);
+            this.#call((data.data as any)?.name, (data.data as any)?.args!);
+            return;
         }
     }
 }

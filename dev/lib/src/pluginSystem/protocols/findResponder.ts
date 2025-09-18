@@ -6,6 +6,7 @@ import { Effect, Schema } from "effect";
 import { pluginIdentWithInstanceIdSchema } from "../plugin_lib/plugin_ident";
 import { libraryIdentSchema, LibraryIdent, LibraryEnvironment } from "../library/library_environment";
 import { MessagePartner } from "../plugin_lib/message_partner/base";
+import { Address } from "../../messaging/exports";
 
 export function findKernel(): KernelEnvironment | null {
     return KernelEnvironment.singleton;

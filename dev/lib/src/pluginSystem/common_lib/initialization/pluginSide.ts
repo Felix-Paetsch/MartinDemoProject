@@ -1,12 +1,23 @@
 import { Effect } from "effect";
 import { Synchronizer } from "./synchronizer";
-import { Address, Connection, Json, Port } from "../../../messaging/exports";
+import { Failure, Address, Connection, Json, Logging, Port } from "../../../messaging/exports";
 import { PrimitiveMessageChannel } from "./synchronizer";
 import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_ident";
+import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
+
+Failure.setAnomalyHandler((e) => {
+    console.log(e);
+    throw e;
+});
+
+Failure.setErrorHandler((e) => {
+    console.log(e);
+    throw e;
+});
 
 export async function initializeExternalPlugin_PluginSide(
     channel: PrimitiveMessageChannel,
-    run_plugin: (port: Port) => void | Promise<void>,
+    plugin: (env: PluginEnvironment) => void | Promise<void>,
 ) {
     return Effect.gen(function* () {
         const synchronizer = new Synchronizer(channel);
@@ -16,12 +27,12 @@ export async function initializeExternalPlugin_PluginSide(
             async (data) => {
                 const _data = data as {
                     pluginIdent: PluginIdentWithInstanceId;
-                    target_process_id: string;
-                    own_process_id: string;
+                    plugin_process_id: string;
+                    kernel_process_id: string;
                 };
 
                 const connection = Connection.create(
-                    Address.generic(_data.own_process_id),
+                    Address.generic(_data.kernel_process_id),
                     (msg) => synchronizer.call_command("send_message", msg)
                 ).open();
 
@@ -29,9 +40,14 @@ export async function initializeExternalPlugin_PluginSide(
                     return connection.receive(data as any);
                 });
 
-                Address.set_process_id(_data.target_process_id);
-                const port = new Port(_data.pluginIdent.instance_id).open();
-                await run_plugin(port);
+                Address.set_process_id(_data.plugin_process_id);
+                Logging.set_logging_target(connection.address);
+                const env = new PluginEnvironment(
+                    _data.kernel_process_id,
+                    _data.pluginIdent
+                );
+                env.use_middleware(Logging.log_middleware(), "monitoring");
+                await plugin(env);
                 synchronizer.call_command("on_plugin_executed");
             }
         );

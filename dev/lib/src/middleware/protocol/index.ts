@@ -1,5 +1,5 @@
 import { Effect, Schema } from "effect";
-import { Address, Port } from "../../messaging/exports";
+import { Address, Connection, Port } from "../../messaging/exports";
 import MessageChannel from "../channel";
 import { registerProtocol } from "./respond";
 import { Json } from "../../utils/json";

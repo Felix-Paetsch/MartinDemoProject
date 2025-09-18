@@ -41,9 +41,8 @@ function computeStandardData(
 ): Record<string, Json> {
     const current_path = oldAnnotation.message_path && Array.isArray(oldAnnotation.message_path) ?
         oldAnnotation.message_path : [];
-    const new_path = current_path[current_path.length - 1] === message.local_data.current_address.serialize() ?
+    const new_path = JSON.stringify(current_path[current_path.length - 1]) === JSON.stringify(message.local_data.current_address.serialize()) ?
         current_path : [...current_path, message.local_data.current_address.serialize()];
-
     return {
         message_id: uuidv4(),
         ...oldAnnotation,

@@ -1,9 +1,9 @@
 import { DefaultFormatter, Formatter } from "./formatter";
-import type LogInvestigator from "./logInverstigator";
 import { LogProcessor } from "../index";
 import { Log, MessageLog, DataLog } from "../log";
 import { Address } from "../../../core/address";
 import { Message } from "../../../core/message";
+import { type LogInvestigator } from "./logInverstigator";
 
 export class LogCollection {
     constructor(

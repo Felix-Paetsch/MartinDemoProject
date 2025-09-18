@@ -35,18 +35,22 @@ export async function initializeExternalPlugin_KernelSide(
             Deferred.succeed(awaitEvaluated, 0).pipe(Effect.runSync)
         });
 
-        Effect.try(connection.open);
+        yield* Effect.try(() => connection.open());
 
         return {
             connection,
             run_plugin: () => Effect.gen(function* () {
                 synchronizer.call_command("run_plugin", {
                     pluginIdent,
-                    target_process_id,
-                    own_process_id: Address.process_id
+                    plugin_process_id: target_process_id,
+                    kernel_process_id: Address.process_id
                 });
                 yield* Deferred.await(awaitEvaluated);
-            }).pipe(Effect.runPromise)
+            }).pipe(
+                Effect.timeout(5000),
+                Effect.ignore,
+                Effect.runPromise
+            )
         }
     }).pipe(
         Effect.merge,
