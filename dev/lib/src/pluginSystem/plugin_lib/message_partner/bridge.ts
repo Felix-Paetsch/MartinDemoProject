@@ -1,16 +1,16 @@
 import { Json } from "../../../utils/json";
 import { MessagePartner } from "./base";
 import PluginMessagePartner, { PluginMessagePartnerID } from "./plugin_message_partner";
-import { Protocol } from "../../../middleware/protocol";
 import { send_bridge_protocol } from "../../protocols/message_partner/bridge/send_bridge";
 import { trigger_on_listener_registered } from "../../protocols/message_partner/bridge/listener_registered";
 
 export default class Bridge extends MessagePartner {
     constructor(
         readonly plugin_partner: PluginMessagePartner,
-        readonly uuid: string
+        readonly uuid: string,
+        readonly parent: PluginMessagePartner
     ) {
-        super(uuid, plugin_partner);
+        super(uuid, plugin_partner, parent);
     }
 
     send(data: Json) {

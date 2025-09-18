@@ -1,19 +1,21 @@
 import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
 import { protocol, Protocol, AnythingTranscoder, send_await_response_transcoded, SchemaTranscoder, receive_transcoded, send_transcoded } from "../../../middleware/protocol";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
-import { findKernel, findPlugin } from "../findResponder";
+import { findKernel, findLibrary, findPlugin } from "../findResponder";
 import MessageChannel from "../../../middleware/channel";
-import { PluginReference } from "../../kernel_lib/external_references/plugin_reference";
+import { libraryIdentSchema } from "../../library/library_environment";
+import { LibraryReference } from "../../kernel_lib/external_references/library_reference";
+import { LibraryEnvironment } from "../../library/library_environment";
 
 export type GetPluginError = Error;
-export const remove_plugin_protocol = protocol(
-    "remove_plugin",
-    SchemaTranscoder(pluginIdentWithInstanceIdSchema),
-    findPlugin,
-    async (mc: MessageChannel, initiator: PluginReference) => {
+export const remove_library_protocol = protocol(
+    "remove_library",
+    SchemaTranscoder(libraryIdentSchema),
+    findLibrary,
+    async (mc: MessageChannel, initiator: LibraryReference) => {
         return await mc.next()
     },
-    async (mc: MessageChannel, responder: PluginEnvironment) => {
+    async (mc: MessageChannel, responder: LibraryEnvironment) => {
         await responder._trigger_remove_environment();
         mc.send("ok");
     }

@@ -15,3 +15,8 @@ export function UnblockFiber<R>(e: Effect.Effect<void, never, R>) {
         return yield* Effect.void;
     })
 }
+
+export function promisify<R, Args extends any[]>(cb: (...args: Args) => R | Promise<R>):
+    (...args: Args) => Promise<Awaited<R>> {
+    return (...args: Args) => Promise.resolve(cb(...args))
+}

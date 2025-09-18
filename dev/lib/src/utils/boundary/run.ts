@@ -33,7 +33,7 @@ export function EffectToResultFlash<T, E extends Error>(e: Effect.Effect<T, E>):
 export function ResultToEffect<T, E extends Error>(r: Result<T, E>): Effect.Effect<T, Exclude<Failure<E>, Failure<never>>>;
 export function ResultToEffect<T, E extends Error>(r: ResultPromise<T, E>): Effect.Effect<T, Exclude<Failure<E>, Failure<never>>>;
 export function ResultToEffect<T, E extends Error>(r: Result<T, E> | ResultPromise<T, E>): Effect.Effect<T, Exclude<Failure<E>, Failure<never>>> {
-    const res = asyncCallbackToEffect(() => promisify(r));
+    const res = asyncCallbackToEffect(() => Promise.resolve(r));
     return res.pipe(
         Effect.catchAll(e => Effect.die(e)),
         Effect.andThen(r => {

@@ -7,7 +7,7 @@ import { Schema } from "effect";
 import { AddressFromString } from "../../../messagingEffect/schemas";
 import { libraryIdentSchema, LibraryIdent } from "../../library/library_environment";
 import LibraryMessagePartner from "../../plugin_lib/message_partner/library";
-import { v4 as uuidv4 } from "uuid";
+import uuidv4 from "../../../utils/uuid";
 
 const libraryData = Schema.Struct({
     address: AddressFromString,

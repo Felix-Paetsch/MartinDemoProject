@@ -21,4 +21,9 @@ export class LibraryEnvironment extends EnvironmentCommunicator {
         super(port_id);
         LibraryEnvironment.libraries.push(this);
     }
+
+    async _trigger_remove_environment() {
+        LibraryEnvironment.libraries = LibraryEnvironment.libraries.filter(l => l !== this);
+        await this.implementation.dispose();
+    }
 }

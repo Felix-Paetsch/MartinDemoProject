@@ -1,5 +1,5 @@
 import { Address, Message, Port } from "../../messaging/exports";
-import { v4 as uuidv4 } from 'uuid';
+import uuidv4 from "../../utils/uuid";
 import { MessageDataEncoded } from "./schemas";
 import { SendMessageBodySchema } from "./schemas/send";
 import { Deferred, Duration, Effect, Schedule, Schema } from "effect";
@@ -197,8 +197,8 @@ export default class MessageChannel {
 
     static middleware = processMessageChannelMessage;
 
-    // Compare Effect stream API
-    // Compare Socket API
-    // Errors
-    // Direct responses to messages - and there errors (?)
+// Compare Effect stream API
+// Compare Socket API
+// Errors
+// Direct responses to messages - and there errors (?)
 }

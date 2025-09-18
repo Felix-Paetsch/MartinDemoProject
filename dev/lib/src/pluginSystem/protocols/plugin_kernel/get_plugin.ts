@@ -8,7 +8,7 @@ import { Effect, Schema } from "effect";
 import { AddressFromString } from "../../../messagingEffect/schemas";
 import { failOnError } from "../../../messagingEffect/utils";
 import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
-import { v4 as uuidv4 } from "uuid";
+import uuidv4 from "../../../utils/uuid";
 
 const pluginData = Schema.Struct({
     address: AddressFromString,

@@ -25,7 +25,7 @@ export function findPlugin(plugin_ident: string | PluginIdentWithInstanceId | Js
     return PluginEnvironment.plugins.find(plugin => plugin.plugin_ident.instance_id === instance_id) || null;
 }
 
-export function findLibrary(library_ident: unknown | LibraryIdent): LibraryEnvironment | null {
+export function findLibrary(library_ident: LibraryIdent): LibraryEnvironment | null {
     const ident = Schema.decodeUnknown(libraryIdentSchema)(library_ident).pipe(
         Effect.orElse(() => Effect.succeed(null)),
         Effect.runSync

@@ -1,7 +1,7 @@
 import { PluginEnvironment } from "../../lib/src/pluginSystem/plugin_lib/plugin_environment";
 import { KernelEnvironment } from "../../lib/src/pluginSystem/kernel_lib/kernel_env";
 import { PluginIdent } from "../../lib/src/pluginSystem/plugin_lib/plugin_ident";
-import { v4 as uuidv4 } from "uuid";
+import uuidv4 from "../../lib/src/utils/uuid";
 import { LibraryReference } from "../../lib/src/pluginSystem/kernel_lib/external_references/library_reference";
 import { LibraryEnvironment, LibraryIdent } from "../../lib/src/pluginSystem/library/library_environment";
 import { AbstractLibraryImplementation } from "../../lib/src/pluginSystem/library/library_implementation";

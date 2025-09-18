@@ -4,8 +4,8 @@ import { ExternalReference } from "./external_reference";
 import { Connection } from "../../../messaging/exports";
 import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
 import { Protocol } from "../../../middleware/protocol";
-import { PluginEnvironment } from "../../../_pluginSystem/plugin_lib/exports";
 import { remove_plugin_protocol } from "../../protocols/plugin_kernel/remove_plugin";
+import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
 
 export class PluginReference extends ExternalReference {
     constructor(

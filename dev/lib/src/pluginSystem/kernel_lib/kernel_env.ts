@@ -6,8 +6,9 @@ import { PluginIdent, PluginIdentWithInstanceId } from "../plugin_lib/plugin_ide
 import { GetLibraryError } from "../protocols/plugin_kernel/get_library";
 import { LibraryReference } from "./external_references/library_reference";
 import { PluginReference } from "./external_references/plugin_reference";
-import { v4 as uuidv4 } from "uuid";
+import uuidv4 from "../../utils/uuid";
 import { Json } from "../../messaging/core/message";
+import { Address } from "../../messaging/exports";
 
 export type GetPluginError = Error;
 
@@ -69,9 +70,13 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         return await this.create_plugin(plugin_ident);
     }
 
-    get_plugin_reference(ident: string | PluginIdentWithInstanceId | PluginReference): PluginReference | null {
+    get_plugin_reference(ident: string | Address | PluginIdentWithInstanceId | PluginReference): PluginReference | null {
         if (ident instanceof PluginReference) {
             return ident;
+        }
+
+        if (ident instanceof Address) {
+            return this.registered_plugins.find(p => p.address.equals(ident)) || null;
         }
 
         if (typeof ident === "string") {
@@ -91,9 +96,25 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
 
         return await this.create_library(library_ident);
     }
-
+    get_library_reference(ident: Address | LibraryReference | LibraryIdent): null | LibraryReference {
+        if (ident instanceof LibraryReference) {
+            return ident;
+        }
+        if (ident instanceof Address) {
+            return this.registered_libraries.find(l => l.address.equals(ident)) || null;
+        }
+        return this.registered_libraries.find(l => {
+            return l.library_ident.name == ident.name
+        }) || null;
+    }
     async create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {
         return new Error("Not implemented!");
+    }
+    async remove_library(l: LibraryReference) {
+        await l.remove();
+        const index = this.registered_libraries.findIndex(m => m == l);
+        if (index < 0) return;
+        this.registered_libraries.splice(index, 1);
     }
 
     async remove_plugin(p: PluginReference) {

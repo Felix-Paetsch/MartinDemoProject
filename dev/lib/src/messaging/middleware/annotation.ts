@@ -1,5 +1,5 @@
 import { Effect, Schema } from "effect";
-import { v4 as uuidv4 } from 'uuid';
+import uuidv4 from "../../utils/uuid";
 import { Message } from "../core/message";
 import { Middleware, MiddlewareContinue } from "../core/middleware";
 import { Json } from "../../utils/json";
