@@ -15,6 +15,6 @@ export default defineConfig({
         },
     },
     optimizeDeps: {
-        include: ['effect']
+        include: ['effect', 'pc-messaging-kernel']
     }
 }); 
