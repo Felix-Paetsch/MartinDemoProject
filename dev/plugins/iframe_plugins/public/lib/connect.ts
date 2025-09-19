@@ -1,15 +1,15 @@
-import { Deferred, Effect } from "effect";
+import { Effect } from "effect";
 import { TimeoutException } from "effect/Cause";
-import { PluginEnvironment, Plugin } from "../../../../lib/src/pluginSystem/plugin_lib/plugin_environment";
-import { EffectToResult, Json, UnblockFiber } from "../../../../lib/src/utils/exports";
-import { initializeExternalPlugin_PluginSide } from "../../../../lib/src/pluginSystem/common_lib/initialization/pluginSide";
-import { PrimitiveMessageChannel } from "../../../../lib/src/pluginSystem/common_lib/initialization/synchronizer";
-import { Port } from "../../../../lib/src/messaging/exports";
+import {
+    Initialization,
+    Plugin,
+    Json
+} from "../../../../lib/src/pluginSystem/plugin_exports"
 
 export async function execute_plugin(plugin: Plugin) {
-    const channel: PrimitiveMessageChannel = await registerChannelPlugin();
+    const channel: Initialization.MessageChannel = await registerChannelPlugin();
 
-    await initializeExternalPlugin_PluginSide(
+    await Initialization.pluginSide(
         channel,
         plugin
     )

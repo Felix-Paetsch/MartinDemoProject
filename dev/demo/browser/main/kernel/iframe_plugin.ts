@@ -1,12 +1,13 @@
 import { Effect } from "effect";
 import { TimeoutException } from "effect/Cause";
-import { Address, Connection } from "../../../../lib/src/messaging/exports";
-import { initializeExternalPlugin_KernelSide } from "../../../../lib/src/pluginSystem/common_lib/initialization/kernelSide";
-import { callbackToEffect, Json } from "../../../../lib/src/utils/exports";
-import { KernelEnvironment } from "../../../../lib/src/pluginSystem/kernel_lib/kernel_env";
-import { PluginIdentWithInstanceId } from "../../../../lib/src/pluginSystem/plugin_lib/plugin_ident";
-import { PrimitiveMessageChannel } from "../../../../lib/src/pluginSystem/common_lib/initialization/synchronizer";
-import { PluginReference } from "../../../../lib/src/pluginSystem/kernel_lib/external_references/plugin_reference";
+import { Address } from "../../../../lib/src/messaging/exports";
+import {
+    KernelEnvironment,
+    PluginIdentWithInstanceId,
+    PluginReference,
+    Json,
+    Initialization
+} from "../../../../lib/src/pluginSystem/kernel_exports";
 
 const appContainer = document.getElementById("app")!;
 function createIframe(id: string, src: string): HTMLIFrameElement {
@@ -24,12 +25,12 @@ export async function createIframePlugin(k: KernelEnvironment, plugin_ident: Plu
     );
     appContainer.appendChild(iframe);
 
-    const c: PrimitiveMessageChannel | Error = await registerChannelKernel(iframe);
+    const c: Initialization.MessageChannel | Error = await registerChannelKernel(iframe);
     if (c instanceof Error) {
         return c;
     }
 
-    const res = await initializeExternalPlugin_KernelSide(
+    const res = await Initialization.kernelSide(
         c,
         processId,
         plugin_ident

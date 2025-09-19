@@ -1,25 +1,25 @@
-import { Effect } from "effect";
-import { Middleware, Address, Logging } from "../../../../lib/src/messaging/exports";
-import { Middleware as CommonMiddleware } from "../../../../lib/src/pluginSystem/common_lib/exports";
-import { KernelEnvironment } from "../../../../lib/src/pluginSystem/kernel_lib/kernel_env";
-import { PluginReference } from "../../../../lib/src/pluginSystem/kernel_lib/external_references/plugin_reference";
-import { PluginEnvironment } from "../../../../lib/src/pluginSystem/plugin_lib/plugin_environment";
-import { LibraryReference } from "../../../../lib/src/pluginSystem/kernel_lib/external_references/library_reference";
-import { LibraryEnvironment } from "../../../../lib/src/pluginSystem/library/library_environment";
-import { PluginIdent, PluginIdentWithInstanceId } from "../../../../lib/src/pluginSystem/plugin_lib/plugin_ident";
-import { LibraryIdent } from "../../../../lib/src/pluginSystem/library/library_environment";
-import uuidv4 from "../../../../lib/src/utils/uuid";
+import { Address, Logging, Middleware } from "../../../../lib/src/messaging/exports";
+import {
+    PsMiddleware,
+    KernelEnvironment,
+    PluginEnvironment,
+    uuidv4,
+    LibraryEnvironment,
+    PluginIdent,
+    LibraryIdent,
+    PluginIdentWithInstanceId,
+    Json
+} from "../../../../lib/src/pluginSystem/kernel_exports";
 
 import { createIframePlugin } from "./iframe_plugin";
 import { createLocalPlugin, isLocalPlugin } from "./local_plugin";
 import { createJSWASMLibrary } from "./wasm/library";
-import { Json } from "../../../../lib/src/messaging/core/message";
 
 Logging.set_logging_target(Address.local_address);
 export class KernelImpl extends KernelEnvironment {
     register_kernel_middleware() {
         this.use_middleware(Middleware.annotation_middleware(), "preprocessing");
-        this.use_middleware(CommonMiddleware.preventLoops, "preprocessing");
+        this.use_middleware(PsMiddleware.PreventLoops, "preprocessing");
         this.use_middleware(Logging.log_middleware(), "monitoring");
 
         Logging.process_middleware_logs_using(globalThis.logInverstigator.log.bind(globalThis.logInverstigator))
@@ -27,13 +27,13 @@ export class KernelImpl extends KernelEnvironment {
 
     register_local_plugin_middleware(env: PluginEnvironment) {
         env.use_middleware(Middleware.annotation_middleware(), "preprocessing");
-        env.use_middleware(CommonMiddleware.preventLoops, "preprocessing");
+        env.use_middleware(PsMiddleware.PreventLoops, "preprocessing");
         env.use_middleware(Logging.log_middleware(), "monitoring");
     }
 
     register_local_library_middleware(env: LibraryEnvironment) {
         env.use_middleware(Middleware.annotation_middleware(), "preprocessing");
-        env.use_middleware(CommonMiddleware.preventLoops, "preprocessing");
+        env.use_middleware(PsMiddleware.PreventLoops, "preprocessing");
         env.use_middleware(Logging.log_middleware(), "monitoring");
     }
 
@@ -44,8 +44,10 @@ export class KernelImpl extends KernelEnvironment {
         const remove_what: PluginIdentWithInstanceId | null = (msg as any).what;
         const ref = this.get_plugin_reference(remove_what)
         if (ref) {
-            this.remove_plugin(ref);
+            await this.remove_plugin(ref);
+            return true;
         }
+        return false;
     }
 
     async create_plugin(plugin_ident: PluginIdent) {

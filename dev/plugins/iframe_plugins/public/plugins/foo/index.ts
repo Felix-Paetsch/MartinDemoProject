@@ -1,6 +1,5 @@
 import { execute_plugin } from "../../lib/connect";
-import { PluginEnvironment } from "../../../../../lib/src/pluginSystem/plugin_lib/plugin_environment";
-import Bridge from "../../../../../lib/src/pluginSystem/plugin_lib/message_partner/bridge";
+import { Bridge, PluginEnvironment } from "../../../../../lib/src/pluginSystem/plugin_exports";
 
 const closeButton = document.getElementById("close")!;
 const closeRightButton = document.getElementById("close-right")!;

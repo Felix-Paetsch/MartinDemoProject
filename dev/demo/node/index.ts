@@ -1,16 +1,17 @@
-import { PluginEnvironment } from "../../lib/src/pluginSystem/plugin_lib/plugin_environment";
-import { KernelEnvironment } from "../../lib/src/pluginSystem/kernel_lib/kernel_env";
-import { PluginIdent } from "../../lib/src/pluginSystem/plugin_lib/plugin_ident";
-import uuidv4 from "../../lib/src/utils/uuid";
-import { LibraryReference } from "../../lib/src/pluginSystem/kernel_lib/external_references/library_reference";
-import { LibraryEnvironment, LibraryIdent } from "../../lib/src/pluginSystem/library/library_environment";
-import { AbstractLibraryImplementation } from "../../lib/src/pluginSystem/library/library_implementation";
-import PluginMessagePartner from "../../lib/src/pluginSystem/plugin_lib/message_partner/plugin_message_partner";
-import Bridge from "../../lib/src/pluginSystem/plugin_lib/message_partner/bridge";
 import { Failure, Logging, Address } from "../../lib/src/messaging/exports";
-import { start_kernel_log_to_file } from "../../lib/src/pluginSystem/debug/logging";
-import { PluginReference } from "../../lib/src/pluginSystem/kernel_lib/external_references/plugin_reference";
-import { Severity } from "../../lib/src/pluginSystem/debug/severity";
+import {
+    PluginEnvironment,
+    LibraryReference,
+    PluginMessagePartner,
+    Bridge,
+    uuidv4,
+    LibraryIdent,
+    AbstractLibraryImplementation,
+    PluginIdent,
+    KernelEnvironment,
+    LibraryEnvironment,
+    PsLogging
+} from "../../lib/src/pluginSystem/kernel_exports"
 
 Failure.setAnomalyHandler((e) => {
     throw e;
@@ -37,7 +38,7 @@ const side_plugin = async (env: PluginEnvironment) => {
             });
         });
 
-        env.log("Hello from side plugin", Severity.INFO);
+        env.log("Hello from side plugin", PsLogging.Severity.INFO);
     });
 
     const lib = await env.get_library({
@@ -79,7 +80,7 @@ let lib_ref: LibraryReference | null = null;
 
 
 Logging.set_logging_target(Address.local_address);
-start_kernel_log_to_file("./debug/logs/internal_logs.log");
+PsLogging.start_kernel_log_to_file("./debug/logs/internal_logs.log");
 class KernelImpl extends KernelEnvironment {
     register_kernel_middleware() {
         //this.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");

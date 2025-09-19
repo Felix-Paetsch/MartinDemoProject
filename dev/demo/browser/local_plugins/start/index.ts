@@ -1,7 +1,7 @@
-import { PluginIdentWithInstanceId } from "../../../../lib/src/pluginSystem/plugin_lib/plugin_ident";
-import { PluginEnvironment } from "../../../../lib/src/pluginSystem/plugin_lib/plugin_environment";
-
-import { Result } from "../../../../lib/src/utils/exports";
+import {
+    PluginIdentWithInstanceId,
+    PluginEnvironment
+} from "../../../../lib/src/pluginSystem/plugin_exports"
 
 const current_plugins: PluginIdentWithInstanceId[] = [];
 export default async function (env: PluginEnvironment) {

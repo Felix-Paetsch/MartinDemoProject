@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { AbstractLibraryImplementation } from "../../../../../lib/src/pluginSystem/library/library_implementation";
+import { AbstractLibraryImplementation } from "../../../../../lib/src/pluginSystem/kernel_exports";
 import { CallbackError } from "../../../../../lib/src/utils/exports";
 import { getQuickJS, QuickJSContext, Scope } from "quickjs-emscripten";
 import { expose_partial } from "./expose";
