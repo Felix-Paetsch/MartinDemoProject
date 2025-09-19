@@ -5,7 +5,7 @@ import { Address } from "../../../messaging/exports";
 import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
 import { Protocol } from "../../../middleware/protocol";
 import { remove_plugin_protocol } from "../../protocols/plugin_kernel/remove_plugin";
-import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
+import { type PluginEnvironment } from "../../plugin_lib/plugin_environment";
 
 export class PluginReference extends ExternalReference {
     constructor(

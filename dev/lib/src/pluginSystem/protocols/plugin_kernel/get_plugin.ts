@@ -2,13 +2,12 @@ import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
 import { protocol, Protocol, AnythingTranscoder, send_await_response_transcoded, SchemaTranscoder, receive_transcoded, send_transcoded } from "../../../middleware/protocol";
 import { KernelEnvironment } from "../../kernel_lib/kernel_env";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
-import { findKernel, findPlugin } from "../findResponder";
 import MessageChannel from "../../../middleware/channel";
 import { Effect, Schema } from "effect";
 import { AddressFromString } from "../../../messagingEffect/schemas";
-import { failOnError } from "../../../messagingEffect/utils";
 import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
 import uuidv4 from "../../../utils/uuid";
+import { deferred } from "../../../utils/defer";
 
 const pluginData = Schema.Struct({
     address: AddressFromString,
@@ -18,8 +17,8 @@ const pluginData = Schema.Struct({
 export type GetPluginError = Error;
 export const get_plugin_from_kernel = protocol(
     "get_plugin_from_kernel",
-    AnythingTranscoder,
-    findKernel,
+    KernelEnvironment.findTranscoder,
+    KernelEnvironment.find,
     async (mc: MessageChannel, initiator: PluginEnvironment, plugin_ident: PluginIdent) => {
         return await send_await_response_transcoded(
             mc,
@@ -48,8 +47,8 @@ const getPluginMessageData = Schema.Struct({
 
 export const make_plugin_message_partner = protocol(
     "create_plugin_message_partner",
-    SchemaTranscoder(pluginIdentWithInstanceIdSchema),
-    findPlugin,
+    deferred(() => PluginEnvironment.findTranscoder),
+    deferred(() => PluginEnvironment.find),
     async (mc: MessageChannel, initiator: PluginEnvironment, plugin_ident: typeof pluginData.Type) => {
         const mp_uuid = uuidv4();
         const res = await send_await_response_transcoded(

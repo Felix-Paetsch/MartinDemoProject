@@ -3,7 +3,6 @@ import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
 import { protocol, Protocol, AnythingTranscoder, send_await_response_transcoded, SchemaTranscoder, receive_transcoded, send_transcoded } from "../../../middleware/protocol";
 import { KernelEnvironment } from "../../kernel_lib/kernel_env";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
-import { findKernel, findPlugin } from "../findResponder";
 import MessageChannel from "../../../middleware/channel";
 import { Effect, Schema } from "effect";
 import { Json } from "../../../messaging/core/message";
@@ -15,8 +14,8 @@ const kernelMessageSchema = Schema.Struct({
 
 export const send_kernel_message = protocol(
     "send_kernel_message",
-    AnythingTranscoder,
-    findKernel,
+    KernelEnvironment.findTranscoder,
+    KernelEnvironment.find,
     async (mc: MessageChannel, initiator: PluginEnvironment, data: Json) => {
         await send_transcoded(
             mc,

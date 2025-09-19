@@ -4,6 +4,8 @@ import PluginMessagePartner from "./plugin_message_partner";
 import { Json } from "./../../../utils/json";
 import { send_message } from "../../protocols/message_partner/send_message";
 import { promisify } from "../../../utils/promisify";
+import { Schema } from "effect";
+import { SchemaTranscoder } from "../../../middleware/protocol";
 
 export type MessagePartnerPairDistinguisher = boolean;
 
@@ -86,5 +88,18 @@ export class MessagePartner {
             new Error("Message partner is removed")
         );
         return protocol(this, initData);
+    }
+
+    static find<S extends MessagePartner, T extends new (...args: any[]) => S>(type?: T):
+        (ident: string) => S | null {
+        return (ident: string) => {
+            return (MessagePartner.message_partners.find(
+                mp => (mp.own_uuid === ident) && (type ? mp instanceof type : true)
+            ) as S | undefined) || null;
+        }
+    }
+
+    static get findTranscoder() {
+        return SchemaTranscoder(Schema.String)
     }
 }

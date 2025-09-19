@@ -1,15 +1,15 @@
 import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
-import { protocol, Protocol, AnythingTranscoder, send_await_response_transcoded, SchemaTranscoder, receive_transcoded, send_transcoded } from "../../../middleware/protocol";
+import { protocol, Protocol, send_await_response_transcoded, receive_transcoded, send_transcoded } from "../../../middleware/protocol";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
-import { findKernel, findPlugin } from "../findResponder";
 import MessageChannel from "../../../middleware/channel";
-import { PluginReference } from "../../kernel_lib/external_references/plugin_reference";
+import { type PluginReference } from "../../kernel_lib/external_references/plugin_reference";
+import { deferred } from "../../../utils/defer";
 
 export type GetPluginError = Error;
 export const remove_plugin_protocol = protocol(
     "remove_plugin",
-    SchemaTranscoder(pluginIdentWithInstanceIdSchema),
-    findPlugin,
+    deferred(() => PluginEnvironment.findTranscoder),
+    deferred(() => PluginEnvironment.find),
     async (mc: MessageChannel, initiator: PluginReference) => {
         return await mc.next()
     },

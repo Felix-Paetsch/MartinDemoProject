@@ -1,7 +1,6 @@
 import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
 import { protocol, receive_transcoded, SchemaTranscoder, send_await_response_transcoded, send_transcoded, AnythingTranscoder } from "../../../middleware/protocol";
 import { KernelEnvironment } from "../../kernel_lib/kernel_env";
-import { findKernel } from "../findResponder";
 import MessageChannel from "../../../middleware/channel";
 import { Schema } from "effect";
 import { AddressFromString } from "../../../messagingEffect/schemas";
@@ -18,8 +17,8 @@ const libraryData = Schema.Struct({
 export type GetLibraryError = Error;
 export const get_library = protocol(
     "get_library",
-    AnythingTranscoder,
-    findKernel,
+    KernelEnvironment.findTranscoder,
+    KernelEnvironment.find,
     async (mc: MessageChannel, initiator: PluginEnvironment, library_ident: LibraryIdent) => {
         const res = await send_await_response_transcoded(
             mc,

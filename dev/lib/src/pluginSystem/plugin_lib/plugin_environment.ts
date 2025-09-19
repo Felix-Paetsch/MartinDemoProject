@@ -3,15 +3,16 @@ import { Address } from "../../messaging/exports";
 import { Json } from "../../utils/json";
 import { EnvironmentCommunicator } from "../common_lib/environments/environment_communicator";
 import PluginMessagePartner from "./message_partner/plugin_message_partner";
-import { PluginIdent, PluginIdentWithInstanceId } from "./plugin_ident";
+import { PluginIdent, PluginIdentWithInstanceId, pluginIdentWithInstanceIdSchema } from "./plugin_ident";
 import { KernelEnvironment } from "../kernel_lib/kernel_env";
-import { Protocol } from "../../middleware/protocol";
+import { Protocol, SchemaTranscoder } from "../../middleware/protocol";
 import { get_plugin_from_kernel, make_plugin_message_partner } from "../protocols/plugin_kernel/get_plugin";
 import { LibraryIdent } from "../library/library_environment";
 import LibraryMessagePartner from "./message_partner/library";
 import { get_library } from "../protocols/plugin_kernel/get_library";
 import { Logging } from "../../messaging/exports"
 import { send_kernel_message } from "../protocols/plugin_kernel/kernel_message";
+import { Schema } from "effect";
 
 export type Plugin = (env: PluginEnvironment) => void | Promise<void>;
 
@@ -129,5 +130,25 @@ export class PluginEnvironment extends EnvironmentCommunicator {
             initData,
             pluginDescriptor.plugin_ident
         );
+    }
+
+    static find(plugin_ident: string | PluginIdentWithInstanceId | Json): PluginEnvironment | null {
+        let instance_id: string | undefined;
+        if (typeof plugin_ident === "string") {
+            instance_id = plugin_ident;
+        } else {
+            try {
+                instance_id = Schema.decodeUnknownSync(pluginIdentWithInstanceIdSchema)(plugin_ident).instance_id;
+            } catch (error) {
+                return null;
+            }
+        }
+        return PluginEnvironment.plugins.find(plugin => plugin.plugin_ident.instance_id === instance_id) || null;
+    }
+
+    static get findTranscoder() {
+        return SchemaTranscoder(Schema.Union(
+            pluginIdentWithInstanceIdSchema, Schema.String
+        ))
     }
 }

@@ -4,7 +4,6 @@ import { LibraryEnvironment, libraryIdentSchema } from "../../library/library_en
 import { Json } from "../../../utils/json";
 import { Schema } from "effect";
 import MessageChannel from "../../../middleware/channel";
-import { findLibrary } from "../findResponder";
 
 const callSchema = Schema.Struct({
     fn: Schema.String,
@@ -19,8 +18,8 @@ export const call_protocol: Protocol<LibraryMessagePartner, LibraryEnvironment, 
     readonly version: string;
 }, Json> = protocol(
     "call_library_method",
-    SchemaTranscoder(libraryIdentSchema),
-    findLibrary,
+    LibraryEnvironment.findTranscoder,
+    LibraryEnvironment.find,
     async (mc: MessageChannel, initiator: LibraryMessagePartner, call_args: { fn: string, args: Json[] }) => {
         return await send_await_response_transcoded(
             mc,

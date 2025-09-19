@@ -1,9 +1,7 @@
-import { Schema } from "effect";
 import { Protocol, protocol, SchemaTranscoder } from "../../../middleware/protocol";
-import { type MessagePartner } from "../../plugin_lib/message_partner/base";
-import { findMessagePartner } from "../findResponder";
+import { MessagePartner } from "../../plugin_lib/message_partner/base";
 import MessageChannel from "../../../middleware/channel";
-import { Address } from "../../../messaging/exports";
+import { deferred } from "../../../utils/defer";
 
 export type MessagePartnerProtocol<Initiator extends MessagePartner, Responder extends MessagePartner, InitData, Result> = (sender: Initiator, with_data: InitData) => Promise<Result | Error>;
 export function message_partner_protocol<
@@ -18,8 +16,8 @@ export function message_partner_protocol<
 ): MessagePartnerProtocol<Initiator, Responder, InitData, Result> {
     const P = protocol(
         name,
-        SchemaTranscoder(Schema.String),
-        findMessagePartner(),
+        deferred(() => MessagePartner.findTranscoder),
+        deferred(() => MessagePartner.find()),
         initiate,
         respond,
     );

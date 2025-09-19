@@ -9,6 +9,7 @@ import { PluginReference } from "./external_references/plugin_reference";
 import uuidv4 from "../../utils/uuid";
 import { Json } from "../../messaging/core/message";
 import { Address } from "../../messaging/exports";
+import { AnythingTranscoder } from "../../middleware/protocol";
 
 export type GetPluginError = Error;
 
@@ -133,4 +134,12 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         }
         return false;
     }
- }
+
+    static find() {
+        return KernelEnvironment.singleton;
+    }
+
+    static get findTranscoder() {
+        return AnythingTranscoder
+    }
+}

@@ -5,7 +5,6 @@ import { LibraryEnvironment, libraryIdentSchema } from "../../library/library_en
 import { Json } from "../../../utils/json";
 import { Schema } from "effect";
 import MessageChannel from "../../../middleware/channel";
-import { findLibrary } from "../findResponder";
 
 const responseTranscoder = SchemaTranscoder(Schema.Array(Schema.String));
 
@@ -14,8 +13,8 @@ export const get_exposed_protocol: Protocol<LibraryMessagePartner, LibraryEnviro
     readonly version: string;
 }, Error | readonly string[]> = protocol(
     "get_exposed_library_method",
-    SchemaTranscoder(libraryIdentSchema),
-    findLibrary,
+    LibraryEnvironment.findTranscoder,
+    LibraryEnvironment.find,
     async (mc: MessageChannel, initiator: LibraryMessagePartner) => {
         return await receive_transcoded(mc, responseTranscoder);
     },
