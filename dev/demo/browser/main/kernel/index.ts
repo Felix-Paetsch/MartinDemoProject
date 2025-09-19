@@ -6,13 +6,14 @@ import { PluginReference } from "../../../../lib/src/pluginSystem/kernel_lib/ext
 import { PluginEnvironment } from "../../../../lib/src/pluginSystem/plugin_lib/plugin_environment";
 import { LibraryReference } from "../../../../lib/src/pluginSystem/kernel_lib/external_references/library_reference";
 import { LibraryEnvironment } from "../../../../lib/src/pluginSystem/library/library_environment";
-import { PluginIdent } from "../../../../lib/src/pluginSystem/plugin_lib/plugin_ident";
+import { PluginIdent, PluginIdentWithInstanceId } from "../../../../lib/src/pluginSystem/plugin_lib/plugin_ident";
 import { LibraryIdent } from "../../../../lib/src/pluginSystem/library/library_environment";
 import uuidv4 from "../../../../lib/src/utils/uuid";
 
 import { createIframePlugin } from "./iframe_plugin";
 import { createLocalPlugin, isLocalPlugin } from "./local_plugin";
 import { createJSWASMLibrary } from "./wasm/library";
+import { Json } from "../../../../lib/src/messaging/core/message";
 
 Logging.set_logging_target(Address.local_address);
 export class KernelImpl extends KernelEnvironment {
@@ -36,6 +37,17 @@ export class KernelImpl extends KernelEnvironment {
         env.use_middleware(Logging.log_middleware(), "monitoring");
     }
 
+    async recieve_plugin_message(msg: Json, plugin: PluginIdentWithInstanceId): Promise<boolean> {
+        const handled = await super.recieve_plugin_message(msg, plugin);
+        if (handled) return true;
+        // Should be typechecked
+        const remove_what: PluginIdentWithInstanceId | null = (msg as any).what;
+        const ref = this.get_plugin_reference(remove_what)
+        if (ref) {
+            this.remove_plugin(ref);
+        }
+    }
+
     async create_plugin(plugin_ident: PluginIdent) {
         const new_ident = {
             instance_id: uuidv4(),
@@ -50,6 +62,7 @@ export class KernelImpl extends KernelEnvironment {
             )
         }
 
+        console.log("create iframe plugin");
         return await createIframePlugin(this, new_ident, "process_" + new_ident.instance_id)
     }
 

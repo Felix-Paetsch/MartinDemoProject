@@ -21,4 +21,4 @@ Failure.setErrorHandler((e) => {
 
 globalThis.logInverstigator = new Logging.LogInvestigator();
 const kernel = new KernelImpl();
-kernel.start().then(r => console.log(r));
+kernel.start() //.then(r => console.log(r));

@@ -41,7 +41,10 @@ export async function createIframePlugin(k: KernelEnvironment, plugin_ident: Plu
         new Address(processId, plugin_ident.instance_id),
         plugin_ident,
         k,
-        () => { res.connection.close() }
+        () => {
+            res.connection.close();
+            appContainer.removeChild(iframe);
+        }
     );
     await res.run_plugin();
     return plugin_reference;

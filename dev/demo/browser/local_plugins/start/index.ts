@@ -9,9 +9,9 @@ export default async function (env: PluginEnvironment) {
     create_div();
 
     const button = document.getElementById('main-plugin-button');
-    await handShake(env);
-    await handShake(env);
     button!.addEventListener('click', () => handShake(env));
+    await handShake(env);
+    await handShake(env);
 
     const library = await env.get_library({
         name: "test",
@@ -34,7 +34,7 @@ async function handShake(env: PluginEnvironment) {
         version: "1.0.0"
     });
 
-    env.log("My lof");
+    // env.log("My lof");
 
     if (plug1 instanceof Error) {
         console.log(plug1);
@@ -45,6 +45,7 @@ async function handShake(env: PluginEnvironment) {
 
     const res_2 = await plug1.bridge();
     if (res_2 instanceof Error) {
+        console.log(res_2);
         throw res_2;
     }
 

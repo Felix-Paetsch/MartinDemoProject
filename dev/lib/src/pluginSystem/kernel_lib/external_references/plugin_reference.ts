@@ -20,7 +20,7 @@ export class PluginReference extends ExternalReference {
 
     async remove() {
         await this.#execute_plugin_protocol(remove_plugin_protocol, null);
-        await super.remove.bind(this);
+        await super.remove();
     }
 
     #execute_plugin_protocol<Result, InitData>(

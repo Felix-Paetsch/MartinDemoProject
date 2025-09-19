@@ -65,13 +65,14 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     }
 
     async get_plugin(plugin_ident: PluginIdent): Promise<PluginReference | GetPluginError> {
-        const existingPlugin = this.registered_plugins.find(plugin => plugin.plugin_ident.name === plugin_ident.name);
+        const existingPlugin = this.registered_plugins.find(plugin => plugin.plugin_ident.instance_id === plugin_ident.instance_id);
         if (existingPlugin) { return existingPlugin; }
 
         return await this.create_plugin(plugin_ident);
     }
 
-    get_plugin_reference(ident: string | Address | PluginIdentWithInstanceId | PluginReference): PluginReference | null {
+    get_plugin_reference(ident: null | string | Address | PluginIdentWithInstanceId | PluginReference): PluginReference | null {
+        if (!ident) return null;
         if (ident instanceof PluginReference) {
             return ident;
         }
