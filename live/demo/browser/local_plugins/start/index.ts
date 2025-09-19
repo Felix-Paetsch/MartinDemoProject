@@ -1,5 +1,7 @@
-import { Bridge, PluginEnvironment, PluginIdentWithInstanceId } from "pc-messaging-kernel/pluginSystem/plugin";
-import { Result } from "pc-messaging-kernel/utils";
+import {
+    PluginIdentWithInstanceId,
+    PluginEnvironment
+} from "pc-messaging-kernel/plugin"
 
 const current_plugins: PluginIdentWithInstanceId[] = [];
 export default async function (env: PluginEnvironment) {
@@ -7,60 +9,61 @@ export default async function (env: PluginEnvironment) {
     create_div();
 
     const button = document.getElementById('main-plugin-button');
-    await handShake(env);
-    await handShake(env);
     button!.addEventListener('click', () => handShake(env));
+    await handShake(env);
+    await handShake(env);
 
     const library = await env.get_library({
         name: "test",
         version: "1.0.0"
     });
 
-    if (library.is_error) {
-        throw library.error;
+    if (library instanceof Error) {
+        throw library;
     }
 
-    const lib = library.value;
-    const exposed = await lib.exposed_functions();
+    const exposed = await library.exposed_functions();
     console.log(exposed);
-    const res = await lib.call("hi", "Martin");
+    const res = await library.call("hi", "Martin");
     console.log(res);
 }
 
 async function handShake(env: PluginEnvironment) {
-    const res_1 = await env.get_plugin({
+    const plug1 = await env.get_plugin({
         name: "foo",
         version: "1.0.0"
     });
 
-    env.log("My lof");
+    // env.log("My lof");
 
-    if (res_1.is_error) {
-        console.log(res_1);
-        throw res_1;
+    if (plug1 instanceof Error) {
+        console.log(plug1);
+        throw plug1;
     }
 
-    const mp = res_1.value;
-    current_plugins.push(mp.plugin_ident);
+    current_plugins.push(plug1.plugin_ident);
 
-    // ts cant infer type on its own for some reason
-    const res_2: Result<Bridge, Error> = await mp.bridge();
-    if (res_2.is_error) {
-        throw res_2.error;
+    const res_2 = await plug1.bridge();
+    if (res_2 instanceof Error) {
+        console.log(res_2);
+        throw res_2;
     }
 
-    const bridge = res_2.value;
+    const bridge = res_2;
     bridge.on((data) => {
         if (data === "close") {
-            const index = current_plugins.indexOf(mp.plugin_ident);
+            const index = current_plugins.indexOf(plug1.plugin_ident);
             if (index !== -1) {
                 current_plugins.splice(index, 1);
             }
         }
         if (data === "close right") {
-            const index = current_plugins.indexOf(mp.plugin_ident);
+            const index = current_plugins.indexOf(plug1.plugin_ident);
             if (index !== current_plugins.length - 1) {
-                env.send_kernel_message("close", current_plugins[index + 1]!);
+                env._send_kernel_message({
+                    cmd: "close",
+                    what: current_plugins[index + 1] || null
+                })
             }
         }
     });

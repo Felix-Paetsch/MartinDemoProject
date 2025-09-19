@@ -1,41 +1,24 @@
-import { Deferred, Effect } from "effect";
+import { Effect } from "effect";
 import { TimeoutException } from "effect/Cause";
-import { Middleware as DebugMiddleware } from "pc-messaging-kernel/debug";
-import { Middleware as CommonMiddleware, Initialization } from "pc-messaging-kernel/pluginSystem/common";
-import { Plugin, PluginEnvironment } from "pc-messaging-kernel/pluginSystem/plugin";
-import { EffectToResult, Json, UnblockFiber } from "pc-messaging-kernel/utils";
+import {
+    Initialization,
+    Plugin,
+    Json
+} from "pc-messaging-kernel/plugin"
 
-export default function execute_plugin(
-    plugin: Plugin
-) {
-    return Effect.gen(function* () {
-        const channel = yield* registerChannelPlugin();
-        const awaitPluginInitialized = yield* Deferred.make<0>();
+export async function execute_plugin(plugin: Plugin) {
+    const channel: Initialization.MessageChannel = await registerChannelPlugin();
 
-        Initialization.plugin(
-            channel,
-            (plugin_env: PluginEnvironment) => {
-                return Effect.gen(function* () {
-                    plugin_env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-                    plugin_env.useMiddleware(DebugMiddleware.plugin(plugin_env.kernel_address), "monitoring");
-
-                    yield* Deferred.succeed(awaitPluginInitialized, 0);
-                })
-            },
-            plugin
-        );
-
-        return yield* Deferred.await(awaitPluginInitialized).pipe(UnblockFiber);
-    }).pipe(
-        Effect.withSpan("PluginEvaluation"),
-        EffectToResult
+    await Initialization.pluginSide(
+        channel,
+        plugin
     )
 }
 
 function registerChannelPlugin() {
     return Effect.async<{
         send: (data: Json) => void,
-        recieve: (cb: (data: Json) => void) => void
+        receive: (cb: (data: Json) => void) => void
     }, TimeoutException>((resume) => {
         let pluginPort: MessagePort | null = null;
 
@@ -43,8 +26,11 @@ function registerChannelPlugin() {
             pluginPort!.postMessage(data);
         }
 
-        const recieve = (cb: (data: Json) => void) => {
-            pluginPort!.onmessage = (event) => cb(event.data || {});
+        const receive = (cb: (data: Json) => void | Promise<void>) => {
+            pluginPort!.onmessage = (event) => {
+                // console.log(event);
+                cb(event.data || {})
+            };
         }
 
         const initListener = (event: MessageEvent) => {
@@ -71,7 +57,7 @@ function registerChannelPlugin() {
                 window.removeEventListener('message', portListener);
                 resume(Effect.succeed({
                     send,
-                    recieve
+                    receive
                 }));
             }
         };
@@ -83,6 +69,7 @@ function registerChannelPlugin() {
             type: 'ck-initialization-port-request'
         }, '*');
     }).pipe(
-        Effect.timeout(10000)
+        Effect.timeout(10000),
+        Effect.runPromise
     );
 }

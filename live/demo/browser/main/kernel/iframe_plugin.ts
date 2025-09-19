@@ -1,10 +1,14 @@
 import { Effect } from "effect";
 import { TimeoutException } from "effect/Cause";
 import { Address } from "pc-messaging-kernel/messaging";
-import { Initialization, type MessageChannel } from "pc-messaging-kernel/pluginSystem/common";
-import { KernelEnvironment, PluginReference } from "pc-messaging-kernel/pluginSystem/kernel";
-import { PluginIdentWithInstanceId } from "pc-messaging-kernel/pluginSystem/plugin";
-import { callbackToEffect, Json } from "pc-messaging-kernel/utils";
+import {
+    KernelEnvironment,
+    PluginIdentWithInstanceId,
+    PluginReference,
+    Json,
+    Initialization
+} from "pc-messaging-kernel/kernel";
+
 const appContainer = document.getElementById("app")!;
 function createIframe(id: string, src: string): HTMLIFrameElement {
     const iframe = document.createElement('iframe');
@@ -14,55 +18,61 @@ function createIframe(id: string, src: string): HTMLIFrameElement {
     return iframe;
 }
 
-export const createIframePlugin = Effect.fn("createIframePlugin")(
-    function* (k: KernelEnvironment, plugin_ident: PluginIdentWithInstanceId, pluginAddress: Address) {
-        const iframe = createIframe(
-            pluginAddress.serialize().replace(/\s|:/g, "_"),
-            `http://localhost:3001/plugins/${plugin_ident.name}/index.html`
-        );
-        appContainer.appendChild(iframe);
-        const c: MessageChannel = yield* registerChannelKernel(iframe);
-        const {
-            execute,
-            remove
-        } = yield* Initialization.kernel(c, k.address, pluginAddress, plugin_ident);
+export async function createIframePlugin(k: KernelEnvironment, plugin_ident: PluginIdentWithInstanceId, processId: string) {
+    const iframe = createIframe(
+        "plugin_" + plugin_ident.instance_id,
+        `http://localhost:3001/plugins/${plugin_ident.name}/index.html`
+    );
+    appContainer.appendChild(iframe);
 
-        const plugin_reference = new PluginReference(
-            pluginAddress,
-            plugin_ident,
-            k,
-            async () => {
-                await remove();
-                appContainer.removeChild(iframe);
-            }
-        );
-        k.register_plugin_middleware(plugin_reference);
-
-        yield* callbackToEffect(execute);
-        return plugin_reference;
+    const c: Initialization.MessageChannel | Error = await registerChannelKernel(iframe);
+    if (c instanceof Error) {
+        return c;
     }
-)
+
+    const res = await Initialization.kernelSide(
+        c,
+        processId,
+        plugin_ident
+    )
+
+    if (res instanceof Error) return res;
+
+    const plugin_reference = new PluginReference(
+        new Address(processId, plugin_ident.instance_id),
+        plugin_ident,
+        k,
+        () => {
+            res.connection.close();
+            appContainer.removeChild(iframe);
+        }
+    );
+    await res.run_plugin();
+    return plugin_reference;
+}
 
 export function registerChannelKernel(iframe: HTMLIFrameElement) {
     return Effect.async<{
         send: (data: Json) => void,
-        recieve: (cb: (data: Json) => void) => void
+        receive: (cb: (data: Json) => void) => void
     }, TimeoutException>((resume) => {
         const { port1: mainPort, port2: iframePort } = new MessageChannel();
         mainPort.start();
 
         const send = (data: Json) => { mainPort.postMessage(data); }
-        const recieve = (cb: (data: Json) => void) => {
-            mainPort.onmessage = (event) => cb(event.data || {});
+        const receive = (cb: (data: Json) => void | Promise<void>) => {
+            mainPort.onmessage = (event) => {
+                cb(event.data || {});
+            }
         }
         add_port_init_event_listener(iframe, iframePort, () => resume(Effect.succeed({
             send,
-            recieve
+            receive
         })));
-
-        return Effect.never;
     }).pipe(
-        Effect.timeout(10000)
+        Effect.timeout(10000),
+        Effect.catchAll(() => Effect.succeed(new Error("Timeout when registering channel"))),
+        Effect.runPromise
     );
 }
 

@@ -1,5 +1,5 @@
-import { Bridge, PluginEnvironment } from "pc-messaging-kernel/pluginSystem/plugin";
-import execute_plugin from "../../lib/connect";
+import { execute_plugin } from "../../lib/connect";
+import { Bridge, PluginEnvironment } from "pc-messaging-kernel/plugin";
 
 const closeButton = document.getElementById("close")!;
 const closeRightButton = document.getElementById("close-right")!;
@@ -21,7 +21,7 @@ execute_plugin(async (env: PluginEnvironment) => {
         });
     });
 
-    env.on_remove(async (data) => {
+    env.on_remove(async () => {
         console.log("Plugin::on remove");
         if (main_plugin_bridge) {
             await main_plugin_bridge.send("close");

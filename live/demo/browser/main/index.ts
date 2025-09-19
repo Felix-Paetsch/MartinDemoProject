@@ -1,21 +1,20 @@
-import { Effect } from "effect";
-import { LogInvestigator } from "pc-messaging-kernel/debug";
-import { LocalAddress } from "pc-messaging-kernel/messaging";
-import { createLocalEnvironment } from "pc-messaging-kernel/pluginSystem/common";
-import { EffectToResult, ResultToEffect } from "pc-messaging-kernel/utils";
+import { Logging, Failure } from "pc-messaging-kernel/messaging";
 import "../local_plugins/main.css";
 import { KernelImpl } from "./kernel/index";
 
 declare global {
-    var logInverstigator: LogInvestigator;
+    var logInverstigator: Logging.LogInvestigator
 }
 
-Effect.gen(function* () {
-    const kernel_address = new LocalAddress("KERNEL");
-    const kernel_env = yield* createLocalEnvironment(kernel_address);
-    const kernel = new KernelImpl(kernel_env);
-    yield* ResultToEffect(kernel.start());
-}).pipe(
-    Effect.catchAll(e => Effect.succeed(console.log(e))),
-    EffectToResult
-)
+Failure.setAnomalyHandler((e) => {
+    console.log(e);
+    throw e;
+});
+Failure.setErrorHandler((e) => {
+    console.log(e);
+    throw e;
+});
+
+globalThis.logInverstigator = new Logging.LogInvestigator();
+const kernel = new KernelImpl();
+kernel.start() //.then(r => console.log(r));

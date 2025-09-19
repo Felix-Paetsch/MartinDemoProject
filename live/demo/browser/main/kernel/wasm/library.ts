@@ -1,11 +1,12 @@
 import { Effect } from "effect";
-import { AbstractLibraryImplementation } from "pc-messaging-kernel/pluginSystem/library";
+import { AbstractLibraryImplementation } from "pc-messaging-kernel/kernel";
 import { CallbackError } from "pc-messaging-kernel/utils";
 import { getQuickJS, QuickJSContext, Scope } from "quickjs-emscripten";
 import { expose_partial } from "./expose";
 
 const QuickJS = getQuickJS();
-export const createJSWASMLibrary = Effect.fn("createJSWASMLibrary")(
+
+export const createJSWASMLibraryEffect = Effect.fn("createJSWASMLibrary")(
     function* (code: string) {
         const qjs = yield* Effect.tryPromise({
             try: () => QuickJS,
@@ -88,3 +89,8 @@ const exposeGlobals = Effect.fn("exposeGlobals")(
             console
         );
     });
+
+export const createJSWASMLibrary = (code: string) => createJSWASMLibraryEffect(code).pipe(
+    Effect.merge,
+    Effect.runPromise
+);
