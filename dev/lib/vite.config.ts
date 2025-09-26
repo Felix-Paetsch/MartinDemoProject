@@ -11,7 +11,8 @@ export default defineConfig({
                 'pluginSystem/kernel_exports': 'src/pluginSystem/kernel_exports.ts',
                 'pluginSystem/plugin_exports': 'src/pluginSystem/plugin_exports.ts',
                 'messaging/exports': 'src/messaging/exports.ts',
-                'utils/exports': 'src/utils/exports.ts'
+                'utils/exports': 'src/utils/exports.ts',
+                "index": 'src/index.ts'
             },
             formats: ['es']
         },
