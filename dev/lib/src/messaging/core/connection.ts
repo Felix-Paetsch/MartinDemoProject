@@ -116,8 +116,7 @@ export class Connection {
         Connection.open_connections.splice(Connection.open_connections.indexOf(this), 1);
     }
 
-    open(): this {
-        // Errors: AddressAlreadyInUseError
+    open(): this | AddressAlreadyInUseError {
         if (this.is_open()) {
             return this;
         }
@@ -126,12 +125,12 @@ export class Connection {
             return Equal.equals(c.address, this.address)
                 || Equal.equals(this.address, Address.local_address)
         })) {
-            throw new AddressAlreadyInUseError({ address: this.address });
+            return new AddressAlreadyInUseError({ address: this.address });
         }
 
         this._is_open = true;
         Connection.open_connections.push(this);
-        return this;
+        return this
     }
 
     is_open(): boolean { return this._is_open; }
@@ -172,12 +171,14 @@ export class PortConnection extends Connection {
         );
     }
 
-    open(): this {
+    open(): this | AddressAlreadyInUseError {
         if (this.is_open()) {
             return this;
         }
-        super.open();
-        this.port.open();
+        const r1 = super.open();
+        if (r1 instanceof AddressAlreadyInUseError) return r1;
+        const r2 = this.port.open();
+        if (r2 instanceof AddressAlreadyInUseError) return r2;
         return this;
     }
 

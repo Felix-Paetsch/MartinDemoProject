@@ -4,6 +4,7 @@ import { Connection } from "../../../messaging/exports";
 import { Json } from "../../../utils/json";
 import { PrimitiveMessageChannel, Synchronizer } from "./synchronizer";
 import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_ident";
+import { AddressAlreadyInUseError } from "../../../messaging/core/errors/errors";
 
 export type PluginInitializationError = Error;
 
@@ -35,7 +36,10 @@ export async function initializeExternalPlugin_KernelSide(
             Deferred.succeed(awaitEvaluated, 0).pipe(Effect.runSync)
         });
 
-        yield* Effect.try(() => connection.open());
+        const r = connection.open();
+        if (r instanceof AddressAlreadyInUseError) {
+            return yield* Effect.fail(r);
+        }
 
         return {
             connection,

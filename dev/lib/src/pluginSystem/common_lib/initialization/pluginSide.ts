@@ -4,6 +4,7 @@ import { Failure, Address, Connection, Json, Logging, Port } from "../../../mess
 import { PrimitiveMessageChannel } from "./synchronizer";
 import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_ident";
 import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
+import { AddressAlreadyInUseError } from "../../../messaging/core/errors/errors";
 
 Failure.setAnomalyHandler((e) => {
     console.log(e);
@@ -35,6 +36,10 @@ export async function initializeExternalPlugin_PluginSide(
                     Address.generic(_data.kernel_process_id),
                     (msg) => synchronizer.call_command("send_message", msg)
                 ).open();
+
+                if (connection instanceof AddressAlreadyInUseError) {
+                    throw connection;
+                }
 
                 synchronizer.add_command("send_message", (data: Json) => {
                     return connection.receive(data as any);

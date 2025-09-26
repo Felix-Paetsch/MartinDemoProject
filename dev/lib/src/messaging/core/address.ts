@@ -1,12 +1,12 @@
 import { Effect, Equal, Hash, Schema } from "effect";
-import uuidv4 from "../../utils/uuid";
+import uuidv4, { type UUID } from "../../utils/uuid";
 import { deserializeAddressFromUnknown } from "../../messagingEffect/schemas";
 import { SerializedAddressSchema } from "../../messagingEffect/schemas";
 import { AddressDeserializationError } from "./errors/anomalies";
 
 export namespace Address {
-    export type ProcessID = string;
-    export type PortID = string;
+    export type ProcessID = UUID;
+    export type PortID = UUID;
 
     export type SerializedAddress = {
         process_id: ProcessID;
@@ -27,11 +27,11 @@ export class Address implements Equal.Equal {
         this._port = port;
     }
 
-    get process_id(): string {
+    get process_id(): Address.ProcessID {
         return this._process_id;
     }
 
-    get port(): string {
+    get port(): Address.PortID {
         return this._port;
     }
 
@@ -96,7 +96,7 @@ export class Address implements Equal.Equal {
         return new LocalAddress("*");
     }
 
-    static new_local_address = (port: string = uuidv4()) => {
+    static new_local_address = (port: Address.PortID = uuidv4()) => {
         return new LocalAddress(port);
     }
 }

@@ -2,7 +2,7 @@ import { Address, LocalAddress } from "./address";
 import { isMiddlewareContinue, Middleware, MiddlewareInterrupt } from "./middleware";
 import { Message, TransmittableMessage } from "./message";
 import { Effect, Schema } from "effect";
-import { HandledError, IgnoreHandled, PortClosedError } from "./errors/errors";
+import { AddressAlreadyInUseError, HandledError, IgnoreHandled, PortClosedError } from "./errors/errors";
 import { applyMiddlewareEffect } from "./middleware";
 import { Connection, PortConnection } from "./connection";
 import { MessageFromString } from "../../messagingEffect/schemas";
@@ -68,13 +68,13 @@ export default class Port {
         this.connection.close();
     }
 
-    open(): this {
-        // Errors: AddressAlreadyInUseError
+    open(): this | AddressAlreadyInUseError {
         if (this.is_open()) {
             return this;
         }
 
-        this.connection.open();
+        const res = this.connection.open();
+        if (res instanceof AddressAlreadyInUseError) return res;
         this._is_open = true;
         Port.open_ports.push(this);
         return this;

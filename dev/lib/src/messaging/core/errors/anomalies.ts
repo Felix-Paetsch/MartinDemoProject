@@ -2,7 +2,7 @@ import { Data, Effect } from "effect";
 import { Address } from "../address";
 import { Message, SerializedMessage, TransmittableMessage } from "../message";
 import { applyAnomalyHandler } from "./main";
-import { Middleware, MiddlewareInterrupt, MiddlewarePassthrough } from "../middleware";
+import { MiddlewareInterrupt, MiddlewarePassthrough } from "../middleware";
 
 export class AddressNotFound extends Error {
     constructor(readonly address: Address) {
@@ -46,7 +46,7 @@ export class ReportedAnomaly extends Error {
 
 export type Anomaly = AddressNotFound | MessageSerializationError | MessageDeserializationError | MessageChannelTransmissionError | ReportedAnomaly;
 
-export function reportAnomaly(anomaly: Error): MiddlewarePassthrough {
+export function reportAnomaly(anomaly: Error): typeof MiddlewareInterrupt {
     applyAnomalyHandler(new ReportedAnomaly(anomaly)).pipe(Effect.runPromise);
     return MiddlewareInterrupt;
 }

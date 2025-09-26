@@ -24,8 +24,8 @@ const WhoToWho: boolean[] = [
 ];
 
 (async () => {
-    const p1 = new Port("Test1").open();
-    const p2 = new Port("Test2").open();
+    const p1 = new Port("Test1").open() as Port;
+    const p2 = new Port("Test2").open() as Port;
 
     (p1 as any)._id = "P1";
     (p2 as any)._id = "P2";
