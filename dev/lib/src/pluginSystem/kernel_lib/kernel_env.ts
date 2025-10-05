@@ -9,7 +9,7 @@ import { PluginReference } from "./external_references/plugin_reference";
 import uuidv4 from "../../utils/uuid";
 import { Json } from "../../messaging/core/message";
 import { Address } from "../../messaging/exports";
-import { AnythingTranscoder } from "../../middleware/protocol";
+import { AnythingTranscoder } from "../../utils/transcoder";
 
 export type GetPluginError = Error;
 

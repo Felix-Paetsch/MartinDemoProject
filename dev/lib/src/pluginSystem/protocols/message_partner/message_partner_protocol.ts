@@ -1,4 +1,4 @@
-import { Protocol, protocol, SchemaTranscoder } from "../../../middleware/protocol";
+import { Protocol, protocol } from "../../../middleware/protocol";
 import { MessagePartner } from "../../plugin_lib/message_partner/base";
 import MessageChannel from "../../../middleware/channel";
 import { deferred } from "../../../utils/defer";

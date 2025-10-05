@@ -24,7 +24,7 @@ export async function initializeExternalPlugin_KernelSide(
         );
 
         synchronizer.add_command("send_message", (data: Json) => {
-            return connection.receive(data as any);
+            return connection.recieve(data as any);
         });
 
         yield* Effect.promise(() => synchronizer.sync()).pipe(

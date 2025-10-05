@@ -1,11 +1,12 @@
 
 import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
-import { protocol, Protocol, AnythingTranscoder, send_await_response_transcoded, SchemaTranscoder, receive_transcoded, send_transcoded } from "../../../middleware/protocol";
 import { KernelEnvironment } from "../../kernel_lib/kernel_env";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
 import MessageChannel from "../../../middleware/channel";
 import { Effect, Schema } from "effect";
 import { Json } from "../../../messaging/core/message";
+import { protocol } from "../../../middleware/protocol";
+import { Transcoder } from "../../../utils/exports";
 
 const kernelMessageSchema = Schema.Struct({
     data: Schema.Any,
@@ -17,9 +18,8 @@ export const send_kernel_message = protocol(
     KernelEnvironment.findTranscoder,
     KernelEnvironment.find,
     async (mc: MessageChannel, initiator: PluginEnvironment, data: Json) => {
-        await send_transcoded(
-            mc,
-            SchemaTranscoder(kernelMessageSchema),
+        await mc.send_encoded(
+            Transcoder.SchemaTranscoder(kernelMessageSchema),
             {
                 data,
                 plugin: initiator.plugin_ident
@@ -27,8 +27,8 @@ export const send_kernel_message = protocol(
         );
     },
     async (mc: MessageChannel, responder: KernelEnvironment) => {
-        const message = await receive_transcoded(
-            mc, SchemaTranscoder(kernelMessageSchema)
+        const message = await mc.next_decoded(
+            Transcoder.SchemaTranscoder(kernelMessageSchema)
         );
         if (message instanceof Error) return;
         responder.recieve_plugin_message(message.data, message.plugin);

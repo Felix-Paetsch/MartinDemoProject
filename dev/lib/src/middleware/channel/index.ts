@@ -9,8 +9,9 @@ import { OpenChannelBodySchema } from "./schemas/open";
 import { Json } from "../../utils/json";
 import { CloseMessageBodySchema } from "./schemas/close";
 import { processMessageChannelMessage } from "./middleware";
+import { Transcoder } from "../../utils/exports";
 
-export type ReceiveMessageError = Error;
+export type recieveMessageError = Error;
 
 export type MessageChannelProcessorName = string;
 export type ChannelMessage = Json;
@@ -26,7 +27,7 @@ export default class MessageChannel {
     private message_promise_queue: [string, (message: ChannelMessage) => void][] = [];
     private _inactivity_timeout: NodeJS.Timeout | null = null;
     public readonly config: MessageChannelConfig;
-    public last_message_received: number = Date.now();
+    public last_message_recieved: number = Date.now();
 
     public readonly context: MessageChannelInitializationContextWithId;
     constructor(
@@ -112,12 +113,12 @@ export default class MessageChannel {
         }));
     }
 
-    async send_await_response(data: ChannelMessage) {
+    async send_await_next(data: ChannelMessage) {
         await this.send(data);
         return await this.next();
     }
 
-    next(timeout?: number): Promise<ChannelMessage | ReceiveMessageError> {
+    next(timeout?: number): Promise<ChannelMessage | recieveMessageError> {
         return Effect.gen(this, function* () {
             if (this.message_queue.length > 0) {
                 return this.message_queue.shift()!;
@@ -128,7 +129,7 @@ export default class MessageChannel {
             }
 
             const key = uuidv4();
-            const deferred = yield* Deferred.make<ChannelMessage, ReceiveMessageError>();
+            const deferred = yield* Deferred.make<ChannelMessage, recieveMessageError>();
             const effectiveTimeout = Math.min(timeout || this.config.defaultMessageTimeout || 2000, 60000);
             const timeout_duration = Duration.millis(effectiveTimeout);
             const deferred_with_timeout = Deferred.await(deferred).pipe(
@@ -162,6 +163,27 @@ export default class MessageChannel {
         )
     }
 
+    async send_encoded<R>(encoder: Transcoder.Encoder<R, any>, data: R) {
+        const r = await encoder.encode(data);
+        if (r instanceof Error) return r;
+        return await this.send(r);
+    }
+
+    async next_decoded<R>(decoder: Transcoder.Decoder<R, any>) {
+        const r = await this.next();
+        if (r instanceof Error) return r;
+        return await decoder.decode(r);
+    }
+
+
+    async send_await_next_transcoded<R, S>(EncodeSend: Transcoder.Encoder<R, any>, data: R, DecodeNext: Transcoder.Decoder<S, any>) {
+        const r1 = await EncodeSend.encode(data);
+        if (r1 instanceof Error) return r1;
+        const r2 = await this.send_await_next(r1);
+        if (r2 instanceof Error) return r2;
+        return await DecodeNext.decode(r2);
+    }
+
     static register_processor(name: MessageChannelProcessorName, processor: MessageChannelProcessor) {
         MessageChannel.processors.set(name, processor);
     }
@@ -182,7 +204,7 @@ export default class MessageChannel {
     }
 
     __on_message(message: ChannelMessage) {
-        this.last_message_received = Date.now();
+        this.last_message_recieved = Date.now();
         this.#startInactivityTimeout();
         if (this.message_promise_queue.length > 0) {
             const [_key, resolve] = this.message_promise_queue.shift()!;

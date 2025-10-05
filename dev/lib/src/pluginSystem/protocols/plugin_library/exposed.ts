@@ -1,12 +1,12 @@
-
-import { Protocol, protocol, receive_transcoded, SchemaTranscoder, send_await_response_transcoded } from "../../../middleware/protocol";
 import LibraryMessagePartner from "../../plugin_lib/message_partner/library";
 import { LibraryEnvironment, libraryIdentSchema } from "../../library/library_environment";
 import { Json } from "../../../utils/json";
 import { Schema } from "effect";
 import MessageChannel from "../../../middleware/channel";
+import { Transcoder } from "../../../utils/exports";
+import { protocol, Protocol } from "../../../middleware/protocol";
 
-const responseTranscoder = SchemaTranscoder(Schema.Array(Schema.String));
+const responseTranscoder = Transcoder.SchemaTranscoder(Schema.Array(Schema.String));
 
 export const get_exposed_protocol: Protocol<LibraryMessagePartner, LibraryEnvironment, null, {
     readonly name: string;
@@ -16,7 +16,7 @@ export const get_exposed_protocol: Protocol<LibraryMessagePartner, LibraryEnviro
     LibraryEnvironment.findTranscoder,
     LibraryEnvironment.find,
     async (mc: MessageChannel, initiator: LibraryMessagePartner) => {
-        return await receive_transcoded(mc, responseTranscoder);
+        return await mc.next_decoded(responseTranscoder);
     },
     async (mc: MessageChannel, responder: LibraryEnvironment) => {
         const res = await Promise.resolve(responder.implementation.exposes())

@@ -1,7 +1,8 @@
 import { Schema } from "effect";
 import { Failure, Address, Port, Json } from "../../messaging/exports";
 import MessageChannel, { MessageChannelProcessor } from "../channel";
-import { TransactionInitDataSchema, Transcoder } from ".";
+import { TransactionInitDataSchema } from ".";
+import { Transcoder } from "../../utils/transcoder";
 
 const ProtocolMap: Map<string, {
     responderIdent: Transcoder<any, any>;

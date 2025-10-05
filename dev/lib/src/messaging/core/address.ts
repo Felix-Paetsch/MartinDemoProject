@@ -12,6 +12,8 @@ export namespace Address {
         process_id: ProcessID;
         port: PortID;
     };
+
+    export type StringSerializedAddress = `${string}::${string}`
 }
 
 export class Address implements Equal.Equal {
@@ -35,7 +37,7 @@ export class Address implements Equal.Equal {
         return this._port;
     }
 
-    toString() {
+    toString(): Address.StringSerializedAddress {
         return `${this.process_id}::${this.port}`
     }
 
@@ -74,8 +76,21 @@ export class Address implements Equal.Equal {
         return Schema.encodeSync(SerializedAddressSchema)(this);
     }
 
+    static fromString(s: Address.StringSerializedAddress): Address {
+        const parts = s.split("::");
+        return new Address(parts[0], parts[1]);
+    }
+
+    static from_unknownString(s: unknown): Address | AddressDeserializationError {
+        if (typeof s !== "string") return new AddressDeserializationError(s);
+        const parts = s.split("::");
+        if (parts.length !== 2 || parts[0]?.length == 0 || parts[1]?.length === 0) {
+            return new AddressDeserializationError(s);
+        }
+        return new Address(parts[0], parts[1]);
+    }
+
     static deserialize(serialized: Address.SerializedAddress): Address {
-        // Errors: AddressDeserializationError
         return deserializeAddressFromUnknown(serialized).pipe(
             Effect.runSync
         );

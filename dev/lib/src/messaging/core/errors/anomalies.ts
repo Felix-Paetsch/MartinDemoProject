@@ -33,8 +33,8 @@ export class MessageChannelTransmissionError extends Data.TaggedError("MessageCh
 }
 
 export class AddressDeserializationError extends Error {
-    constructor(readonly address: any) {
-        super("Address not deserializable", { cause: address });
+    constructor(readonly wanna_be_address: any) {
+        super("Address not deserializable", { cause: wanna_be_address });
     }
 }
 

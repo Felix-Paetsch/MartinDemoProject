@@ -5,7 +5,9 @@ import { Json } from "./../../../utils/json";
 import { send_message } from "../../protocols/message_partner/send_message";
 import { promisify } from "../../../utils/promisify";
 import { Schema } from "effect";
-import { SchemaTranscoder } from "../../../middleware/protocol";
+import { is_responsive } from "../../protocols/message_partner/is_responsive";
+import { PluginEnvironment } from "../plugin_environment";
+import { Transcoder } from "../../../utils/exports";
 
 export type MessagePartnerPairDistinguisher = boolean;
 
@@ -27,8 +29,18 @@ export class MessagePartner {
         }
     }
 
+    get env(): PluginEnvironment {
+        return this.root_message_partner.env;
+    }
+
     get is_removed() {
         return this.removed
+    }
+
+    async is_responsive(max_timeout = 3000): Promise<boolean> {
+        const res: boolean | Error = await this.run_message_partner_protocol(is_responsive, "");
+        if (res instanceof Error) return false;
+        return res;
     }
 
     get own_uuid(): string {
@@ -42,7 +54,7 @@ export class MessagePartner {
     remove() {
         if (this.is_removed) return;
         this.removed = true;
-        this.#send_message_partner_message("remove");
+        this._send_message_partner_message("remove");
         this._internal_remove();
     }
     async _internal_remove(trigger_callback = true) {
@@ -66,15 +78,41 @@ export class MessagePartner {
         this.on_remove_cb = promisify(cb);
     }
 
-
-    _trigger_on_message_partner_message(msg: Json) {
-        if (msg === "remove") {
-            return this._internal_remove();
-        }
+    send_message(msg: Json) {
+        return this._send_message_partner_message("user_message", msg);
     }
 
-    #send_message_partner_message(msg: Json) {
-        this.run_message_partner_protocol(send_message, msg);
+    __on_message_cb: (data: Json) => Promise<void> = () => Promise.resolve();
+    on_message(cb: (data: Json) => void) {
+        this.__on_message_cb = (data) => Promise.resolve(cb(data));
+        this._send_message_partner_message("user_message_listener_registered");
+    }
+    __on_listener_registered_cb: (b: any) => Promise<void> = () => Promise.resolve();
+    on_listener_registered(cb: (b: typeof this) => void) {
+        this.__on_listener_registered_cb = (b) => Promise.resolve(cb(b));
+    }
+
+    async _trigger_on_message_partner_message(type: string, data: Json) {
+        if (type === "remove") {
+            await this._internal_remove();
+            return true;
+        }
+        if (type === "user_message") {
+            await this.__on_message_cb(data);
+            return true;
+        }
+        if (type === "user_message_listener_registered") {
+            await this.__on_listener_registered_cb(this);
+            return true;
+        }
+        return false;
+    }
+
+    _send_message_partner_message(type: string, data: Json = "") {
+        return this.run_message_partner_protocol(send_message, {
+            type,
+            data
+        });
     }
     protected run_message_partner_protocol<
         Responder extends MessagePartner,
@@ -100,6 +138,6 @@ export class MessagePartner {
     }
 
     static get findTranscoder() {
-        return SchemaTranscoder(Schema.String)
+        return Transcoder.SchemaTranscoder(Schema.String)
     }
 }

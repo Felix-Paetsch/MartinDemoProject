@@ -1,9 +1,9 @@
 import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
-import { protocol, Protocol, send_await_response_transcoded, receive_transcoded, send_transcoded } from "../../../middleware/protocol";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
 import MessageChannel from "../../../middleware/channel";
 import { type PluginReference } from "../../kernel_lib/external_references/plugin_reference";
 import { deferred } from "../../../utils/defer";
+import { protocol } from "../../../middleware/protocol";
 
 export type GetPluginError = Error;
 export const remove_plugin_protocol = protocol(

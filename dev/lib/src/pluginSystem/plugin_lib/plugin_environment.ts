@@ -5,7 +5,6 @@ import { EnvironmentCommunicator } from "../common_lib/environments/environment_
 import PluginMessagePartner from "./message_partner/plugin_message_partner";
 import { PluginIdent, PluginIdentWithInstanceId, pluginIdentWithInstanceIdSchema } from "./plugin_ident";
 import { KernelEnvironment } from "../kernel_lib/kernel_env";
-import { Protocol, SchemaTranscoder } from "../../middleware/protocol";
 import { get_plugin_from_kernel, make_plugin_message_partner } from "../protocols/plugin_kernel/get_plugin";
 import { LibraryIdent } from "../library/library_environment";
 import LibraryMessagePartner from "./message_partner/library";
@@ -13,6 +12,8 @@ import { get_library } from "../protocols/plugin_kernel/get_library";
 import { Logging } from "../../messaging/exports"
 import { send_kernel_message } from "../protocols/plugin_kernel/kernel_message";
 import { Schema } from "effect";
+import { Protocol } from "../../middleware/protocol";
+import { Transcoder } from "../../utils/exports";
 
 export type Plugin = (env: PluginEnvironment) => void | Promise<void>;
 
@@ -147,7 +148,7 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     }
 
     static get findTranscoder() {
-        return SchemaTranscoder(Schema.Union(
+        return Transcoder.SchemaTranscoder(Schema.Union(
             pluginIdentWithInstanceIdSchema, Schema.String
         ))
     }

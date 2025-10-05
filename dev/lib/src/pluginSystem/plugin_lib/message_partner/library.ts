@@ -1,11 +1,11 @@
 import { MessagePartner, MessagePartnerPairDistinguisher } from "./base";
 import { Address } from "../../../messaging/exports";
 import { LibraryEnvironment, LibraryIdent } from "../../library/library_environment";
-import { PluginEnvironment } from "../plugin_environment";
 import { Json } from "../../../utils/json";
 import { Protocol } from "../../../middleware/protocol";
 import { call_protocol } from "../../protocols/plugin_library/call";
 import { get_exposed_protocol } from "../../protocols/plugin_library/exposed";
+import { PluginEnvironment } from "../plugin_environment";
 
 export type LibraryDescriptor = {
     address: Address;
@@ -15,7 +15,7 @@ export type LibraryDescriptor = {
 export default class LibraryMessagePartner extends MessagePartner {
     constructor(
         readonly library_descriptor: LibraryDescriptor,
-        readonly env: PluginEnvironment,
+        private _env: PluginEnvironment,
         readonly uuid: string
     ) {
         super(uuid, null as any);
@@ -24,7 +24,11 @@ export default class LibraryMessagePartner extends MessagePartner {
         (this as any).pair_distinguisher = own_part_distinguisher;
         (this as any).root_message_partner = this;
 
-        env.library_message_partners.push(this);
+        this.env.library_message_partners.push(this);
+    }
+
+    get env() {
+        return this._env;
     }
 
     get address() {

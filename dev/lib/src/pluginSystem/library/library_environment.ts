@@ -2,7 +2,7 @@ import { Schema, Effect } from "effect";
 import { Address, Port } from "../../messaging/exports";
 import { AbstractLibraryImplementation } from "./library_implementation";
 import { EnvironmentCommunicator } from "../common_lib/environments/environment_communicator";
-import { SchemaTranscoder } from "../../middleware/protocol";
+import { Transcoder } from "../../utils/exports";
 
 export const libraryIdentSchema = Schema.Struct({
     name: Schema.String,
@@ -40,6 +40,6 @@ export class LibraryEnvironment extends EnvironmentCommunicator {
     }
 
     static get findTranscoder() {
-        return SchemaTranscoder(libraryIdentSchema);
+        return Transcoder.SchemaTranscoder(libraryIdentSchema);
     }
 }

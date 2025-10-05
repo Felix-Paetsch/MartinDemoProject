@@ -115,7 +115,7 @@ export class MessageLogCollection extends LogCollection {
         });
     }
 
-    at_receiver() {
+    at_reciever() {
         return this.filter(log => {
             return log.meta_data.annotation?.at_target;
         });

@@ -24,13 +24,13 @@ export function deferedObj<S extends Record<string, any>>(
     };
 
     const handler: ProxyHandler<S> = {
-        get(_obj, prop, receiver) {
+        get(_obj, prop, reciever) {
             const real = getTarget();
-            return Reflect.get(real, prop, receiver);
+            return Reflect.get(real, prop, reciever);
         },
-        set(_obj, prop, value, receiver) {
+        set(_obj, prop, value, reciever) {
             const real = getTarget();
-            return Reflect.set(real, prop, value, receiver);
+            return Reflect.set(real, prop, value, reciever);
         },
         has(_obj, prop) {
             return prop in getTarget();
@@ -65,11 +65,11 @@ export function deferred(factory: () => any): any {
     };
 
     const handler: ProxyHandler<any> = {
-        get(_obj, prop, receiver) {
-            return Reflect.get(getTarget(), prop, receiver);
+        get(_obj, prop, reciever) {
+            return Reflect.get(getTarget(), prop, reciever);
         },
-        set(_obj, prop, value, receiver) {
-            return Reflect.set(getTarget(), prop, value, receiver);
+        set(_obj, prop, value, reciever) {
+            return Reflect.set(getTarget(), prop, value, reciever);
         },
         has(_obj, prop) {
             return prop in getTarget();

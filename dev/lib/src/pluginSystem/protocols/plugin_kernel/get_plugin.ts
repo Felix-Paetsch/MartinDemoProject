@@ -1,5 +1,4 @@
 import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
-import { protocol, Protocol, AnythingTranscoder, send_await_response_transcoded, SchemaTranscoder, receive_transcoded, send_transcoded } from "../../../middleware/protocol";
 import { KernelEnvironment } from "../../kernel_lib/kernel_env";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
 import MessageChannel from "../../../middleware/channel";
@@ -8,6 +7,8 @@ import { AddressFromString } from "../../../messagingEffect/schemas";
 import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
 import uuidv4 from "../../../utils/uuid";
 import { deferred } from "../../../utils/defer";
+import { protocol } from "../../../middleware/protocol";
+import { Transcoder } from "../../../utils/exports";
 
 const pluginData = Schema.Struct({
     address: AddressFromString,
@@ -20,19 +21,18 @@ export const get_plugin_from_kernel = protocol(
     KernelEnvironment.findTranscoder,
     KernelEnvironment.find,
     async (mc: MessageChannel, initiator: PluginEnvironment, plugin_ident: PluginIdent) => {
-        return await send_await_response_transcoded(
-            mc,
-            SchemaTranscoder(pluginIdentSchema),
+        return await mc.send_await_next_transcoded(
+            Transcoder.SchemaTranscoder(pluginIdentSchema),
             plugin_ident,
-            SchemaTranscoder(pluginData)
+            Transcoder.SchemaTranscoder(pluginData)
         );
     },
     async (mc: MessageChannel, responder: KernelEnvironment) => {
-        const plugin_ident = await receive_transcoded(mc, SchemaTranscoder(pluginIdentSchema));
+        const plugin_ident = await mc.next_decoded(Transcoder.SchemaTranscoder(pluginIdentSchema));
         if (plugin_ident instanceof Error) return;
         const plugin = await responder.get_plugin(plugin_ident);
         if (plugin instanceof Error) return;
-        await send_transcoded(mc, SchemaTranscoder(pluginData), {
+        await mc.send_encoded(Transcoder.SchemaTranscoder(pluginData), {
             address: plugin.address,
             plugin_ident: plugin.plugin_ident
         });
@@ -51,15 +51,14 @@ export const make_plugin_message_partner = protocol(
     deferred(() => PluginEnvironment.find),
     async (mc: MessageChannel, initiator: PluginEnvironment, plugin_ident: typeof pluginData.Type) => {
         const mp_uuid = uuidv4();
-        const res = await send_await_response_transcoded(
-            mc,
-            SchemaTranscoder(getPluginMessageData),
+        const res = await mc.send_await_next_transcoded(
+            Transcoder.SchemaTranscoder(getPluginMessageData),
             {
                 mp_uuid,
                 plugin_ident: initiator.plugin_ident,
                 address: initiator.address
             },
-            AnythingTranscoder
+            Transcoder.AnythingTranscoder
         );
         if (res instanceof Error) return res;
         return new PluginMessagePartner(
@@ -70,7 +69,7 @@ export const make_plugin_message_partner = protocol(
         );
     },
     async (mc: MessageChannel, responder: PluginEnvironment) => {
-        const data = await receive_transcoded(mc, SchemaTranscoder(getPluginMessageData));
+        const data = await mc.next_decoded(Transcoder.SchemaTranscoder(getPluginMessageData));
         if (data instanceof Error) return;
         const mp = new PluginMessagePartner(
             {
