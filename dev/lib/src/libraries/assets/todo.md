@@ -1,3 +1,9 @@
+Clean up the protocol folder a bit more
+Clean up the plugin folder
+Make things more changable
+Move to reasonable File Store
+
+ api to create system files
     /*
 
      * 

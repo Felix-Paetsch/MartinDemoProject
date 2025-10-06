@@ -1,3 +1,5 @@
+import { AssetPlugin } from "./plugin/plugin";
+
 export {
     type ManagedFile,
     create_managed_file,
@@ -13,5 +15,8 @@ export type {
     FileReference,
     FileContents,
     File,
-    RecencyToken
+    RecencyToken,
+    MetaData
 } from "./types"
+
+export const __Plugin = AssetPlugin;

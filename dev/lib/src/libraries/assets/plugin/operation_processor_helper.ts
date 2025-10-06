@@ -1,7 +1,6 @@
-import { Address } from "../../../messaging/exports";
 import { File, FileReference } from "../exports";
-import { fileStore, OperationProcessingResult } from "./file_store";
-import { active_subscriptions } from "./plugin";
+import { FileDescription } from "../types";
+import { fileStore, OperationProcessingResult } from "./file_operation_processors";
 
 export function set_file_response(res: OperationProcessingResult, fr: File | FileReference) {
     let file: File | undefined;
@@ -14,6 +13,13 @@ export function set_file_response(res: OperationProcessingResult, fr: File | Fil
         return new Error(`File "${fr}" not found`);
     }
     res.fileReferences[file.meta_data.fileReference] = file;
+}
+
+export function get_description(f: File): FileDescription {
+    return {
+        recency_token: f.recency_token,
+        meta_data: f.meta_data
+    }
 }
 
 export function set_description_response(res: OperationProcessingResult, fr: File | FileReference) {
@@ -29,10 +35,7 @@ export function set_description_response(res: OperationProcessingResult, fr: Fil
 
     const ffr = file.meta_data.fileReference;
     if (!res.fileReferences[ffr]) {
-        res.fileReferences[ffr] = {
-            recency_token: file.recency_token,
-            meta_data: file.meta_data
-        }
+        res.fileReferences[ffr] = get_description(file);
     }
 
     if (res.fileReferences[ffr].contents) {

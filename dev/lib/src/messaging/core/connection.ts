@@ -10,18 +10,16 @@ import { MessageFromString } from "../../messagingEffect/schemas";
 import { applyMiddlewareEffect } from "./middleware";
 import { core_send } from "./core_send";
 import { callbackToEffect } from "./errors/main";
+import { promisify } from "../../utils/exports";
 
-function TransmittableMessageToSerializedMessage(msg: TransmittableMessage): SerializedMessage {
+function TransmittableMessageToSerializedMessage(msg: TransmittableMessage) {
     if (typeof msg === "string") {
         return msg;
     }
     try {
         return msg.serialize();
     } catch (e) {
-        HandledError.handleA(e as MessageSerializationError).pipe(
-            Effect.runPromise
-        );
-        throw e;
+        return e as MessageSerializationError;
     }
 }
 
@@ -44,7 +42,15 @@ export class Connection {
     ) {
         return new Connection(
             address,
-            flow(TransmittableMessageToSerializedMessage, send)
+            (m: TransmittableMessage) => {
+                const res = TransmittableMessageToSerializedMessage(m);
+                if (res instanceof Error) {
+                    return HandledError.handleA(res as MessageSerializationError).pipe(
+                        Effect.runPromise
+                    );
+                }
+                return send(res as string);
+            }
         );
     }
 
@@ -58,9 +64,16 @@ export class Connection {
 
     update_send(send: (msg: SerializedMessage) => void | Promise<void>): void {
         this.update_sendTM(
-            (msg) => Promise.resolve(
-                send(TransmittableMessageToSerializedMessage(msg))
-            )
+            (m: TransmittableMessage) => {
+                const res = TransmittableMessageToSerializedMessage(m);
+                if (res instanceof Error) {
+                    HandledError.handleA(res as MessageSerializationError).pipe(
+                        Effect.runPromise
+                    );
+                    return Promise.resolve();
+                }
+                return promisify(send)(res as string);
+            }
         );
     }
 
@@ -68,7 +81,7 @@ export class Connection {
         this._send = send;
     }
 
-    recieve(msg: TransmittableMessage): Promise<void> {
+    receive(msg: TransmittableMessage): Promise<void> {
         const e: Effect.Effect<void> = Effect.gen(this, function* (this: Connection) {
             if (this.is_closed()) {
                 return;
@@ -167,7 +180,7 @@ export class PortConnection extends Connection {
     ) {
         super(
             port.address,
-            (m: TransmittableMessage) => port.__recieve_message(m)
+            (m: TransmittableMessage) => port.__receive_message(m)
         );
     }
 

@@ -1,13 +1,22 @@
-import { CreateOperationS } from "../operations/create";
-import { DeleteOperationS } from "../operations/delete";
-import { GetFileOperationS, GetMetaDataOperationS } from "../operations/file";
-import { ForeceWriteOperationS, WriteOperationS } from "../operations/write";
-import { PatchOperationS } from "../operations/patch";
-import { DeleteByMetaDataOperationS, FilterByMetaDataOperationS, ForceSetMetaDataOperationS, SetMetaDataOperationS, UpdateMetaDataOperationS } from "../operations/meta_data";
-import { ActiveFilesOperationS, AssetSideSubscriptionOperation, SubscribeOperationS, SubscriptionOperation, UnsubscribeOperationS } from "../operations/subscribe";
 import { Schema } from "effect";
+import { ClientSideSubscriptionOperation } from "./subscribe_client";
+import { ActiveFileReferencesOperationS, AssetSubscribeFileReferenceOperationS, AssetUnsubscribeFileReferenceOperationS } from "./subscribe_asset";
+import {
+    CreateOperationS,
+    DeleteByMetaDataOperationS,
+    DeleteOperationS,
+    FilterByMetaDataOperationS,
+    ForceSetMetaDataOperationS,
+    ForeceWriteOperationS,
+    GetFileOperationS,
+    GetMetaDataOperationS,
+    PatchOperationS,
+    SetMetaDataOperationS,
+    UpdateMetaDataOperationS,
+    WriteOperationS
+} from "./shared";
 
-const DataBaseOperationS = Schema.Union(
+const SharedOperationS = Schema.Union(
     CreateOperationS,
     DeleteOperationS,
     GetFileOperationS,
@@ -22,13 +31,12 @@ const DataBaseOperationS = Schema.Union(
     DeleteByMetaDataOperationS,
 );
 
-export const BaseOperationS = Schema.Union(
-    DataBaseOperationS,
-    SubscribeOperationS,
-    UnsubscribeOperationS,
-    ActiveFilesOperationS
+export type ClientSideOperation = Schema.Schema.Type<typeof SharedOperationS> | ClientSideSubscriptionOperation;
+
+export const AssetSideOperationS = Schema.Union(
+    SharedOperationS,
+    AssetSubscribeFileReferenceOperationS,
+    AssetUnsubscribeFileReferenceOperationS,
+    ActiveFileReferencesOperationS
 )
-
-export type AssetSideBaseOperation = Schema.Schema.Type<typeof BaseOperationS>;
-export type ClientSideBaseOperation = Schema.Schema.Type<typeof DataBaseOperationS> | SubscriptionOperation;
-
+export type AssetSideOperation = Schema.Schema.Type<typeof AssetSideOperationS>;

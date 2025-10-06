@@ -42,15 +42,7 @@ async function handShake(env: PluginEnvironment) {
     }
 
     current_plugins.push(plug1.plugin_ident);
-
-    const res_2 = await plug1.bridge();
-    if (res_2 instanceof Error) {
-        console.log(res_2);
-        throw res_2;
-    }
-
-    const bridge = res_2;
-    bridge.on((data) => {
+    plug1.on_message((data) => {
         if (data === "close") {
             const index = current_plugins.indexOf(plug1.plugin_ident);
             if (index !== -1) {

@@ -1,10 +1,11 @@
 import { PluginEnvironment, PluginMessagePartner, uuidv4 } from "../../../pluginSystem/plugin_exports"
 import { FileReference, File, RecencyToken, FileDescription } from "../types";
 import { FileContents } from "../types";
-import { ClientSideBaseOperation, perform_operation, perform_operations } from "../protocol/operations";
 import { mapSuccess, mapSuccessAsync } from "../../../utils/error_handling";
 import { JsonPatch } from "../../../utils/json-patch";
 import { SubscriptionCallback } from "./subscriptions";
+import { perform_operation, perform_operations } from "../protocol/operations";
+import { ClientSideOperation } from "../operations";
 
 function get_file(fr: FileReference, from: Awaited<ReturnType<typeof perform_operation>>) {
     return mapSuccess(
@@ -77,7 +78,7 @@ function get_description(fr: FileReference, from: Awaited<ReturnType<typeof perf
     );
 }
 
-export function create_operation(fr: FileReference = uuidv4(), meta_data: { [key: string]: string } = {}, contents: FileContents = ""): ClientSideBaseOperation {
+export function create_operation(fr: FileReference = uuidv4(), meta_data: { [key: string]: string } = {}, contents: FileContents = ""): ClientSideOperation {
     return {
         type: "CREATE",
         fr,
@@ -96,7 +97,7 @@ export function create(env: PluginEnvironment, fr: FileReference = uuidv4(), met
 }
 
 
-export function delete_file_operation(fr: FileReference): ClientSideBaseOperation {
+export function delete_file_operation(fr: FileReference): ClientSideOperation {
     return {
         type: "DELETE",
         fr
@@ -111,7 +112,7 @@ export function delete_file(env: PluginEnvironment, fr: FileReference) {
 }
 
 
-export function file_operation(fr: FileReference): ClientSideBaseOperation {
+export function file_operation(fr: FileReference): ClientSideOperation {
     return {
         type: "FILE",
         fr
@@ -126,7 +127,7 @@ export function file(env: PluginEnvironment, fr: FileReference): Promise<Error |
     })
 }
 
-export function description_operation(fr: FileReference): ClientSideBaseOperation {
+export function description_operation(fr: FileReference): ClientSideOperation {
     return {
         type: "DESCRIPTION",
         fr
@@ -147,7 +148,7 @@ export function meta_data(env: PluginEnvironment, fr: FileReference) {
     })
 }
 
-export function read_operation(fr: FileReference): ClientSideBaseOperation {
+export function read_operation(fr: FileReference): ClientSideOperation {
     return {
         type: "FILE",
         fr
@@ -162,7 +163,7 @@ export function read(env: PluginEnvironment, fr: FileReference) {
     })
 }
 
-export function write_operation(fr: FileReference, token: RecencyToken, contents: FileContents): ClientSideBaseOperation {
+export function write_operation(fr: FileReference, token: RecencyToken, contents: FileContents): ClientSideOperation {
     return {
         token,
         fr,
@@ -179,7 +180,7 @@ export function write(env: PluginEnvironment, fr: FileReference, token: RecencyT
     })
 }
 
-export function force_write_operation(fr: FileReference, contents: FileContents): ClientSideBaseOperation {
+export function force_write_operation(fr: FileReference, contents: FileContents): ClientSideOperation {
     return {
         fr,
         contents,
@@ -196,7 +197,7 @@ export function force_write(env: PluginEnvironment, fr: FileReference, contents:
 }
 
 
-export function patch_operation(fr: FileReference, token: RecencyToken, patches: JsonPatch.Operation[]): ClientSideBaseOperation {
+export function patch_operation(fr: FileReference, token: RecencyToken, patches: JsonPatch.Operation[]): ClientSideOperation {
     return {
         fr,
         patches,
@@ -210,7 +211,7 @@ export function patch(env: PluginEnvironment, fr: FileReference, token: RecencyT
     })
 }
 
-export function set_meta_data_operation(fr: FileReference, token: RecencyToken, meta_data: { [key: string]: string }): ClientSideBaseOperation {
+export function set_meta_data_operation(fr: FileReference, token: RecencyToken, meta_data: { [key: string]: string }): ClientSideOperation {
     return {
         fr,
         token,
@@ -225,7 +226,7 @@ export function set_meta_data(env: PluginEnvironment, fr: FileReference, token: 
 }
 
 
-export function force_set_meta_data_operation(fr: FileReference, meta_data: { [key: string]: string }): ClientSideBaseOperation {
+export function force_set_meta_data_operation(fr: FileReference, meta_data: { [key: string]: string }): ClientSideOperation {
     return {
         fr,
         type: "FORCE_SET_META_DATA",
@@ -238,7 +239,7 @@ export function force_set_meta_data(env: PluginEnvironment, fr: FileReference, m
     });
 }
 
-export function update_meta_data_operation(fr: FileReference, token: RecencyToken, update_with: { [key: string]: string }): ClientSideBaseOperation {
+export function update_meta_data_operation(fr: FileReference, token: RecencyToken, update_with: { [key: string]: string }): ClientSideOperation {
     return {
         fr,
         token,
@@ -256,7 +257,7 @@ export function update_meta_data(env: PluginEnvironment, fr: FileReference, toke
 }
 
 export type RegexString = string;
-export function filter_by_meta_data_operation(filter_by: { [key: string]: RegexString }): ClientSideBaseOperation {
+export function filter_by_meta_data_operation(filter_by: { [key: string]: RegexString }): ClientSideOperation {
     return {
         type: "FILTER_BY_META_DATA",
         filter_by
@@ -268,7 +269,7 @@ export function filter_by_meta_data(env: PluginEnvironment, filter_by: { [key: s
     });
 }
 
-export function delete_by_meta_data_operation(delete_by: { [key: string]: string }): ClientSideBaseOperation {
+export function delete_by_meta_data_operation(delete_by: { [key: string]: string }): ClientSideOperation {
     return {
         type: "DELETE_BY_META_DATA",
         delete_by
@@ -280,9 +281,9 @@ export function delete_by_meta_data(env: PluginEnvironment, delete_by: { [key: s
     });
 }
 
-export function subscribe_operation(to: FileReference, callback: SubscriptionCallback, key: string = uuidv4()): ClientSideBaseOperation {
+export function subscribe_operation(to: FileReference, callback: SubscriptionCallback, key: string = uuidv4()): ClientSideOperation {
     return {
-        type: "SUBSCRIBE",
+        type: "SUBSCRIBE_CB",
         fr: to,
         key,
         cb: callback
@@ -294,9 +295,9 @@ export async function subscribe(env: PluginEnvironment, to: FileReference, callb
     })
 }
 
-export function unsubscribe_operation(fr: FileReference, key: string): ClientSideBaseOperation {
+export function unsubscribe_operation(fr: FileReference, key: string): ClientSideOperation {
     return {
-        type: "UNSUBSCRIBE",
+        type: "UNSUBSCRIBE_CB",
         key,
         fr
     }
@@ -310,9 +311,9 @@ export function unsubscribe(
     );
 }
 
-export function active_subscriptions_operation(fr: FileReference): ClientSideBaseOperation {
+export function active_subscriptions_operation(fr: FileReference): ClientSideOperation {
     return {
-        type: "GET_ACTIVE_SUBSCRIPTIONS",
+        type: "GET_ACTIVE_SUBSCRIPTIONS_FILE_REFERENCE",
         fr: fr
     }
 }
@@ -325,10 +326,10 @@ export function active_subscriptions(env: PluginEnvironment, fr: FileReference):
     ) as Promise<Error | string[]>
 }
 
-export function atomic_operation(env: PluginEnvironment, operations: ClientSideBaseOperation[]) {
+export function atomic_operation(env: PluginEnvironment, operations: ClientSideOperation[]) {
     return perform_operations(env, operations, "Atomic")
 }
 
-export function bundled_operation(env: PluginEnvironment, operations: ClientSideBaseOperation[]) {
+export function bundled_operation(env: PluginEnvironment, operations: ClientSideOperation[]) {
     return perform_operations(env, operations, "Bundled")
 }

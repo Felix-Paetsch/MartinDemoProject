@@ -3,7 +3,7 @@ import { Json } from "../../utils/json";
 export abstract class AbstractLibraryImplementation {
     protected _disposed = false;
     abstract exposes(): string[];
-    abstract call(fn: string, args: readonly Json[]): Json | Promise<Json>;
+    abstract call(fn: string, args: readonly Json[]): Json | Error | Promise<Json | Error>;
 
     is_disposed(): boolean {
         return this._disposed;
@@ -23,7 +23,7 @@ export abstract class AbstractLibraryImplementation {
                 if (Object.keys(obj).includes(fn) && typeof obj[fn] === "function") {
                     return obj[fn](...args as Args);
                 }
-                throw new Error("Function not found");
+                return new Error("Function not found");
             },
             dispose
         );
@@ -45,7 +45,7 @@ export abstract class AbstractLibraryImplementation {
 class ConcreteLibraryImplementation extends AbstractLibraryImplementation {
     constructor(
         readonly exposes: () => string[],
-        readonly call: (fn: string, args: readonly Json[]) => Json | Promise<Json>,
+        readonly call: (fn: string, args: readonly Json[]) => Error | Json | Promise<Json | Error>,
         readonly __dispose: () => void
     ) {
         super();

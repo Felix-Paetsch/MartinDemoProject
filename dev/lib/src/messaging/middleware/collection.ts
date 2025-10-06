@@ -20,7 +20,7 @@ export function collection_middleware(...args: any[]): Array<Middleware> & (() =
     }
 
     return new Proxy(mwf, {
-        get(target, prop, reciever) {
+        get(target, prop, receiver) {
             if (prop in arr) {
                 const value = (arr as any)[prop];
                 if (typeof value === 'function') {
@@ -28,14 +28,14 @@ export function collection_middleware(...args: any[]): Array<Middleware> & (() =
                 }
                 return value;
             }
-            return Reflect.get(target, prop, reciever);
+            return Reflect.get(target, prop, receiver);
         },
-        set(target, prop, value, reciever) {
+        set(target, prop, value, receiver) {
             if (prop in arr) {
                 (arr as any)[prop] = value;
                 return true;
             }
-            return Reflect.set(target, prop, value, reciever);
+            return Reflect.set(target, prop, value, receiver);
         },
         has(target, prop) {
             return prop in arr || Reflect.has(target, prop);
@@ -70,7 +70,7 @@ export function non_interrupt_collection_middleware(...args: any[]): Array<Middl
     }
 
     return new Proxy(mwf, {
-        get(target, prop, reciever) {
+        get(target, prop, receiver) {
             if (prop in arr) {
                 const value = (arr as any)[prop];
                 if (typeof value === 'function') {
@@ -78,14 +78,14 @@ export function non_interrupt_collection_middleware(...args: any[]): Array<Middl
                 }
                 return value;
             }
-            return Reflect.get(target, prop, reciever);
+            return Reflect.get(target, prop, receiver);
         },
-        set(target, prop, value, reciever) {
+        set(target, prop, value, receiver) {
             if (prop in arr) {
                 (arr as any)[prop] = value;
                 return true;
             }
-            return Reflect.set(target, prop, value, reciever);
+            return Reflect.set(target, prop, value, receiver);
         },
         has(target, prop) {
             return prop in arr || Reflect.has(target, prop);

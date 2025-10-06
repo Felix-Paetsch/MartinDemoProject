@@ -53,18 +53,18 @@ export function partition_middleware<
     };
 
     return new Proxy(mainMiddleware, {
-        get(target, prop, reciever) {
+        get(target, prop, receiver) {
             if (typeof prop === 'string' && prop in partitionMap) {
                 return partitionMap[prop as keyof typeof partitionMap];
             }
-            return Reflect.get(target, prop, reciever);
+            return Reflect.get(target, prop, receiver);
         },
-        set(target, prop, value, reciever) {
+        set(target, prop, value, receiver) {
             if (prop in mainMiddleware) {
                 (mainMiddleware as any)[prop] = value;
                 return true;
             }
-            return Reflect.set(target, prop, value, reciever);
+            return Reflect.set(target, prop, value, receiver);
         },
         has(target, prop) {
             return (typeof prop === 'string' && prop in partitionMap) || Reflect.has(target, prop);

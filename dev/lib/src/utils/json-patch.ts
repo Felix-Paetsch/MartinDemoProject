@@ -12,9 +12,15 @@ import {
     TestOperation as Test,
 } from 'rfc6902/diff';
 import * as Patch from 'rfc6902/patch';
+import { Json } from './json';
 
 export namespace JsonPatch {
-    export const apply = applyPatch;
+    export const apply = function (obj: Json, operations: Operation[]): Error | Json {
+        const res = applyPatch(obj, operations);
+        const err = res.find(e => e instanceof Error);
+        if (err) return err;
+        return obj;
+    }
     export const create = createPatch;
 
     export type JSONPointer = string;

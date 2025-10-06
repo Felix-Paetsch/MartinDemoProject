@@ -9,7 +9,7 @@ export default class BranchedMessagePartner extends MessagePartner {
         uuid: string,
         readonly parent: BranchedMessagePartner,
     ) {
-        super(uuid, parent.root_message_partner, parent);
+        super(uuid, parent?.root_message_partner, parent);
     }
 
     get address() {
@@ -21,10 +21,11 @@ export default class BranchedMessagePartner extends MessagePartner {
     }
 
     async _trigger_on_message_partner_message(type: string, data: Json): Promise<boolean> {
-        const res = super._trigger_on_message_partner_message(type, data);
+        const res = await super._trigger_on_message_partner_message(type, data);
         if (res) return res;
         if (type === "branch" && typeof data === "string") {
-            new BranchedMessagePartner(data, this);
+            const b = new BranchedMessagePartner(data, this);
+            await this._on_branch_cb(b);
             return true;
         }
         return false;
@@ -36,10 +37,13 @@ export default class BranchedMessagePartner extends MessagePartner {
     }
     async branch() {
         const uuid = uuidv4();
-        const res = this._send_message_partner_message("branch", uuid);
-        if (res instanceof Error) return res;
-        // Otherwise the message was send. So the other side has initialized
-        return new BranchedMessagePartner(uuid, this);
+        const b = new BranchedMessagePartner(uuid, this);
+        const res = await this._send_message_partner_message("branch", uuid, true);
+        if (res instanceof Error) {
+            await b._internal_remove(false);
+            return res as Error;
+        }
+        return b;
     }
 
     copy() {

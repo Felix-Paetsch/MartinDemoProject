@@ -42,7 +42,7 @@ export async function initializeExternalPlugin_PluginSide(
                 }
 
                 synchronizer.add_command("send_message", (data: Json) => {
-                    return connection.recieve(data as any);
+                    return connection.receive(data as any);
                 });
 
                 Address.set_process_id(_data.plugin_process_id);

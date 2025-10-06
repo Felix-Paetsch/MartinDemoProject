@@ -36,7 +36,7 @@ export async function connect(env: PluginEnvironment) {
     return res;
 }
 
-export type SubscriptionCallback = (event: FileEvent) => Promise<void>;
+export type SubscriptionCallback = (event: FileEvent) => void | Promise<void>;
 let subscriptions: {
     env: PluginEnvironment,
     key: string,

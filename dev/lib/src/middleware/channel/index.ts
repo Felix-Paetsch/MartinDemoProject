@@ -11,7 +11,7 @@ import { CloseMessageBodySchema } from "./schemas/close";
 import { processMessageChannelMessage } from "./middleware";
 import { Transcoder } from "../../utils/exports";
 
-export type recieveMessageError = Error;
+export type receiveMessageError = Error;
 
 export type MessageChannelProcessorName = string;
 export type ChannelMessage = Json;
@@ -27,7 +27,7 @@ export default class MessageChannel {
     private message_promise_queue: [string, (message: ChannelMessage) => void][] = [];
     private _inactivity_timeout: NodeJS.Timeout | null = null;
     public readonly config: MessageChannelConfig;
-    public last_message_recieved: number = Date.now();
+    public last_message_received: number = Date.now();
 
     public readonly context: MessageChannelInitializationContextWithId;
     constructor(
@@ -118,7 +118,7 @@ export default class MessageChannel {
         return await this.next();
     }
 
-    next(timeout?: number): Promise<ChannelMessage | recieveMessageError> {
+    next(timeout?: number): Promise<ChannelMessage | receiveMessageError> {
         return Effect.gen(this, function* () {
             if (this.message_queue.length > 0) {
                 return this.message_queue.shift()!;
@@ -129,7 +129,7 @@ export default class MessageChannel {
             }
 
             const key = uuidv4();
-            const deferred = yield* Deferred.make<ChannelMessage, recieveMessageError>();
+            const deferred = yield* Deferred.make<ChannelMessage, receiveMessageError>();
             const effectiveTimeout = Math.min(timeout || this.config.defaultMessageTimeout || 2000, 60000);
             const timeout_duration = Duration.millis(effectiveTimeout);
             const deferred_with_timeout = Deferred.await(deferred).pipe(
@@ -204,7 +204,7 @@ export default class MessageChannel {
     }
 
     __on_message(message: ChannelMessage) {
-        this.last_message_recieved = Date.now();
+        this.last_message_received = Date.now();
         this.#startInactivityTimeout();
         if (this.message_promise_queue.length > 0) {
             const [_key, resolve] = this.message_promise_queue.shift()!;

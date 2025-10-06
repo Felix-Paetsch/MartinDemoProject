@@ -37,8 +37,8 @@ export class KernelImpl extends KernelEnvironment {
         env.use_middleware(Logging.log_middleware(), "monitoring");
     }
 
-    async recieve_plugin_message(msg: Json, plugin: PluginIdentWithInstanceId): Promise<boolean> {
-        const handled = await super.recieve_plugin_message(msg, plugin);
+    async receive_plugin_message(msg: Json, plugin: PluginIdentWithInstanceId): Promise<boolean> {
+        const handled = await super.receive_plugin_message(msg, plugin);
         if (handled) return true;
         // Should be typechecked
         const remove_what: PluginIdentWithInstanceId | null = (msg as any).what;

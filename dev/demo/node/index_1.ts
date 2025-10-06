@@ -9,11 +9,9 @@ import {
     PluginIdent,
     KernelEnvironment,
     LibraryEnvironment,
-    PsLogging,
-    BranchedMessagePartner
+    PsLogging
 } from "../../lib/src/pluginSystem/kernel_exports"
-import { Assets } from "../../lib/src/libraries/exports";
-import { FileEvent } from "../../lib/src/libraries/assets/types";
+import BranchedMessagePartner from "../../lib/src/pluginSystem/plugin_lib/message_partner/branched_message_partner";
 
 Failure.setAnomalyHandler((e) => {
     throw e;
@@ -53,38 +51,17 @@ const side_plugin = async (env: PluginEnvironment) => {
     }
     const res = await lib.call("hi", ["Martin"]);
     console.log(res);
-
-    const assets = new Assets.AssetManager(env);
-    const subscriptionKey = await assets.subscribe("TestFile", (fe: FileEvent) => {
-        if (fe.type === "CHANGE_FILE_CONTENT") {
-            console.log(fe.contents);
-        }
-    });
-
-    if (subscriptionKey instanceof Error) {
-        throw subscriptionKey;
-    }
 }
 
 const main_plugin = async (env: PluginEnvironment) => {
     console.log("<< STARTING MAIN PLUGIN >>")
-
-    const assets = new Assets.AssetManager(env);
-
-    const fr = "TestFile";
-    let fileDescription = await assets.create(fr, {
-        "someKey": "someValue"
-    }, "Content")
-    if (fileDescription instanceof Error) {
-        throw fileDescription;
-    }
-
     const mp = await env.get_plugin({
         name: "side",
         version: "1.0.0"
     });
 
     if (mp instanceof Error) {
+        console.log("THROWING");
         throw mp;
     }
 
@@ -97,9 +74,6 @@ const main_plugin = async (env: PluginEnvironment) => {
     br.on_message((data) => {
         console.log(data + ", and I must still scream");
     });
-
-    fileDescription = await assets.write(fr, fileDescription.recency_token, "Some new content");
-    if (fileDescription instanceof Error) throw fileDescription;
 }
 
 let lib_ref: LibraryReference | null = null;
@@ -144,21 +118,14 @@ class KernelImpl extends KernelEnvironment {
             ...plugin_ident
         }
 
-        const plugin = findCreatePlugin(plugin_ident.name);
+        const name = plugin_ident.name;
+        const plugin = name === "start" ? main_plugin : side_plugin;
 
         const { env, ref } = this.create_local_plugin_environment(ident_with_id);
 
         await plugin(env);
         return ref;
     }
-}
-
-function findCreatePlugin(name: string) {
-    switch (name) {
-        case "start": return main_plugin;
-        case "assets": return Assets.__Plugin;
-    }
-    return side_plugin;
 }
 
 const kernel = new KernelImpl();

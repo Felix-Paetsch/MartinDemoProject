@@ -1,3 +1,13 @@
+Refactor:
+- move json definition to utils/json-patch
+- transcoder to utils (including Transcoder.trust)
+- transcoder can also transcode message partners maybe?
+- readonly json and fany things like that
+- remove all throws if possible
+
+
+
+
 Errors with specific types
 Give some primitive types we use in the outside world type names which make sence
 

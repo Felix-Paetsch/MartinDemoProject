@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { Failure, Address, Port, Json } from "../../messaging/exports";
+import { Failure, Json } from "../../messaging/exports";
 import MessageChannel, { MessageChannelProcessor } from "../channel";
 import { TransactionInitDataSchema } from ".";
 import { Transcoder } from "../../utils/transcoder";

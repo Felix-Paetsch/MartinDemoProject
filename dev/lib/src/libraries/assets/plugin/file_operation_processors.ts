@@ -1,38 +1,17 @@
-// Long term we need to think abt async stuff and so on..
-// And timeouts... bla... on the other hand: responsiveness
-
 import { Address } from "../../../messaging/exports";
 import { JsonPatch } from "../../../utils/json-patch";
-import { ProtocolResponse } from "../protocol/main";
-import { AssetSideBaseOperation } from "../protocol/operations";
+import { MakeMutable } from "../../../utils/mutability";
+import { AssetSideOperation } from "../operations";
 import { File, FileContents, FileEvent, FileReference, MetaData, RecencyToken } from "../types";
 import {
     filter_by_meta_data,
     set_file_response,
     set_description_response
-} from "./helper";
-import { is_settable_meta_data, userFileTypes } from "./meta_data";
-import { active_subscriptions, SubscriptionEvent, trigger_events } from "./plugin";
+} from "./operation_processor_helper";
+import { SubscriptionEvent } from "./plugin";
+import { is_settable_meta_data, is_system_file, system_files } from "../systemFiles/system_files";
 
-export const fileStore: File[] = [];
-
-const operationOrder = [
-    "FILE",
-    "DESCRIPTION",
-    "FILTER_BY_META_DATA",
-    "SUBSCRIBE",
-    "UNSUBSCRIBE",
-    "CREATE",
-    "DELETE",
-    "FORCE_WRITE",
-    "WRITE",
-    "PATCH",
-    "SET_META_DATA",
-    "FORCE_SET_META_DATA",
-    "UPDATE_META_DATA",
-    "DELETE_BY_META_DATA",
-    "GET_ACTIVE_FILE_REFERENCES"
-] as const;
+export const fileStore: MakeMutable<File>[] = system_files();
 
 export type OperationProcessingResult = {
     fileReferences: {
@@ -43,16 +22,16 @@ export type OperationProcessingResult = {
         }
     },
     fileReferenceArrays: FileReference[][],
-    errors: Error[] // Only needed when bundled and not atomic
+    errors: Error[]
 };
 
-type OperationProcessor<O extends AssetSideBaseOperation> = (op: O, res: OperationProcessingResult, partner: Address.StringSerializedAddress) => Error | {
+export type OperationProcessor<O extends AssetSideOperation> = (op: O, res: OperationProcessingResult, partner: Address.StringSerializedAddress) => Error | {
     undo?: () => void,
     events?: (FileEvent | SubscriptionEvent)[]
 } | void;
 
-const Processors: {
-    [Key in typeof operationOrder[number]]: OperationProcessor<AssetSideBaseOperation & { type: Key }>
+export const Processors: {
+    [Key in AssetSideOperation["type"]]: OperationProcessor<AssetSideOperation & { type: Key }>
 } = {
     "FILE": (op, res) => {
         return set_file_response(res, op.fr);
@@ -70,7 +49,7 @@ const Processors: {
         });
         res.fileReferenceArrays.push(ref);
     },
-    "SUBSCRIBE": (op, _, partner) => {
+    "SUBSCRIBE_FILE_REFERENCE": (op, _, partner) => {
         if (!fileStore.some(f => f.meta_data.fileReference == op.fr)) {
             return new Error("File reference doesnt't exist!");
         }
@@ -82,7 +61,7 @@ const Processors: {
             }]
         }
     },
-    "UNSUBSCRIBE": (op, _, partner) => {
+    "UNSUBSCRIBE_FILE_REFERENCE": (op, _, partner) => {
         return {
             events: [{
                 type: "UNSUBSCRIBE",
@@ -96,9 +75,9 @@ const Processors: {
             return new Error(`File ${op.fr} already exists.`);
         }
         const meta_data = {
-            fileReference: op.fr,
             fileType: "LOCAL",
-            ...op.meta_data
+            ...op.meta_data,
+            fileReference: op.fr,
         };
 
         if (!is_settable_meta_data(meta_data)) {
@@ -131,12 +110,11 @@ const Processors: {
     },
     "DELETE": (op) => {
         const fileIndex = fileStore.findIndex(f => f.meta_data.fileReference === op.fr);
-        if (
-            fileIndex < 0
-            || !userFileTypes.includes(fileStore[fileIndex]!.meta_data.fileType)
-        ) {
-            return new Error(`File ${op.fr} not found.`);
+        if (fileIndex < 0) { return new Error(`File ${op.fr} not found.`); }
+        if (is_system_file(op.fr)) {
+            return new Error(`Cant delete system file ${op.fr}`);
         }
+
         const file = fileStore.splice(fileIndex, 1)[0]!;
         return {
             undo: () => {
@@ -153,9 +131,7 @@ const Processors: {
         const filtered = filter_by_meta_data(op.delete_by)
         if (filtered instanceof Error) return filtered;
 
-        const files = filtered.filter(f => {
-            return ["LOCAL", "PERSISTED"].includes(f.meta_data.fileType)
-        });
+        const files = filtered.filter(f => is_system_file(f.meta_data.fileReference));
 
         for (let i = fileStore.length - 1; i >= 0; i--) {
             if (files.includes(fileStore[i]!)) {
@@ -181,17 +157,20 @@ const Processors: {
     "WRITE": (op, res) => {
         const file = fileStore.find(f => f.meta_data.fileReference === op.fr);
         if (!file) return new Error(`File ${op.fr} not found.`);
+        if (is_system_file(file.meta_data.fileReference)) {
+            return new Error(`Can't write to system file ${op.fr}`);
+        }
         if (file.recency_token !== op.token) return new Error(`File recency token outdated.`);
 
         const oldContents = file.contents;
         const oldToken = file.recency_token;
-        (file as any).contents = op.contents;
-        (file as any).recency_token = performance.now();
+        file.contents = op.contents;
+        file.recency_token = performance.now();
         set_description_response(res, file.meta_data.fileReference);
         return {
             undo: () => {
-                (file as any).recency_token = oldToken;
-                (file as any).contents = oldContents;
+                file.recency_token = oldToken;
+                file.contents = oldContents;
             },
             events: [{
                 "type": "CHANGE_FILE_CONTENT",
@@ -203,16 +182,19 @@ const Processors: {
     "FORCE_WRITE": (op, res) => {
         const file = fileStore.find(f => f.meta_data.fileReference === op.fr);
         if (!file) return new Error(`File ${op.fr} not found.`);
+        if (is_system_file(file.meta_data.fileReference)) {
+            return new Error(`Can't write to system file ${op.fr}`);
+        }
 
         const oldContents = file.contents;
         const oldToken = file.recency_token;
-        (file as any).contents = op.contents;
-        (file as any).recency_token = performance.now();
+        file.contents = op.contents;
+        file.recency_token = performance.now();
         set_description_response(res, file.meta_data.fileReference);
         return {
             undo: () => {
-                (file as any).recency_token = oldToken;
-                (file as any).contents = oldContents;
+                file.recency_token = oldToken;
+                file.contents = oldContents;
             },
             events: [{
                 "type": "CHANGE_FILE_CONTENT",
@@ -225,6 +207,9 @@ const Processors: {
         const file = fileStore.find(f => f.meta_data.fileReference === op.fr);
         if (!file) return new Error(`File ${op.fr} not found.`);
         if (file.recency_token !== op.token) return new Error(`File recency token outdated.`);
+        if (is_system_file(file.meta_data.fileReference)) {
+            return new Error(`Can't write to system file ${op.fr}`);
+        }
 
         if (
             !is_settable_meta_data(op.meta_data)
@@ -235,13 +220,13 @@ const Processors: {
 
         const oldMetaData = file.meta_data;
         const oldToken = file.recency_token;
-        (file as any).meta_data = op.meta_data;
-        (file as any).recency_token = performance.now();
+        file.meta_data = op.meta_data;
+        file.recency_token = performance.now();
         set_description_response(res, file);
         return {
             undo: () => {
-                (file as any).recency_token = oldToken;
-                (file as any).meta_data = oldMetaData;
+                file.recency_token = oldToken;
+                file.meta_data = oldMetaData;
             },
             events: [{
                 type: "CHANGE_META_DATA",
@@ -260,16 +245,19 @@ const Processors: {
         ) {
             return new Error("Tried to set invalid meta data");
         }
+        if (is_system_file(file.meta_data.fileReference)) {
+            return new Error(`Can't write to system file ${op.fr}`);
+        }
 
         const oldMetaData = file.meta_data;
         const oldToken = file.recency_token;
-        (file as any).meta_data = op.meta_data;
-        (file as any).recency_token = performance.now();
+        file.meta_data = op.meta_data;
+        file.recency_token = performance.now();
         set_description_response(res, file);
         return {
             undo: () => {
-                (file as any).recency_token = oldToken;
-                (file as any).meta_data = oldMetaData;
+                file.recency_token = oldToken;
+                file.meta_data = oldMetaData;
             },
             events: [{
                 type: "CHANGE_META_DATA",
@@ -282,6 +270,9 @@ const Processors: {
         const file = fileStore.find(f => f.meta_data.fileReference === op.fr);
         if (!file) return new Error(`File ${op.fr} not found.`);
         if (file.recency_token !== op.token) return new Error(`File recency token outdated.`);
+        if (is_system_file(file.meta_data.fileReference)) {
+            return new Error(`Can't write to system file ${op.fr}`);
+        }
 
         const oldMetaData = file.meta_data;
         const oldToken = file.recency_token;
@@ -305,13 +296,13 @@ const Processors: {
             return new Error("Tried to set invalid meta data");
         }
 
-        (file as any).meta_data = meta_data;
-        (file as any).recency_token = performance.now();
+        file.meta_data = meta_data;
+        file.recency_token = performance.now();
         set_description_response(res, file);
         return {
             undo: () => {
-                (file as any).recency_token = oldToken;
-                (file as any).meta_data = oldMetaData;
+                file.recency_token = oldToken;
+                file.meta_data = oldMetaData;
             },
             events: [{
                 type: "CHANGE_META_DATA",
@@ -324,22 +315,22 @@ const Processors: {
         const file = fileStore.find(f => f.meta_data.fileReference === op.fr);
         if (!file) return new Error(`File ${op.fr} not found.`);
         if (file.recency_token !== op.token) return new Error(`File recency token outdated.`);
+        if (is_system_file(file.meta_data.fileReference)) {
+            return new Error(`Can't write to system file ${op.fr}`);
+        }
 
         const oldContents = JSON.stringify(file.contents);
         const oldToken = file.recency_token;
         const patchResults = JsonPatch.apply(file.contents, op.patches);
 
-        if (patchResults.some(r => r !== null)) {
-            (file as any).contents = JSON.parse(oldContents);
-            return new Error("JSON Patching problem");
-        }
+        if (patchResults instanceof Error) return patchResults;
 
-        (file as any).recency_token = performance.now();
+        file.recency_token = performance.now();
         set_description_response(res, file);
         return {
             undo: () => {
-                (file as any).recency_token = oldToken;
-                (file as any).contents = JSON.parse(oldContents);
+                file.recency_token = oldToken;
+                file.contents = JSON.parse(oldContents);
             },
             events: [{
                 type: "CHANGE_FILE_CONTENT",
@@ -349,60 +340,6 @@ const Processors: {
         }
     },
     "GET_ACTIVE_FILE_REFERENCES": () => {
-        // Gets handled later
+        // Gets handled individually
     }
-}
-
-export function process_operations(
-    ops: AssetSideBaseOperation[],
-    mode: "Bundled" | "Atomic",
-    partner: Address
-) {
-    const rollbacks: (() => void)[] = [];
-    const events: (SubscriptionEvent | FileEvent)[] = [];
-    const res: OperationProcessingResult = {
-        fileReferences: {},
-        fileReferenceArrays: [],
-        errors: []
-    }
-
-    for (const op of ops) {
-        const r: ReturnType<OperationProcessor<any>> = (Processors as any)[op.type](
-            op,
-            res,
-            partner.toString()
-        );
-        if (r instanceof Error) {
-            if (mode === "Atomic") {
-                while (rollbacks.length > 0) {
-                    rollbacks.pop()!();
-                }
-                return r;
-            }
-            res.errors.push(r);
-        } else if (r) {
-            if (r.undo) {
-                rollbacks.push(r.undo);
-            }
-            if (r.events) {
-                events.push(...r.events);
-            }
-        }
-
-    }
-    trigger_events(events);
-    const result: Exclude<ProtocolResponse, Error> = {
-        fileReferences: res.fileReferences,
-        fileReferenceArrays: res.fileReferenceArrays
-    };
-
-    if (ops.some(o => o.type === "GET_ACTIVE_FILE_REFERENCES")) {
-        result.active_file_references = active_subscriptions.filter(
-            s => {
-                return s.partner === partner.toString()
-            }
-        ).map(s => s.fr)
-    }
-
-    return result;
 }

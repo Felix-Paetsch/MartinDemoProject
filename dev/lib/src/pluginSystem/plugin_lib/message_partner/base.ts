@@ -2,12 +2,13 @@ import { MessagePartnerProtocol } from "../../protocols/message_partner/message_
 import LibraryMessagePartner from "./library";
 import PluginMessagePartner from "./plugin_message_partner";
 import { Json } from "./../../../utils/json";
-import { send_message } from "../../protocols/message_partner/send_message";
+import { send_message, send_message_acknowledge } from "../../protocols/message_partner/send_message";
 import { promisify } from "../../../utils/promisify";
 import { Schema } from "effect";
 import { is_responsive } from "../../protocols/message_partner/is_responsive";
 import { PluginEnvironment } from "../plugin_environment";
 import { Transcoder } from "../../../utils/exports";
+import { identity } from "effect/Stream";
 
 export type MessagePartnerPairDistinguisher = boolean;
 
@@ -88,7 +89,7 @@ export class MessagePartner {
         this._send_message_partner_message("user_message_listener_registered");
     }
     __on_listener_registered_cb: (b: any) => Promise<void> = () => Promise.resolve();
-    on_listener_registered(cb: (b: typeof this) => void) {
+    on_message_listener_registered(cb: (b: typeof this) => void) {
         this.__on_listener_registered_cb = (b) => Promise.resolve(cb(b));
     }
 
@@ -108,8 +109,9 @@ export class MessagePartner {
         return false;
     }
 
-    _send_message_partner_message(type: string, data: Json = "") {
-        return this.run_message_partner_protocol(send_message, {
+    _send_message_partner_message(type: string, data: Json = "", acknowledge: boolean = false) {
+        return this.run_message_partner_protocol(
+            acknowledge ? send_message_acknowledge : send_message, {
             type,
             data
         });

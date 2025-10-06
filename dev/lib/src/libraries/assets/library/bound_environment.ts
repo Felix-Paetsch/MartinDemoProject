@@ -23,13 +23,13 @@ import {
     description,
     meta_data
 } from "."
-import { ClientSideBaseOperation } from "../protocol/operations";
 import { SubscriptionCallback } from "./subscriptions";
+import { ClientSideOperation } from "../operations";
 
 export class AssetManager {
     constructor(readonly env: PluginEnvironment) { }
 
-    create(fr: FileReference, meta_data: { [key: string]: string }, contents: FileContents = "") {
+    create(fr: FileReference = uuidv4(), meta_data: { [key: string]: string } = {}, contents: FileContents = "") {
         return create(this.env, fr, meta_data, contents);
     }
     delete(fr: FileReference) {
@@ -107,11 +107,11 @@ export class AssetManager {
         return delete_by_meta_data(this.env, data);
     }
 
-    atomic(operations: ClientSideBaseOperation[]) {
+    atomic(operations: ClientSideOperation[]) {
         return atomic_operation(this.env, operations);
     }
 
-    bundled(operations: ClientSideBaseOperation[]) {
+    bundled(operations: ClientSideOperation[]) {
         return bundled_operation(this.env, operations);
     }
 }

@@ -2,11 +2,11 @@ import { PluginEnvironment } from "../../../pluginSystem/plugin_exports";
 import { Address } from "../../../messaging/exports";
 import { asset_protocol } from "./main";
 import { exists_subscription } from "../library/subscriptions";
-import { AssetSideBaseOperation, ClientSideBaseOperation } from "../operations";
-import { AssetSideSubscriptionOperation } from "../operations/subscribe";
+import { AssetSideOperation, ClientSideOperation } from "../operations";
+import { AssetSideSubscriptionOperation } from "../operations/subscribe_asset";
 
 export function perform_operations(
-    env: PluginEnvironment, operations: ClientSideBaseOperation[], type: "Bundled" | "Atomic"
+    env: PluginEnvironment, operations: ClientSideOperation[], type: "Bundled" | "Atomic"
 ) {
     return asset_protocol(
         env,
@@ -23,16 +23,16 @@ export function perform_operations(
 }
 
 export function perform_operation(
-    env: PluginEnvironment, operation: ClientSideBaseOperation
+    env: PluginEnvironment, operation: ClientSideOperation
 ) {
     return perform_operations(env, [operation], "Bundled");
 }
 
-export function client_side_base_operations_to_base_operations(
+export function clientSide_to_assetSide_operations(
     env: PluginEnvironment,
-    ops: ClientSideBaseOperation[]
-): AssetSideBaseOperation[] {
-    const res: AssetSideBaseOperation[] = [];
+    ops: ClientSideOperation[]
+): AssetSideOperation[] {
+    const res: AssetSideOperation[] = [];
     let subscription_operations: (
         AssetSideSubscriptionOperation
         & { key: string }
@@ -43,13 +43,13 @@ export function client_side_base_operations_to_base_operations(
         ].includes(element.type)) {
             return res.push(element as any);
         }
-        if (element.type === "GET_ACTIVE_SUBSCRIPTIONS") {
+        if (element.type === "GET_ACTIVE_SUBSCRIPTIONS_FILE_REFERENCE") {
             return res.push({
                 "type": "GET_ACTIVE_FILE_REFERENCES"
             });
         }
         // else subscribe, unsubscribe
-        if (element.type === "SUBSCRIBE" || element.type === "UNSUBSCRIBE") {
+        if (element.type === "SUBSCRIBE_CB" || element.type === "UNSUBSCRIBE_CB") {
             subscription_operations.push({
                 type: (element as any).type,
                 fr: (element as any).fr,
@@ -59,11 +59,11 @@ export function client_side_base_operations_to_base_operations(
     });
 
     subscription_operations = subscription_operations.filter((o, i) => {
-        if (o.type === "UNSUBSCRIBE") {
+        if (o.type === "UNSUBSCRIBE_FILE_REFERENCE") {
             return !(
                 exists_subscription(env, o.fr, [o.key])
                 || subscription_operations.some(s => {
-                    return s.type === "SUBSCRIBE" && s.fr === o.fr
+                    return s.type === "SUBSCRIBE_FILE_REFERENCE" && s.fr === o.fr
                 })
             )
         }

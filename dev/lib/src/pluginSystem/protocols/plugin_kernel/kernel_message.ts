@@ -31,6 +31,6 @@ export const send_kernel_message = protocol(
             Transcoder.SchemaTranscoder(kernelMessageSchema)
         );
         if (message instanceof Error) return;
-        responder.recieve_plugin_message(message.data, message.plugin);
+        responder.receive_plugin_message(message.data, message.plugin);
     }
 );

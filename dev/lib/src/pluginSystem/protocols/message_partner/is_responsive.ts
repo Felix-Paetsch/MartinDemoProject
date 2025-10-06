@@ -3,7 +3,7 @@ import { message_partner_protocol } from "./message_partner_protocol"
 import { Transcoder } from "../../../utils/exports";
 
 export const is_responsive = message_partner_protocol(
-    "send_message_partner_message",
+    "is_responsive",
     async (mc) => {
         return mc.next_decoded(Transcoder.SchemaTranscoder(Schema.Boolean))
     },

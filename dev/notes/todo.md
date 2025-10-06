@@ -1,3 +1,5 @@
+
+
 1. Handle everything gracefully - and write specification
 2. Review effect.ignore's and finalizers
 3. Add logging on error cases

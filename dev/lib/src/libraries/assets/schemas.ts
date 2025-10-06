@@ -4,7 +4,7 @@ export const FileTypeS = Schema.Literal("LOCAL", "SYSTEM", "PERSISTED");
 export const SystemFileS = Schema.Literal("LISTDIR");
 
 export const FileReferenceS = Schema.String;
-export const FileContentsS = Schema.parseJson(Schema.Any);
+export const FileContentsS = Schema.Any;
 
 export const RecencyTokenS = Schema.Number;
 
@@ -26,7 +26,6 @@ export const FileS = Schema.Struct({
     meta_data: MetaDataS,
     contents: FileContentsS
 })
-
 
 export const DeleteFileEventS = Schema.Struct({
     type: Schema.Literal("DELETE"),

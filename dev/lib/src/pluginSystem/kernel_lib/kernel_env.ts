@@ -127,7 +127,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     }
 
     // The boolean says if we processed this message already (true)
-    async recieve_plugin_message(msg: Json, plugin: PluginIdentWithInstanceId): Promise<boolean> {
+    async receive_plugin_message(msg: Json, plugin: PluginIdentWithInstanceId): Promise<boolean> {
         if (msg === "remove_self") {
             const ref = this.get_plugin_reference(plugin);
             if (ref) await this.remove_plugin(ref);
