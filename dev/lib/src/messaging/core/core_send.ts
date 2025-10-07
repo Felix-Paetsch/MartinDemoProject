@@ -11,6 +11,8 @@ import { Connection } from "./connection";
 import { UnblockFiberDeamon } from "../../utils/promisify";
 
 export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, never> = Effect.fn("send")(function* (msg: TransmittableMessage) {
+    // console.log(msg);
+
     if (typeof msg === "string") {
         msg = yield* Schema.decode(MessageFromString)(msg)
             .pipe(

@@ -1,15 +1,13 @@
 import { Address, Message, Port } from "../../messaging/exports";
 import uuidv4 from "../../utils/uuid";
-import { MessageDataEncoded } from "./schemas";
-import { SendMessageBodySchema } from "./schemas/send";
 import { Deferred, Duration, Effect, Schedule, Schema } from "effect";
 import { MessageChannelInitializationContextEncoded, MessageChannelInitializationContextWithId } from "./schemas/context";
 import { MessageChannelConfig, MessageChannelConfigEncoded, MessageChannelConfigSchema } from "./schemas/config";
-import { OpenChannelBodySchema } from "./schemas/open";
 import { Json } from "../../utils/json";
-import { CloseMessageBodySchema } from "./schemas/close";
 import { processMessageChannelMessage } from "./middleware";
 import { Transcoder } from "../../utils/exports";
+import { ChannelTransmitionData, CloseMessageBodySchema, InternalChannelMessage, OpenChannelBodySchema, SendMessageBodySchema } from "./schemas/messages";
+import { asMutable } from "../../utils/mutability";
 
 export type receiveMessageError = Error;
 
@@ -33,15 +31,16 @@ export default class MessageChannel {
     constructor(
         public readonly partner: Address,
         public readonly port: Port,
+        initial_messages: Json[] = [],
         context: MessageChannelInitializationContextEncoded,
-        config: MessageChannelConfigEncoded = {}
+        config: MessageChannelConfigEncoded = {},
     ) {
         if (!context.id) { (context as any).id = uuidv4(); }
         this.context = context as MessageChannelInitializationContextWithId;
         this.config = Schema.decodeSync(MessageChannelConfigSchema)(config);
 
         if (!context.remotely_initialized) {
-            const first_message = Schema.encodeSync(OpenChannelBodySchema)({
+            const first_message = Schema.decodeSync(OpenChannelBodySchema)({
                 type: "OpenNewChannel",
                 context: {
                     ...this.context,
@@ -50,7 +49,15 @@ export default class MessageChannel {
                 address: this.port.address,
                 config: this.config,
             });
-            this.#send_message(first_message);
+
+            this.#send_messages([
+                first_message,
+                ...initial_messages.map(d => Schema.encodeSync(SendMessageBodySchema)({
+                    type: "SendMessage",
+                    data: d,
+                    targetID: this.context.id
+                }))
+            ]);
         }
 
         if (this.is_open()) MessageChannel.open_channels.push(this);
@@ -61,15 +68,16 @@ export default class MessageChannel {
     static processors: Map<MessageChannelProcessorName, MessageChannelProcessor> = new Map();
 
     #closeWithReason(reason: MessageChannelCloseReason) {
-        // Error: From callback
         if (!this._is_open) { return; }
         this._is_open = false;
         this.#clearInactivityTimeout();
         if (["ChannelLocallyClosed"].includes(reason)) {
-            this.#send_message(Schema.encodeSync(CloseMessageBodySchema)({
-                type: "CloseChannel",
-                targetID: this.context.id
-            }));
+            this.#send_messages(
+                [Schema.encodeSync(CloseMessageBodySchema)({
+                    type: "CloseChannel",
+                    targetID: this.context.id
+                })]
+            );
         }
         return Promise.resolve(this._on_close(reason));
     }
@@ -104,13 +112,15 @@ export default class MessageChannel {
     }
     get close_reason() { return this._close_reason; }
 
-    send(data: ChannelMessage) {
+    send(...messages: Json[]) {
         // Ignoring if port is closed
-        return this.#send_message(Schema.encodeSync(SendMessageBodySchema)({
-            type: "SendMessage",
-            data,
-            targetID: this.context.id
-        }));
+        return this.#send_messages(
+            messages.map(d => Schema.encodeSync(SendMessageBodySchema)({
+                type: "SendMessage",
+                data: d,
+                targetID: this.context.id
+            }))
+        );
     }
 
     async send_await_next(data: ChannelMessage) {
@@ -196,11 +206,15 @@ export default class MessageChannel {
         MessageChannel.processors.delete(processor);
     }
 
-    #send_message(body: MessageDataEncoded) {
+    #send_messages(body: InternalChannelMessage[]) {
         if (!this.is_open()) { return Promise.resolve(); }
-        return this.port.send(new Message(this.partner, body, {
-            "message_channel_middleware": this.context.id,
-        }));
+        return this.port.send(new Message(
+            this.partner,
+            asMutable(Schema.encodeSync(ChannelTransmitionData)({ messages: body })),
+            {
+                "message_channel_middleware": this.context.id,
+            }
+        ));
     }
 
     __on_message(message: ChannelMessage) {
@@ -214,7 +228,7 @@ export default class MessageChannel {
     }
 
     __closed_remotely() {
-        this.#closeWithReason("ChannelRemotelyClosed");
+        return this.#closeWithReason("ChannelRemotelyClosed");
     }
 
     static middleware = processMessageChannelMessage;

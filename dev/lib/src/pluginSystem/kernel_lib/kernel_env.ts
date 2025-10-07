@@ -41,8 +41,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     }
 
     create_local_plugin_environment(plugin_ident: PluginIdentWithInstanceId) {
-        const env = new PluginEnvironment(Address.process_id, plugin_ident);
-        const ref = new PluginReference(env.address, plugin_ident, this);
+        const env = new PluginEnvironment(Address.process_id, plugin_ident); const ref = new PluginReference(env.address, plugin_ident, this);
         this.register_local_plugin_middleware(env);
 
         return {

@@ -4,7 +4,7 @@ import { PluginEnvironment, uuidv4 } from "../../../pluginSystem/plugin_exports"
 import { FileDescription, FileEvent, FileReference, RecencyToken } from "../types";
 import { FileContents } from "../types";
 import { AssetManager } from "./bound_environment";
-import { JsonPatch } from "../../../utils/json-patch";
+import { JsonPatch } from "../../../utils/json";
 import { mapErrorAsync, mapSuccessAsync } from "../../../utils/error_handling";
 import { type UUID } from "../../../utils/uuid";
 import { SubscriptionCallback } from "./subscriptions";

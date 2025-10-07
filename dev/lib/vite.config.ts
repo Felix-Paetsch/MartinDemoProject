@@ -12,6 +12,7 @@ export default defineConfig({
                 'pluginSystem/plugin_exports': 'src/pluginSystem/plugin_exports.ts',
                 'messaging/exports': 'src/messaging/exports.ts',
                 'utils/exports': 'src/utils/exports.ts',
+                'libraries/exports': 'src/libraries/exports.ts',
                 "index": 'src/index.ts'
             },
             formats: ['es']

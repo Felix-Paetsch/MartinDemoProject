@@ -1,7 +1,7 @@
 import { Message, Middleware, Port, Failure } from "../../messaging/exports";
 import { Schema } from "effect";
 import MessageChannel from ".";
-import { MessageData, MessageDataSchema } from "./schemas";
+import { ChannelTransmitionData, InternalChannelMessage } from "./schemas/messages";
 
 export function isMessageChannelMessage(m: Message): boolean {
     return (typeof m.meta_data["message_channel_middleware"] == "string") && m.local_data.at_target;
@@ -12,9 +12,9 @@ export const processMessageChannelMessage: Middleware.Middleware = (m: Message) 
         return Middleware.Continue;
     }
 
-    let body: MessageData;
+    let body: { messages: InternalChannelMessage[] };
     try {
-        body = Schema.decodeUnknownSync(MessageDataSchema)(m.content);
+        body = Schema.decodeUnknownSync(ChannelTransmitionData)(m.content);
     } catch (e) {
         throw new Error("Message channel message has wrong format.");
     }
@@ -23,37 +23,46 @@ export const processMessageChannelMessage: Middleware.Middleware = (m: Message) 
     if (!port) {
         return Failure.reportAnomaly(new Error("Port for message channel message not found."));
     }
-    processMessageBody(body, port);
+    processMessageBody(body.messages, port);
     return Middleware.Interrupt;
 }
 
-export const processMessageBody = (body: MessageData, port: Port) => {
-    if (body.type === "OpenNewChannel") {
-        const processor = MessageChannel.get_processor(body.context.target_processor);
-        if (!processor) {
-            return Failure.reportAnomaly(new Error("Processor for message channel message not found."));
+export const processMessageBody = async (body: InternalChannelMessage[], port: Port) => {
+    for (const channelMsg of body) {
+        if (channelMsg.type === "OpenNewChannel") {
+            const processor = MessageChannel.get_processor(channelMsg.context.target_processor);
+            if (!processor) {
+                Failure.reportAnomaly(new Error("Processor for message channel message not found."));
+                continue;
+            }
+            const channel = new MessageChannel(
+                channelMsg.address,
+                port,
+                [],
+                channelMsg.context,
+                channelMsg.config
+            );
+            processor(channel);
+            continue;
         }
-        const channel = new MessageChannel(
-            body.address,
-            port,
-            body.context,
-            body.config
-        );
-        body.message && processMessageBody(body.message, port);
-        return Promise.resolve(processor(channel));
-    }
-    const channel = MessageChannel.open_channels.find(c => {
-        return (c.context.id === body.targetID) && c.port === port
-    });
-    if (!channel) {
-        return Failure.reportAnomaly(new Error("Channel for message channel message not found."));
-    }
 
-    if (body.type === "CloseChannel") {
-        return channel.__closed_remotely();
-    }
+        const channel = MessageChannel.open_channels.find(c => {
+            return (c.context.id === channelMsg.targetID) && c.port === port
+        });
 
-    if (body.type === "SendMessage") {
-        channel.__on_message(body.data);
+        if (!channel) {
+            Failure.reportAnomaly(new Error("Channel for message channel message not found."));
+            continue;
+        }
+
+        if (channelMsg.type === "CloseChannel") {
+            channel.__closed_remotely();
+            continue;
+        }
+
+        if (channelMsg.type === "SendMessage") {
+            channel.__on_message(channelMsg.data);
+            continue;
+        }
     }
 }

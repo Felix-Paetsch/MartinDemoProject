@@ -1,3 +1,4 @@
+import { Assets } from "../../../../lib/src/libraries/exports";
 import {
     PluginIdentWithInstanceId,
     PluginEnvironment
@@ -8,14 +9,25 @@ export default async function (env: PluginEnvironment) {
     console.log("<< STARTING MAIN PLUGIN >>");
     create_div();
 
+    const assets = new Assets.AssetManager(env);
+    const fr = "TestFile";
+    let fileDescription = await assets.create(fr, {
+        "someKey": "someValue"
+    }, "Content")
+    if (fileDescription instanceof Error) {
+        throw fileDescription;
+    }
+
     const button = document.getElementById('main-plugin-button');
     button!.addEventListener('click', () => handShake(env));
     await handShake(env);
     await handShake(env);
 
+    fileDescription = await assets.write(fr, fileDescription.recency_token, "Some new content");
+    if (fileDescription instanceof Error) throw fileDescription;
+
     const library = await env.get_library({
-        name: "test",
-        version: "1.0.0"
+        name: "test", version: "1.0.0"
     });
 
     if (library instanceof Error) {

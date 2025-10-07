@@ -1,5 +1,5 @@
 import { Address } from "../../../messaging/exports";
-import { JsonPatch } from "../../../utils/json-patch";
+import { JsonPatch } from "../../../utils/json";
 import { MakeMutable } from "../../../utils/mutability";
 import { AssetSideOperation } from "../operations";
 import { File, FileContents, FileEvent, FileReference, MetaData, RecencyToken } from "../types";

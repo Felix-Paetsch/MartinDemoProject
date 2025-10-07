@@ -49,11 +49,17 @@ export function clientSide_to_assetSide_operations(
             });
         }
         // else subscribe, unsubscribe
-        if (element.type === "SUBSCRIBE_CB" || element.type === "UNSUBSCRIBE_CB") {
+        if (element.type === "SUBSCRIBE_CB") {
             subscription_operations.push({
-                type: (element as any).type,
-                fr: (element as any).fr,
-                key: (element as any).key
+                type: "SUBSCRIBE_FILE_REFERENCE",
+                fr: element.fr,
+                key: element.key
+            })
+        } else if (element.type === "UNSUBSCRIBE_CB") {
+            subscription_operations.push({
+                type: "UNSUBSCRIBE_FILE_REFERENCE",
+                fr: element.fr,
+                key: element.key
             })
         }
     });

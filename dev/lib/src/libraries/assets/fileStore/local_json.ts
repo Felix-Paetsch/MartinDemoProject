@@ -1,7 +1,7 @@
 import { FileReference, FileStore, execute_atomic_transaction } from ".";
 import { mapSuccessAsync } from "../../../utils/error_handling";
 import { Json } from "../../../utils/exports";
-import { JsonPatch } from "../../../utils/json-patch";
+import { JsonPatch } from "../../../utils/json";
 import { LocalStringStore } from "./local_string";
 
 export class LocalJsonStore<T extends Json> implements FileStore<T> {

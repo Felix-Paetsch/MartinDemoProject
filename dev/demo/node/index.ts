@@ -3,7 +3,6 @@ import {
     PluginEnvironment,
     LibraryReference,
     PluginMessagePartner,
-    uuidv4,
     LibraryIdent,
     AbstractLibraryImplementation,
     PluginIdent,
@@ -13,13 +12,14 @@ import {
     BranchedMessagePartner
 } from "../../lib/src/pluginSystem/kernel_exports"
 import { Assets } from "../../lib/src/libraries/exports";
-import { FileEvent } from "../../lib/src/libraries/assets/types";
 
 Failure.setAnomalyHandler((e) => {
+    console.log("[handle anomaly]")
     throw e;
 });
 
 Failure.setErrorHandler((e) => {
+    console.log("[handle anomaly]")
     throw e;
 });
 
@@ -32,11 +32,6 @@ const side_plugin = async (env: PluginEnvironment) => {
             });
             branch.on_message_listener_registered(async (bridge) => {
                 await bridge.send_message("I am here");
-
-                env.on_remove(() => {
-                    console.log("Removing self");
-                });
-                env.remove_self();
             });
         });
 
@@ -48,14 +43,14 @@ const side_plugin = async (env: PluginEnvironment) => {
         version: "1.0.0"
     });
     if (lib instanceof Error) {
-        console.log("This is an error");
         throw lib;
     }
     const res = await lib.call("hi", ["Martin"]);
     console.log(res);
 
     const assets = new Assets.AssetManager(env);
-    const subscriptionKey = await assets.subscribe("TestFile", (fe: FileEvent) => {
+    const subscriptionKey = await assets.subscribe("TestFile", (fe: Assets.FileEvent) => {
+        console.log(fe);
         if (fe.type === "CHANGE_FILE_CONTENT") {
             console.log(fe.contents);
         }
@@ -99,31 +94,37 @@ const main_plugin = async (env: PluginEnvironment) => {
     });
 
     fileDescription = await assets.write(fr, fileDescription.recency_token, "Some new content");
-    if (fileDescription instanceof Error) throw fileDescription;
+    if (fileDescription instanceof Error) {
+        throw fileDescription;
+    }
 }
 
 let lib_ref: LibraryReference | null = null;
 
-
 Logging.set_logging_target(Address.local_address);
 PsLogging.start_kernel_log_to_file("./debug/logs/internal_logs.log");
+let i = 0;
+const shared_log_middleware = Logging.log_middleware(
+    //    () => { console.log("Log", ++i) }
+)
+
 class KernelImpl extends KernelEnvironment {
     register_kernel_middleware() {
         //this.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
         //this.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
-        this.use_middleware(Logging.log_middleware(), "monitoring");
+        this.use_middleware(shared_log_middleware, "monitoring");
         //this.useMiddleware(DebugMiddleware.kernel("debug/logs/internal_logs.log"), "monitoring");
     }
 
     register_local_plugin_middleware(env: PluginEnvironment) {
         // env.use_middleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        env.use_middleware(Logging.log_middleware(), "monitoring");
+        env.use_middleware(shared_log_middleware, "monitoring");
         //env.use_middleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
     register_local_library_middleware(env: LibraryEnvironment) {
         //env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        env.use_middleware(Logging.log_middleware(), "monitoring");
+        env.use_middleware(shared_log_middleware, "monitoring");
         //env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 
@@ -140,7 +141,7 @@ class KernelImpl extends KernelEnvironment {
 
     async create_plugin(plugin_ident: PluginIdent) {
         const ident_with_id = {
-            instance_id: uuidv4(),
+            instance_id: plugin_ident.name, //uuidv4(),
             ...plugin_ident
         }
 
@@ -151,15 +152,25 @@ class KernelImpl extends KernelEnvironment {
         await plugin(env);
         return ref;
     }
+
+    async start() {
+        await this.get_plugin({
+            "name": "assets"
+        });
+        return await super.start();
+    }
 }
 
 function findCreatePlugin(name: string) {
     switch (name) {
         case "start": return main_plugin;
         case "assets": return Assets.__Plugin;
+        case "side": return side_plugin;
     }
     return side_plugin;
 }
 
-const kernel = new KernelImpl();
-kernel.start();
+(async () => {
+    const kernel = new KernelImpl();
+    await kernel.start();
+})()

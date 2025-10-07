@@ -1,5 +1,6 @@
 import { execute_plugin } from "../../lib/connect";
 import { PluginEnvironment, PluginMessagePartner } from "../../../../../lib/src/pluginSystem/plugin_exports";
+import { Assets } from "../../../../../lib/src/libraries/exports";
 
 const closeButton = document.getElementById("close")!;
 const closeRightButton = document.getElementById("close-right")!;
@@ -26,6 +27,17 @@ execute_plugin(async (env: PluginEnvironment) => {
         }
     })
 
+    const assets = new Assets.AssetManager(env);
+    const subscriptionKey = await assets.subscribe("TestFile", (fe: Assets.FileEvent) => {
+        console.log(fe);
+        if (fe.type === "CHANGE_FILE_CONTENT") {
+            console.log(fe.contents);
+        }
+    });
+
+    if (subscriptionKey instanceof Error) {
+        throw subscriptionKey;
+    }
     closeButton.addEventListener("click", () => {
         env.remove_self();
     });

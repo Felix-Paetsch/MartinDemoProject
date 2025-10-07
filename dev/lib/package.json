@@ -24,6 +24,11 @@
             "import": "./dist/utils/exports.js",
             "require": "./dist/utils/exports.js"
         },
+        "./libraries": {
+            "types": "./dist/libraries/exports.d.ts",
+            "import": "./dist/libraries/exports.js",
+            "require": "./dist/libraries/exports.js"
+        },
         ".": {
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js",

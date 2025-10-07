@@ -51,7 +51,7 @@ function handle_subscriptions(env: PluginEnvironment) {
         events.forEach(event => {
             subscriptions.forEach(s => {
                 if (s.env === env && event.file_reference == s.fr) {
-                    return s.cb(data as any);
+                    return s.cb(event);
                 }
             });
         })

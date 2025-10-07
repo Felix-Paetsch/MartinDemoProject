@@ -1,20 +1,3 @@
-Refactor:
-- move json definition to utils/json-patch
-- transcoder to utils (including Transcoder.trust)
-- transcoder can also transcode message partners maybe?
-- readonly json and fany things like that
-- remove all throws if possible
-
-
-
-
-Errors with specific types
-Give some primitive types we use in the outside world type names which make sence
-
-Return errors aren't handled correctly with ptotocols
-Allow getting libraries (and plugins) from address
-In the filter method in debug: If there is an error, just think of it as false
-
 -   We need support for p5.js
 -   GPU accallerated as easy as p5.js
 -   Power Users
@@ -51,12 +34,9 @@ Plugin als Klasse??
 
 TODO:
 
--   Signals
--   Unify Callback structure
 -   Debug Middleware
 -   Better Kernel Support
 -   Shut Down etc.
--   log errors
 
 Reduce possible Errors with protocols
 Abstract from Protocols? (deabstract?)
@@ -78,15 +58,6 @@ For result:
 Result <-> Result Promise
 Assert it is something / How do we deal with that we now always have error return type?
 ... just effect...
-
--   Move message chains to protocol, as we need them also for ...
-
-Snake/Camel Casing
-
-Built in JSON schema serializer in effect ts
-
-// Effect.try
-// Deeffect
 
 Effect.ts
 
@@ -111,55 +82,6 @@ How do other places use effect?
 
 We first await (and reject) promise. Then we get around resolving it
 
-# Todo:
-
--   Maybe allow a 2nd message partner as input for creating a first one (?) or better a function: "message_partner_pair"
--   Generalize Bridge & MP
--   Remove Message Partners & MPOs
--   Every Pair of Message partners could have id_1 and id_2.. and then their id as MOPs can again be the same..
-
--   Unify the syntax for on callbacks and stuff, registering...
--   Go through all effect .orDie // ignore
--   asynmmetric MPO?
--   Implement "Ping" one level higher (; Basically a user should also have access to request/respond like I do (outside of any fetch implementation)
--   Better errors
-    -   Test if - with protocols - we responded with an actual correct (acceptable) error
-    -   Move more things to invalid message format error
-    -   Send the correct errors
-    -   SendFirstMessage should have same error as subsequent messages -> Protocoll error, right
-    -   Check i.g. error types of protocols
-    -   Automatically add as much data on error as possible
--   On Callback
--   Unify Casing
--   Unify if schemas live as const or static members
--   Set and overwrite local computed message data correctly
--   Get rid of the flying around evironment dependencies; assuming env stays the same and - at most - deactivates!!!!
--   move "Json" somewhere else
--   Better Errors for highest level protocols
-    => MPO do need envs for example
-
-# Todo
-
--   Build bridge
--   Clean Up
--   How to do "on" for protocolls correctly?
-
--   Debug
--   Handle (log) the (currently) ignore wrong message format errors and the other errors
-- Better errors
-- Refactor protocol
-- Get other stuff to work (demo)
-
--   Docs
--   Flat errors
-
-# MaybeTodo
-
--   Propagate errors back up
--   higher order middleware
--   Allow several communication channels (i.e. a wrapper channel) which implements retries, ...
--   Allow for a bridge to another endpoint, so we don't need to know the Address correctly. Maybe something like a "\*"
-
 # Notes on Effect
 
 -   Effect likes factories-ish more than classes
@@ -181,17 +103,6 @@ We first await (and reject) promise. Then we get around resolving it
 -   How to do servers in Effect, F# and functional programming?
 
 # Axioms
-
--   All middleware should be
-    a) Side-Effectless (except editing message)
-    or
-    b) Be fine if there is no future message that something failed
-
--   MW may don't have Errors?
--   What errors can MW even have reasonably?
-
-*   Invalid Message Format
-*   smth smth not found
 
 xxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxx

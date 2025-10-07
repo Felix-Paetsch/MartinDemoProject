@@ -52,7 +52,9 @@ const WhoToWho: boolean[] = [
 
     {
         const mc = new MessageChannel(
-            p2.address, p1,
+            p2.address,
+            p1,
+            [],
             { target_processor: "test" },
             { defaultMessageTimeout: 600000 }
         );

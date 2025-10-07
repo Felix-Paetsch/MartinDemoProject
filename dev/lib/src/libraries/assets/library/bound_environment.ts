@@ -1,6 +1,6 @@
 import { PluginEnvironment, uuidv4 } from "../../../pluginSystem/plugin_exports";
 import { FileContents, FileReference, RecencyToken } from "../types";
-import { JsonPatch } from "../../../utils/json-patch";
+import { JsonPatch } from "../../../utils/json";
 import {
     subscribe,
     unsubscribe,

@@ -1,3 +1,4 @@
+import { Assets } from "../../../../lib/src/libraries/exports";
 import { Address, Logging, Middleware } from "../../../../lib/src/messaging/exports";
 import {
     PsMiddleware,
@@ -56,6 +57,18 @@ export class KernelImpl extends KernelEnvironment {
             ...plugin_ident
         }
 
+        if (plugin_ident.name === "assets") {
+            const { env, ref } = this.create_local_plugin_environment({
+                instance_id: "assets",
+                ...plugin_ident
+            })
+
+            await Promise.resolve(Assets.__Plugin(env)).catch(e => {
+                throw new Error("Error executing plugin")
+            });
+            return ref;
+        }
+
         if (await isLocalPlugin(plugin_ident) === true) {
             return await createLocalPlugin(
                 this,
@@ -64,7 +77,6 @@ export class KernelImpl extends KernelEnvironment {
             )
         }
 
-        console.log("create iframe plugin");
         return await createIframePlugin(this, new_ident, "process_" + new_ident.instance_id)
     }
 
@@ -78,4 +90,11 @@ export class KernelImpl extends KernelEnvironment {
         const { ref } = this.create_local_library_environment(library_ident, lib);
         return ref;
     };
+
+    async start() {
+        await this.get_plugin({
+            "name": "assets"
+        });
+        return await super.start();
+    }
 }

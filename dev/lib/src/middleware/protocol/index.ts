@@ -3,7 +3,7 @@ import { Address, Connection, Port } from "../../messaging/exports";
 import MessageChannel from "../channel";
 import { registerProtocol } from "./respond";
 import { Json } from "../../utils/json";
-import { Transcoder } from "../../utils/exports";
+import { localizeErrorAsync, Transcoder } from "../../utils/exports";
 
 export const TransactionInitDataSchema = Schema.Struct({
     ident: Schema.Any,
@@ -32,10 +32,18 @@ export function protocol<
     });
 
     return async (sender: Initiator, port: Port, target: Address, with_data: InitData, ident_data: IdentData) => {
-        // console.log("Executing protocol", protocol_name);
+        const data = await responderIdent.encode(ident_data);
+        if (data instanceof Error) return data;
+
         const mc = new MessageChannel(
             target,
             port,
+            [
+                Schema.encodeSync(TransactionInitDataSchema)({
+                    ident: data,
+                    name: protocol_name,
+                })
+            ],
             { target_processor: "protocol_processor" },
             { defaultMessageTimeout: 2000 }
         );
@@ -44,20 +52,9 @@ export function protocol<
             return new Error("Port is closed");
         }
 
-        const data = await responderIdent.encode(ident_data);
-        if (data instanceof Error) return data;
-
-        const res = await mc.send_await_next(
-            Schema.encodeSync(TransactionInitDataSchema)({
-                ident: data,
-                name: protocol_name,
-            }));
-
+        const res = await mc.next();
         if (res !== "ok") return new Error("Failed to find responder");
-        return await initiate(mc, sender, with_data).then(r => {
-            // console.log("End Executing", protocol.name)
-            return r;
-        });
+        return await localizeErrorAsync(initiate(mc, sender, with_data));
     }
 }
 

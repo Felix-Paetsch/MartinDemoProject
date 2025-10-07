@@ -2,7 +2,7 @@ import { PluginEnvironment, PluginMessagePartner, uuidv4 } from "../../../plugin
 import { FileReference, File, RecencyToken, FileDescription } from "../types";
 import { FileContents } from "../types";
 import { mapSuccess, mapSuccessAsync } from "../../../utils/error_handling";
-import { JsonPatch } from "../../../utils/json-patch";
+import { JsonPatch } from "../../../utils/json";
 import { SubscriptionCallback } from "./subscriptions";
 import { perform_operation, perform_operations } from "../protocol/operations";
 import { ClientSideOperation } from "../operations";
