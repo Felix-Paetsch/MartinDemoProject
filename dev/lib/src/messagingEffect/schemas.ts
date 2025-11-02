@@ -3,7 +3,6 @@ import { Address } from "../messaging/core/address";
 import { AddressDeserializationError } from "../messaging/core/errors/anomalies";
 import { Message } from "../messaging/core/message";
 
-
 export const SerializedAddressSchema = Schema.Struct({
     process_id: Schema.String,
     port: Schema.String

@@ -89,3 +89,15 @@ export function deferred(factory: () => any): any {
     const dummyFn = function () { };
     return new Proxy(dummyFn as any, handler);
 }
+
+export const cacheFun = <T>(fn: () => T) => {
+    let called = false;
+    let value: T | undefined;
+    return () => {
+        if (!called) {
+            value = fn();
+        }
+        called = true;
+        return value as T;
+    }
+}

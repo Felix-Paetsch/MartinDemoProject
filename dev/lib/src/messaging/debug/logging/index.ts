@@ -1,11 +1,10 @@
 import { Schema } from "effect";
 import { reportAnomaly } from "../../core/errors/anomalies";
-import { Json } from "../../../utils/exports";
+import { cacheFun, Json } from "../../../utils/exports";
 import { Address } from "../../core/address";
 import { Message } from "../../core/message";
 import Port from "../../core/port";
 import { Middleware, MiddlewareContinue, MiddlewareInterrupt } from "../../core/middleware";
-import { cacheFun } from "../../../messagingEffect/utils";
 import { Log, LogSchema } from "./log";
 import { ToLog } from "./log";
 import { collection_middleware } from "../../middleware/collection";

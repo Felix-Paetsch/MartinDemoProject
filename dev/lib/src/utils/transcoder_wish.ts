@@ -1,5 +1,5 @@
 import { Effect, Schema } from "effect";
-import { Json } from "./json";
+import { Json, ReadonlyJson } from "./json";
 
 export type SyncDecoder<Decoded, Encoded extends Json> = {
     decode: (data: unknown) => Error | Decoded;
@@ -11,29 +11,29 @@ export type SyncEncoder<Decoded, Encoded extends Json> = {
 
 export type SyncTranscoder<Decoded, Encoded extends Json> = SyncDecoder<Decoded, Encoded> & SyncEncoder<Decoded, Encoded>;
 
-export type Decoder<Decoded, Encoded extends Json> = {
+export type Decoder<Decoded, Encoded extends ReadonlyJson> = {
     decode: (data: unknown) => Promise<Error | Decoded>;
 }
 
-export type Encoder<Decoded, Encoded extends Json> = {
+export type Encoder<Decoded, Encoded extends ReadonlyJson> = {
     encode: (data: Decoded) => Promise<Error | Encoded>;
 }
 
-export type Transcoder<Decoded, Encoded extends Json> = Decoder<Decoded, Encoded> & Encoder<Decoded, Encoded>;
+export type Transcoder<Decoded, Encoded extends ReadonlyJson> = Decoder<Decoded, Encoded> & Encoder<Decoded, Encoded>;
 
 export const AnythingTranscoder: Transcoder<null, null> = {
     decode: async () => null,
     encode: async () => null,
 }
 
-export function identity<T extends Json>(): Transcoder<T, T> {
+export function identity<T extends ReadonlyJson>(): Transcoder<T, T> {
     return {
         decode: async (data: unknown) => data as T,
         encode: async (data: unknown) => data as T
     }
 }
 
-export function trustType<T extends Json>(_?: Transcoder<T, any>) {
+export function trustType<T extends ReadonlyJson>(_?: Transcoder<T, any>) {
     return identity<T>();
 }
 
@@ -49,7 +49,7 @@ export type DecodedType<T> = T extends Transcoder<infer A, infer B>
 
 // Effech && Schemas
 
-export function SchemaTranscoder<Decoded>(schema: Schema.Schema<Decoded, any>): Transcoder<Decoded, Json> {
+export function SchemaTranscoder<Decoded, Encoded extends ReadonlyJson>(schema: Schema.Schema<Decoded, Encoded>): Transcoder<Decoded, Encoded> {
     return {
         decode: async (data: unknown) => Schema.decodeUnknown(schema)(data).pipe(
             Effect.merge,
@@ -62,9 +62,11 @@ export function SchemaTranscoder<Decoded>(schema: Schema.Schema<Decoded, any>): 
     }
 }
 
+// export function TranscoderSchema<
+
 export type SchemaTranscoderType<T> = T extends Schema.Schema<infer A, infer B>
-    ? B extends Json
+    ? B extends ReadonlyJson
     ? Transcoder<A, B>
-    : Transcoder<A, Json>
+    : never
     : never;
 
