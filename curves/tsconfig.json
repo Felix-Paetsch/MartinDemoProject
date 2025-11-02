@@ -12,6 +12,7 @@
         "isolatedModules": true,
         "outDir": "dist",
         "declaration": true,
+        "preserveSymlinks": true,
         "plugins": [
             {
                 "name": "@effect/language-service"

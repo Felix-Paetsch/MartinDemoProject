@@ -17,12 +17,12 @@ export const mapBothAsync = async <
     ErrorResult
 >(
     b: MaybeError,
-    cb: (arg: Exclude<MaybeError, Error>) => SuccessResult,
-    cbErr: (arg: MaybeError & Error) => ErrorResult
+    cb: (arg: Exclude<Awaited<MaybeError>, Error>) => SuccessResult,
+    cbErr: (arg: Awaited<MaybeError> & Error) => ErrorResult
 ) => {
     const a = await b;
     if (a instanceof Error) return cbErr(a);
-    return cb(a as Exclude<MaybeError, Error>);
+    return cb(a as Exclude<Awaited<MaybeError>, Error>);
 };
 
 export const mapSuccess = <

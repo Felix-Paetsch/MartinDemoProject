@@ -4,6 +4,8 @@
     "main": "index.js",
     "scripts": {
         "typecheck": "tsc --noEmit",
+        "node": "tsx watch node.ts",
+
         "reinstall": "npm i \"../dev/lib/pc-messaging-kernel-0.1.0.tgz\"",
         "scratch": "tsx watch scratchpad/index.ts",
         "dev:node": "tsx watch demo/node/index.ts",

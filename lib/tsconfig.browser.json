@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist/browser",
+    "moduleResolution": "bundler",
+    "lib": ["DOM", "ES2022"],
+    "types": []
+  }
+}

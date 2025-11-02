@@ -7,7 +7,7 @@ import { applyMiddlewareEffect } from "./middleware";
 import { Connection, PortConnection } from "./connection";
 import { MessageFromString } from "../../messagingEffect/schemas";
 import { callbackToEffect } from "./errors/main";
-import { MessageDeserializationError } from "./errors/anomalies";
+import { MessageDeserializationError, reportAnomaly } from "./errors/anomalies";
 import { core_send } from "./core_send";
 
 export default class Port {
@@ -85,7 +85,7 @@ export default class Port {
 
     async send(msg: Message): Promise<void> {
         if (this.is_closed()) {
-            reportError(new PortClosedError({ port: this }));
+            reportAnomaly(new PortClosedError({ port: this }));
             return;
         }
 

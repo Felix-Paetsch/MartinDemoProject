@@ -36,7 +36,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
 
     start() {
         return this.get_plugin({
-            name: "start"
+            name: "root"
         });
     }
 
@@ -87,9 +87,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         return this.get_plugin_reference(ident.instance_id);
     }
 
-    async create_plugin(plugin_ident: PluginIdent): Promise<PluginReference | GetPluginError> {
-        return new Error("Not implemented!");
-    }
+    abstract create_plugin(plugin_ident: PluginIdent): Promise<PluginReference | GetPluginError>
 
     async get_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {
         const existingLibrary = this.registered_libraries.find(library => library.library_ident.name === library_ident.name && library.library_ident.version === library_ident.version);
@@ -108,9 +106,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
             return l.library_ident.name == ident.name
         }) || null;
     }
-    async create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {
-        return new Error("Not implemented!");
-    }
+    abstract create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError>
     async remove_library(l: LibraryReference) {
         await l.remove();
         const index = this.registered_libraries.findIndex(m => m == l);

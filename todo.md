@@ -1,0 +1,3 @@
+- Local references should (ideally) point to files and not to builds..
+- Startup script should start up correct things (e.g. lib build watch)
+- Browser & Asset things
