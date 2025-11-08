@@ -6,19 +6,18 @@
         "strict": true,
         "noUncheckedIndexedAccess": true,
         "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
         "outDir": "dist",
         "declaration": true,
+        "preserveSymlinks": true,
         "plugins": [
             {
                 "name": "@effect/language-service"
             }
         ]
     },
-    "include": ["**/*"],
     "exclude": ["node_modules", "dist", "lib"]
 }

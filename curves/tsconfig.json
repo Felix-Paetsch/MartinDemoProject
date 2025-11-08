@@ -1,24 +1,32 @@
 {
-    "compilerOptions": {
-        "target": "ES2022",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "strict": true,
-        "noUncheckedIndexedAccess": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "outDir": "dist",
-        "declaration": true,
-        "preserveSymlinks": true,
-        "plugins": [
-            {
-                "name": "@effect/language-service"
-            }
-        ]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "preserveSymlinks": true,
+    "declaration": true,
+    "outDir": "dist",
+
+    "baseUrl": ".",
+    "paths": {
+      "pc-messaging-kernel": ["../lib/src/index.ts"],
+      "pc-messaging-kernel/kernel": ["../lib/src/pluginSystem/kernel_exports.ts"],
+      "pc-messaging-kernel/plugin": ["../lib/src/pluginSystem/plugin_exports.ts"],
+      "pc-messaging-kernel/messaging": ["../lib/src/messaging/exports.ts"],
+      "pc-messaging-kernel/utils": ["../lib/src/utils/exports.ts"],
+      "pc-messaging-kernel/libraries": ["../lib/src/libraries/exports.ts"]
     },
-    "include": ["demo/**/*", "scratchpad/**/*", "plugins/**/*"],
-    "exclude": ["node_modules", "dist", "lib"]
+
+    "plugins": [
+      { "name": "@effect/language-service" }
+    ]
+  },
+  "exclude": ["node_modules", "dist", "lib"]
 }
