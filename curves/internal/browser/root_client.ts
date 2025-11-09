@@ -1,8 +1,7 @@
-import { Failure, Logging, Address } from "pc-messaging-kernel/messaging";
+import { Failure, Logging } from "pc-messaging-kernel/messaging";
 import {
     PluginEnvironment,
     BrowserPlatform,
-    PsLogging,
     LibraryEnvironment
 } from "pc-messaging-kernel/kernel"
 
@@ -13,6 +12,7 @@ Failure.setAnomalyHandler((e) => {
 Failure.setErrorHandler((e) => {
     throw e;
 });
+
 
 class KernelImpl extends BrowserPlatform.KernelEnvironment {
     register_kernel_middleware() {

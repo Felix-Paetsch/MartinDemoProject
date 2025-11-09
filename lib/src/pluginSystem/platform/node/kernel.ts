@@ -23,7 +23,7 @@ export class NodeKernelEnvironment extends KernelEnvironment {
                 return false as const;
             }
 
-            return p.load()
+            return p.execute(this, ident_with_id)
         }, () => false as const);
 
         if (plugin instanceof Error) {
@@ -31,13 +31,7 @@ export class NodeKernelEnvironment extends KernelEnvironment {
             plugin = false;
         }
 
-        if (plugin) {
-            const { env, ref } = this.create_local_plugin_environment(ident_with_id);
-            await plugin(env);
-            return ref;
-        }
-
-        throw new Error("[No local plugin] Unimplemeted: Get Plugin.. " + ident_with_id.name);
+        return new Error("[No local plugin] Unimplemeted: Get Plugin.. " + ident_with_id.name);
     }
 
     create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {

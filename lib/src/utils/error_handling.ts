@@ -42,10 +42,11 @@ export const mapSuccessAsync = async <
 >(
     b: Promise<MaybeError>,
     cb: (arg: Exclude<MaybeError, Error>) => SuccessResult
-) => {
+): Promise<Awaited<SuccessResult> | (MaybeError & Error)> => {
     const a = await b;
     if (a instanceof Error) return a;
-    return await cb(a as Exclude<MaybeError, Error>);
+    const r = await cb(a as Exclude<MaybeError, Error>);
+    return r;
 };
 
 export const mapError = <

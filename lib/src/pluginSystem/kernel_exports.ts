@@ -6,8 +6,9 @@ import { LibraryReference } from "./kernel_lib/external_references/library_refer
 import { PluginReference } from "./kernel_lib/external_references/plugin_reference";
 import { AbstractLibraryImplementation } from "./library/library_implementation";
 import { LibraryEnvironment } from "./library/library_environment";
-import { NodeKernelEnvironment } from "./platform/node/kernel";
-
+import { NodePlatform } from "./platform/node/exports";
+import { BrowserPlatform } from "./platform/browser/exports";
+import { PluginServer } from "./platform/server/exports";
 
 export {
     KernelEnvironment,
@@ -16,5 +17,7 @@ export {
     PluginReference,
     AbstractLibraryImplementation,
     LibraryEnvironment,
-    NodeKernelEnvironment
+    NodePlatform,
+    BrowserPlatform,
+    PluginServer
 }

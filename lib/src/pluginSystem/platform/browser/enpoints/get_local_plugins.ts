@@ -1,13 +1,10 @@
 import fs from "fs";
-import url from "url";
 import path from "path";
-import { mapBothAsync, mapSuccessAsync } from "../../../../utils/error_handling";
-import { KernelEnvironment, Plugin } from "../../../../pluginSystem/kernel_exports";
-import { ExecutablePlugin } from "../../types";
 
-export interface NodeLocalPluginData {
-    full_path: string,
-    ext: ".ts" | ".js"
+export type BackendLocalPluginData = {
+    name: string;
+    path: string;
+    ext: ".ts" | ".js";
 }
 
 async function exists(p: string): Promise<boolean> {
@@ -19,21 +16,12 @@ async function exists(p: string): Promise<boolean> {
     }
 }
 
-async function loadPlugin(full_path: NodeLocalPluginData["full_path"]) {
-    const fileUrl = url.pathToFileURL(full_path).href;
-    return mapBothAsync(
-        import(fileUrl).catch((r) => r as Error),
-        (m) => m.default as Plugin,
-        (e) => e as Error
-    );
-}
-
 async function findLocalPlugins(): Promise<
-    Record<string, NodeLocalPluginData>
+    Record<string, BackendLocalPluginData>
 > {
     const projectRoot = process.cwd();
     const targetRoot = path.resolve(projectRoot, "plugins", "local");
-    const results: Record<string, NodeLocalPluginData> = {};
+    const results: Record<string, BackendLocalPluginData> = {};
 
     async function walk(dir: string): Promise<void> {
         let entries: fs.Dirent[];
@@ -57,9 +45,16 @@ async function findLocalPlugins(): Promise<
                 const full_path = hasTs ? tsIndex : jsIndex;
                 const ext = hasTs ? ".ts" : ".js";
 
+                const relativePath = path
+                    .relative(projectRoot, full_path)
+                    .replace(/\.[tj]s$/, "")
+                    .split(path.sep)
+                    .join("/");
+
                 results[entry.name] = {
-                    full_path,
-                    ext
+                    name: entry.name,
+                    path: relativePath,
+                    ext,
                 };
             }
 
@@ -77,7 +72,7 @@ async function findLocalPlugins(): Promise<
     return results;
 }
 
-async function findRootPlugin(): Promise<NodeLocalPluginData | null> {
+async function findRootPlugin(): Promise<BackendLocalPluginData | null> {
     const projectRoot = process.cwd();
     const rootDir = path.resolve(projectRoot, "plugins", "root");
     const tsIndex = path.join(rootDir, "index.ts");
@@ -93,15 +88,20 @@ async function findRootPlugin(): Promise<NodeLocalPluginData | null> {
     const full_path = hasTs ? tsIndex : jsIndex;
     const ext = hasTs ? ".ts" : ".js";
 
+    const relativePath = path
+        .relative(projectRoot, full_path)
+        .replace(/\.[tj]s$/, "")
+        .split(path.sep)
+        .join("/");
+
     return {
-        full_path,
-        ext
+        name: "root",
+        path: relativePath,
+        ext,
     };
 }
 
-export async function getLocalPlugins(): Promise<
-    Record<string, ExecutablePlugin>
-> {
+export async function api_endpoints_get_local_plugins() {
     const [localPlugins, rp] = await Promise.all([
         findLocalPlugins(),
         findRootPlugin(),
@@ -111,20 +111,5 @@ export async function getLocalPlugins(): Promise<
         localPlugins["root"] = rp;
     }
 
-    const res: Record<string, ExecutablePlugin> = {};
-    for (const [key, data] of Object.entries(localPlugins)) {
-        res[key] = {
-            name: key,
-            execute: (k, ident) => mapSuccessAsync(
-                loadPlugin(data.full_path),
-                async (p: Plugin) => {
-                    const { env, ref } = k.create_local_plugin_environment(ident);
-                    await p(env);
-                    return ref;
-                }
-            ),
-        }
-    }
-
-    return res;
+    return localPlugins;
 }

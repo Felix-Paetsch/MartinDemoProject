@@ -1,36 +1,43 @@
 import {
-    KernelEnvironment,
-    PluginIdentWithInstanceId,
     PluginEnvironment,
-    PluginIdent
+    Plugin
 } from "../../../../pluginSystem/kernel_exports";
+import { mapSuccessAsync } from "../../../../utils/error_handling";
+import { get_api_data } from "../api_endpoints";
+import { ExecutablePlugin } from "../../types";
+import { BackendLocalPluginData } from "../enpoints/get_local_plugins";
 
-export function createLocalPlugin(k: KernelEnvironment, plugin_ident: PluginIdentWithInstanceId) {
-    return import(path).catch(e => {
-        throw new Error("Failed to find plugin");
-    }).then(
+async function load_api_plugin(val: BackendLocalPluginData): Promise<Error | Plugin> {
+    return import(window.location.pathname + val.path).then(
         (importet) => importet.default as (env: PluginEnvironment) => Promise<void>
     ).then(
-        async (plugin) => {
-            const { env, ref } = k.create_local_plugin_environment(plugin_ident)
-            await plugin(env).catch(e => {
-                throw new Error("Error executing plugin")
-            });
-            return ref;
-        }
-    )
+        async (plugin) => plugin as Plugin
+    ).catch(e => e as Error);
 }
 
-export const isLocalPlugin = (plugin_ident: PluginIdent): Promise<boolean> => {
-    const name = plugin_ident.name.toLowerCase();
-    const potential_path = `/plugins/local/${name}/index.ts`;
-    return fetch(potential_path).then(
-        r => {
-            const content_type = r.headers.get("content-type") || "error";
-            return r.ok && (
-                content_type == "text/js"
-                || content_type == "text/javascript"
+export async function getLocalPlugins(): Promise<
+    Error | Record<string, ExecutablePlugin>
+> {
+    return await mapSuccessAsync(
+        get_api_data("local_plugins"),
+        (r) => {
+            const ret: Record<string, ExecutablePlugin> = Object.fromEntries(
+                Object.entries(r).map(([key, value]) => [key, {
+                    name: value.name,
+                    execute: (kernel, ident_with_id) => {
+                        return mapSuccessAsync(
+                            load_api_plugin(value),
+                            async (plugin) => {
+                                const { env, ref } = kernel.create_local_plugin_environment(ident_with_id);
+                                await plugin(env);
+                                return ref;
+                            }
+                        )
+                    }
+                }])
             );
+
+            return ret;
         }
-    ).catch(() => false);
+    )
 }

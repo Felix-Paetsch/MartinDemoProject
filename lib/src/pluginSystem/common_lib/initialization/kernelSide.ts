@@ -10,7 +10,6 @@ export type PluginInitializationError = Error;
 
 export async function initializeExternalPlugin_KernelSide(
     channel: PrimitiveMessageChannel,
-    target_process_id: string,
     pluginIdent: PluginIdentWithInstanceId
 ): Promise<{
     connection: Connection,
@@ -19,7 +18,7 @@ export async function initializeExternalPlugin_KernelSide(
     return Effect.gen(function* () {
         const synchronizer = new Synchronizer(channel);
         const connection = Connection.create(
-            Address.generic(target_process_id),
+            Address.generic(pluginIdent.instance_id),
             (msg) => synchronizer.call_command("send_message", msg)
         );
 
@@ -46,7 +45,7 @@ export async function initializeExternalPlugin_KernelSide(
             run_plugin: () => Effect.gen(function* () {
                 synchronizer.call_command("run_plugin", {
                     pluginIdent,
-                    plugin_process_id: target_process_id,
+                    plugin_process_id: pluginIdent.instance_id,
                     kernel_process_id: Address.process_id
                 });
                 yield* Deferred.await(awaitEvaluated);
