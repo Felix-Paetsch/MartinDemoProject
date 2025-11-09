@@ -10,7 +10,8 @@ export default async (env: PluginEnvironment) => {
     });
 
     if (mp instanceof Error) {
-        console.log("THROWING");
+        console.log("EARLY RETURNING");
+        return;
         throw mp;
     }
 

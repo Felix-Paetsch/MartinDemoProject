@@ -1,47 +1,35 @@
 import { Effect } from "effect";
-import { promisify } from "../promisify";
-import { asyncCallbackToEffect } from "./callbacks";
-import { createFailure, Failure, Result, ResultPromise, Success } from "./result";
 
-export function dangerouslyRunPromise<T>(e: Effect.Effect<T>): Promise<T> {
-    return Effect.runPromise(e);
+export function EffectToPromise<T, E>(e: Effect.Effect<T, E>): Promise<T | E> {
+    return e.pipe(
+        Effect.merge,
+        Effect.runPromise
+    );
 }
 
-export function EffectToResultFn<T, E extends Error>(e: Effect.Effect<T, E>): () => ResultPromise<T, E> {
-    return () => Effect.runPromise(e.pipe(
-        Effect.map(res => new Success(res)),
-        Effect.catchAllCause(cause => Effect.succeed(cause))
-    )).then(res => {
-        if (res instanceof Success) { return res; }
-        const f = createFailure(res as any, 2) as Failure<E>;
-        return f;
-    });
+export function EffectToPromiseFn<T, E extends Error>(e: Effect.Effect<T, E>): () => Promise<T | E> {
+    return () => EffectToPromise(e);
 }
 
-export function EffectToResult<T, E extends Error>(e: Effect.Effect<T, E>) {
-    return EffectToResultFn(e)()
+export function EffectToPromiseFlashFn<T, E extends Error>(e: Effect.Effect<T, E>): () => Promise<void | E> {
+    return EffectToPromiseFn(e.pipe(Effect.as(undefined as void)));
 }
 
-export function EffectToResultFlashFn<T, E extends Error>(e: Effect.Effect<T, E>): () => ResultPromise<void, E> {
-    return () => EffectToResult(e.pipe(Effect.as(undefined)))
+export function EffectToPromiseFlash<T, E extends Error>(e: Effect.Effect<T, E>): Promise<void | E> {
+    return EffectToPromise(e.pipe(Effect.as(undefined as void)));
 }
 
-export function EffectToResultFlash<T, E extends Error>(e: Effect.Effect<T, E>): ResultPromise<void, E> {
-    return EffectToResultFlashFn(e)()
-}
+export function PromiseToEffect<T>(p: Promise<T> | (() => Promise<T>)): Effect.Effect<Exclude<T, Error>, T & Error> {
+    if (typeof p === "function") {
+        return Effect.suspend(() => PromiseToEffect(p()));
+    }
 
-export function ResultToEffect<T, E extends Error>(r: Result<T, E>): Effect.Effect<T, Exclude<Failure<E>, Failure<never>>>;
-export function ResultToEffect<T, E extends Error>(r: ResultPromise<T, E>): Effect.Effect<T, Exclude<Failure<E>, Failure<never>>>;
-export function ResultToEffect<T, E extends Error>(r: Result<T, E> | ResultPromise<T, E>): Effect.Effect<T, Exclude<Failure<E>, Failure<never>>> {
-    const res = asyncCallbackToEffect(() => Promise.resolve(r));
-    return res.pipe(
-        Effect.catchAll(e => Effect.die(e)),
-        Effect.andThen(r => {
-            if (r instanceof Failure) return Effect.fail(r as any).pipe(
-                Effect.withSpan("ResultToEffect")
-            );
-            return Effect.succeed(r.value).pipe(
-                Effect.withSpan("ResultToEffect")
-            );
-        }));
+    return Effect.promise(() => p).pipe(
+        Effect.flatMap((r) => {
+            if (r instanceof Error) {
+                return Effect.fail(r);
+            }
+            return Effect.succeed(r as Exclude<T, Error>);
+        })
+    )
 }

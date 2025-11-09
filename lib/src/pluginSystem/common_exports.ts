@@ -29,9 +29,9 @@ export namespace PsMiddleware {
     export const PreventLoops = prevent_loops
 }
 
-import * as InitPluginSide from "./common_lib/initialization/pluginSide";
-import * as InitKernelSide from "./common_lib/initialization/kernelSide";
-import * as InitSync from "./common_lib/initialization/synchronizer";
+import * as InitPluginSide from "./platform/browser/iframe/initialization/pluginSide";
+import * as InitKernelSide from "./platform/browser/iframe/initialization/kernelSide";
+import * as InitSync from "./platform/browser/iframe/initialization/synchronizer";
 import { PluginEnvironment } from "./plugin_exports";
 export namespace Initialization {
     export const pluginSide = InitPluginSide.initializeExternalPlugin_PluginSide;

@@ -8,7 +8,6 @@ import { Schema } from "effect";
 import { is_responsive } from "../../protocols/message_partner/is_responsive";
 import { PluginEnvironment } from "../plugin_environment";
 import { Transcoder } from "../../../utils/exports";
-import { identity } from "effect/Stream";
 
 export type MessagePartnerPairDistinguisher = boolean;
 

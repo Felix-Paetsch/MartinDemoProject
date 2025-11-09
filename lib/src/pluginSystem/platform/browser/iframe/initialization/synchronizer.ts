@@ -1,4 +1,4 @@
-import { Json } from "../../../utils/json";
+import { Json } from "../../../../../utils/json";
 
 export type PrimitiveMessageChannel = {
     send: (data: Json) => void;

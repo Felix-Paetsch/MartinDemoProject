@@ -1,10 +1,10 @@
 import { Effect } from "effect";
 import { Synchronizer } from "./synchronizer";
-import { Failure, Address, Connection, Json, Logging, Port } from "../../../messaging/exports";
+import { Failure, Address, Connection, Json, Logging } from "../../../../../messaging/exports";
 import { PrimitiveMessageChannel } from "./synchronizer";
-import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_ident";
-import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
-import { AddressAlreadyInUseError } from "../../../messaging/core/errors/errors";
+import { PluginIdentWithInstanceId } from "../../../../plugin_lib/plugin_ident";
+import { PluginEnvironment } from "../../../../plugin_lib/plugin_environment";
+import { AddressAlreadyInUseError } from "../../../../../messaging/core/errors/errors";
 
 Failure.setAnomalyHandler((e) => {
     console.log(e);

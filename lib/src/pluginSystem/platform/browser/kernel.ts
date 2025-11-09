@@ -49,7 +49,11 @@ export class BrowserKernelEnvironment extends KernelEnvironment {
             plugin = false;
         }
 
-        return new Error("[No local plugin] Unimplemeted: Get Plugin.. " + ident_with_id.name);
+        if (plugin === false) {
+            return new Error("[No local plugin] Unimplemeted: Get Plugin.. " + ident_with_id.name);
+        }
+
+        return plugin;
     }
 
     create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {

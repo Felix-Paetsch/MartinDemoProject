@@ -3,7 +3,7 @@ import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
 import { KernelEnvironment } from "../../kernel_lib/kernel_env";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
 import MessageChannel from "../../../middleware/channel";
-import { Effect, Schema } from "effect";
+import { Schema } from "effect";
 import { Json } from "../../../messaging/core/message";
 import { protocol } from "../../../middleware/protocol";
 import { Transcoder } from "../../../utils/exports";

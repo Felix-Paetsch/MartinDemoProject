@@ -36,4 +36,4 @@ export const applyMiddlewareEffect =
         }
 
         return MiddlewareContinue;
-    }); 1
+    }); 

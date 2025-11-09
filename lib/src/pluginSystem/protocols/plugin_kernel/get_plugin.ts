@@ -2,7 +2,7 @@ import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
 import { KernelEnvironment } from "../../kernel_lib/kernel_env";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
 import MessageChannel from "../../../middleware/channel";
-import { Effect, Schema } from "effect";
+import { Schema } from "effect";
 import { AddressFromString } from "../../../messagingEffect/schemas";
 import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
 import uuidv4 from "../../../utils/uuid";

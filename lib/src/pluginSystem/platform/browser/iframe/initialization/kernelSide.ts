@@ -1,10 +1,10 @@
 import { Deferred, Duration, Effect } from "effect";
-import { Address } from "../../../messaging/core/address";
-import { Connection } from "../../../messaging/exports";
-import { Json } from "../../../utils/json";
+import { Address } from "../../../../../messaging/core/address";
+import { Connection } from "../../../../../messaging/exports";
+import { Json } from "../../../../../utils/json";
 import { PrimitiveMessageChannel, Synchronizer } from "./synchronizer";
-import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_ident";
-import { AddressAlreadyInUseError } from "../../../messaging/core/errors/errors";
+import { PluginIdentWithInstanceId } from "../../../../plugin_lib/plugin_ident";
+import { AddressAlreadyInUseError } from "../../../../../messaging/core/errors/errors";
 
 export type PluginInitializationError = Error;
 
