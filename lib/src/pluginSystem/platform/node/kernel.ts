@@ -1,10 +1,8 @@
 import { reportAnomaly } from "../../../messaging/core/errors/anomalies";
-import { LibraryReference } from "../../../pluginSystem/kernel_lib/external_references/library_reference";
 import { PluginReference } from "../../../pluginSystem/kernel_lib/external_references/plugin_reference";
 import { GetPluginError, KernelEnvironment } from "../../../pluginSystem/kernel_lib/kernel_env";
-import { LibraryIdent, uuidv4 } from "../../../pluginSystem/plugin_exports";
+import { uuidv4 } from "../../../pluginSystem/plugin_exports";
 import { PluginIdent } from "../../../pluginSystem/plugin_lib/plugin_ident";
-import { GetLibraryError } from "../../../pluginSystem/protocols/plugin_kernel/get_library";
 import { mapBothAsync } from "../../../utils/error_handling";
 import { getLocalPlugins } from "./get_plugins/local";
 
@@ -36,9 +34,5 @@ export class NodeKernelEnvironment extends KernelEnvironment {
         }
 
         return plugin;
-    }
-
-    create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {
-        throw new Error("Unimplemented")
     }
 }

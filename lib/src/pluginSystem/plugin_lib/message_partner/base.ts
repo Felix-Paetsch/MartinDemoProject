@@ -1,5 +1,4 @@
 import { MessagePartnerProtocol } from "../../protocols/message_partner/message_partner_protocol";
-import LibraryMessagePartner from "./library";
 import PluginMessagePartner from "./plugin_message_partner";
 import { Json } from "./../../../utils/json";
 import { send_message, send_message_acknowledge } from "../../protocols/message_partner/send_message";
@@ -19,7 +18,7 @@ export class MessagePartner {
     private removed = false;
     constructor(
         readonly pair_uuid: string,
-        readonly root_message_partner: PluginMessagePartner | LibraryMessagePartner,
+        readonly root_message_partner: PluginMessagePartner,
         readonly parent: MessagePartner | null = null
     ) {
         this.pair_distinguisher = root_message_partner?.pair_distinguisher || false;
@@ -115,7 +114,7 @@ export class MessagePartner {
             data
         });
     }
-    protected run_message_partner_protocol<
+    run_message_partner_protocol<
         Responder extends MessagePartner,
         InitData,
         Result

@@ -2,7 +2,6 @@ import { PluginIdentWithInstanceId } from "../../plugin_lib/plugin_ident";
 import { KernelEnvironment } from "../kernel_env";
 import { ExternalReference } from "./external_reference";
 import { Address } from "../../../messaging/exports";
-import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
 import { Protocol } from "../../../middleware/protocol";
 import { remove_plugin_protocol } from "../../protocols/plugin_kernel/remove_plugin";
 import { type PluginEnvironment } from "../../plugin_lib/plugin_environment";

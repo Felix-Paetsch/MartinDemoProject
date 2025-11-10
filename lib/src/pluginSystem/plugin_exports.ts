@@ -1,12 +1,10 @@
 export * from "./common_exports";
 
 import { MessagePartner } from "./plugin_lib/message_partner/base";
-import LibraryMessagePartner from "./plugin_lib/message_partner/library";
 import PluginMessagePartner from "./plugin_lib/message_partner/plugin_message_partner";
 import BranchedMessagePartner from "./plugin_lib/message_partner/branched_message_partner";
 
 export {
-    LibraryMessagePartner,
     PluginMessagePartner,
     MessagePartner,
     BranchedMessagePartner

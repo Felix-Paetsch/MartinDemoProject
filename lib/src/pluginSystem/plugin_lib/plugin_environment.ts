@@ -6,9 +6,6 @@ import PluginMessagePartner from "./message_partner/plugin_message_partner";
 import { PluginIdent, PluginIdentWithInstanceId, pluginIdentWithInstanceIdSchema } from "./plugin_ident";
 import { KernelEnvironment } from "../kernel_lib/kernel_env";
 import { get_plugin_from_kernel, make_plugin_message_partner } from "../protocols/plugin_kernel/get_plugin";
-import { LibraryIdent } from "../library/library_environment";
-import LibraryMessagePartner from "./message_partner/library";
-import { get_library } from "../protocols/plugin_kernel/get_library";
 import { Logging } from "../../messaging/exports"
 import { send_kernel_message } from "../protocols/plugin_kernel/kernel_message";
 import { Schema } from "effect";
@@ -25,7 +22,6 @@ export type PluginDescriptor = {
 export class PluginEnvironment extends EnvironmentCommunicator {
     static plugins: PluginEnvironment[] = [];
     readonly plugin_message_partners: PluginMessagePartner[] = [];
-    readonly library_message_partners: LibraryMessagePartner[] = [];
     constructor(
         readonly kernel_process_id: string,
         readonly plugin_ident: PluginIdentWithInstanceId
@@ -46,13 +42,6 @@ export class PluginEnvironment extends EnvironmentCommunicator {
             data,
             severity
         });
-    }
-
-    async get_library(library_ident: LibraryIdent): Promise<LibraryMessagePartner | Error> {
-        return await this.#execute_kernel_protocol(
-            get_library,
-            library_ident
-        );
     }
 
     async get_plugin(plugin_ident: PluginIdent): Promise<PluginMessagePartner | Error> {

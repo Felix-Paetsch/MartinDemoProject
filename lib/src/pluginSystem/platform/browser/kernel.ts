@@ -2,14 +2,11 @@ import {
     KernelEnvironment,
     uuidv4,
     PluginIdent,
-    LibraryIdent,
-    LibraryReference
 } from "../../kernel_exports";
 import { mapBothAsync } from "../../../utils/error_handling";
 import { reportAnomaly } from "../../../messaging/core/errors/anomalies";
 import { getLocalPlugins } from "./get_plugins/local";
 import { getAPIPlugins } from "./get_plugins/api";
-import { GetLibraryError } from "../../protocols/plugin_kernel/get_library";
 import { ExecutablePlugin } from "../types";
 import { cacheFun } from "../../../utils/exports";
 
@@ -55,8 +52,4 @@ export class BrowserKernelEnvironment extends KernelEnvironment {
 
         return plugin;
     }
-
-    create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {
-        throw new Error("Unimplemeted")
-    };
 }

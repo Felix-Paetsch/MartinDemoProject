@@ -1,12 +1,7 @@
 import { EnvironmentCommunicator } from "../common_lib/environments/environment_communicator";
-import { LibraryEnvironment, LibraryIdent } from "../library/library_environment";
-import { AbstractLibraryImplementation } from "../library/library_implementation";
 import { PluginEnvironment } from "../plugin_lib/plugin_environment";
 import { PluginIdent, PluginIdentWithInstanceId } from "../plugin_lib/plugin_ident";
-import { GetLibraryError } from "../protocols/plugin_kernel/get_library";
-import { LibraryReference } from "./external_references/library_reference";
 import { PluginReference } from "./external_references/plugin_reference";
-import uuidv4 from "../../utils/uuid";
 import { Json } from "../../messaging/core/message";
 import { Address } from "../../messaging/exports";
 import { AnythingTranscoder } from "../../utils/transcoder";
@@ -17,7 +12,6 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     static singleton: KernelEnvironment | null = null;
 
     readonly registered_plugins: PluginReference[] = [];
-    readonly registered_libraries: LibraryReference[] = [];
 
     constructor() {
         if (KernelEnvironment.singleton) {
@@ -32,7 +26,6 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
 
     register_kernel_middleware(ker: this) { }
     register_local_plugin_middleware(env: PluginEnvironment) { }
-    register_local_library_middleware(env: LibraryEnvironment) { }
 
     start() {
         return this.get_plugin({
@@ -47,19 +40,6 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
         return {
             ref: ref,
             env: env
-        };
-    }
-
-    create_local_library_environment(library_ident: LibraryIdent, implementation: AbstractLibraryImplementation, port_id: string = uuidv4()): {
-        ref: LibraryReference, env: LibraryEnvironment
-    } {
-        const lib = new LibraryEnvironment(port_id, this.address, library_ident, implementation);
-        this.register_local_library_middleware(lib);
-
-        const ref = new LibraryReference(lib.address, library_ident, this);
-        return {
-            ref: ref,
-            env: lib
         };
     }
 
@@ -88,31 +68,6 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
     }
 
     abstract create_plugin(plugin_ident: PluginIdent): Promise<PluginReference | GetPluginError>
-
-    async get_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError> {
-        const existingLibrary = this.registered_libraries.find(library => library.library_ident.name === library_ident.name && library.library_ident.version === library_ident.version);
-        if (existingLibrary) { return existingLibrary; }
-
-        return await this.create_library(library_ident);
-    }
-    get_library_reference(ident: Address | LibraryReference | LibraryIdent): null | LibraryReference {
-        if (ident instanceof LibraryReference) {
-            return ident;
-        }
-        if (ident instanceof Address) {
-            return this.registered_libraries.find(l => l.address.equals(ident)) || null;
-        }
-        return this.registered_libraries.find(l => {
-            return l.library_ident.name == ident.name
-        }) || null;
-    }
-    abstract create_library(library_ident: LibraryIdent): Promise<LibraryReference | GetLibraryError>
-    async remove_library(l: LibraryReference) {
-        await l.remove();
-        const index = this.registered_libraries.findIndex(m => m == l);
-        if (index < 0) return;
-        this.registered_libraries.splice(index, 1);
-    }
 
     async remove_plugin(p: PluginReference) {
         await p.remove();

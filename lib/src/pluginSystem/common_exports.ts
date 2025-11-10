@@ -4,11 +4,6 @@ import * as PluginStuff from "../pluginSystem/plugin_lib/plugin_ident";
 export type PluginIdent = PluginStuff.PluginIdent;
 export type PluginIdentWithInstanceId = PluginStuff.PluginIdentWithInstanceId;
 
-import { LibraryIdent } from "./library/library_environment";
-export {
-    type LibraryIdent
-}
-
 import * as LoggingStuff from "../pluginSystem/debug/logging";
 import { Severity as _Severity } from "./debug/severity";
 import { prevent_loops } from "./common_lib/middleware/prevent_loops";
@@ -32,7 +27,6 @@ export namespace PsMiddleware {
 import * as InitPluginSide from "./platform/browser/iframe/initialization/pluginSide";
 import * as InitKernelSide from "./platform/browser/iframe/initialization/kernelSide";
 import * as InitSync from "./platform/browser/iframe/initialization/synchronizer";
-import { PluginEnvironment } from "./plugin_exports";
 export namespace Initialization {
     export const pluginSide = InitPluginSide.initializeExternalPlugin_PluginSide;
     export const kernelSide = InitKernelSide.initializeExternalPlugin_KernelSide;
