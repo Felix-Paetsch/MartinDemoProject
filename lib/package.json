@@ -54,6 +54,7 @@
     "license": "MIT",
     "scripts": {
         "typecheck": "npx tsc -p tsconfig.node.json --noEmit && npx tsc -p tsconfig.browser.json --noEmit",
+
         "build:browser:js": "cross-env TARGET=browser vite build",
         "build:node:js": "cross-env TARGET=node vite build",
         "build:browser:types": "tsc --emitDeclarationOnly -p tsconfig.browser.json",
@@ -64,7 +65,9 @@
 
         "watch:build:node": "./scripts/build_watch.sh 'npm run build:node' 2",
         "watch:build:browser": "./scripts/build_watch.sh 'npm run build:browser' 2",
-        "watch:build:full": "./scripts/build_watch.sh 'npm run build:full' 2"
+        "watch:build:full": "./scripts/build_watch.sh 'npm run build:full' 2",
+
+        "package": "npm run typecheck && npm run build:full && npm pack"
     },
     "peerDependencies": {
         "effect": "^3.15.2",

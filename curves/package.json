@@ -7,7 +7,10 @@
         "node": "tsx watch node.ts",
         "browser1": "cross-env BROWSER=true vite",
         "browser2": "tsx watch browser.ts",
-        "server": "cd server && npm run dev"
+        "browser3": "cd iframe-server && npm run dev -- --port 3002",
+        "server": "cd server && npm run dev",
+
+        "reinstall_lib": "./scripts/package_and_import_lib.sh"
     },
     "author": "",
     "license": "ISC",

@@ -29,35 +29,33 @@ export async function get_api_data<K extends keyof typeof api_endpoints>(
     key: K,
     ...args: EndpointArgs<K>
 ): Promise<EndpointReturn<K> | Error> {
-    try {
-        console.log(api_endpoint + key)
-        const res = await fetch(api_endpoint + key, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(args)
-        });
+    const res = await fetch(api_endpoint + key, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(args)
+    }).catch((e) => e as Error);
 
-        if (!res.ok) {
-            return new Error(`HTTP ${res.status} ${res.statusText}`);
-        }
-
-        const res2 = (
-            await res.json().catch(e => e as Error)
-        ) as Error | Awaited<
-            ApiResponse<
-                EndpointReturn<K>
-            >
-        >;
-
-        if (res2 instanceof Error) return res2;
-        if (res2.error) {
-            return new Error(res2.value);
-        }
-
-        return res2.value;
-    } catch (error) {
-        return error as Error;
+    if (res instanceof Error) {
+        return res;
     }
+    if (!res.ok) {
+        return new Error(`HTTP ${res.status} ${res.statusText}`);
+    }
+
+    const res2 = (
+        await res.json().catch(e => e as Error)
+    ) as Error | Awaited<
+        ApiResponse<
+            EndpointReturn<K>
+        >
+    >;
+
+    if (res2 instanceof Error) return res2;
+    if (res2.error) {
+        return new Error(res2.value);
+    }
+
+    return res2.value;
 }
 
 export async function compute_api_data(key: string, args: Json[]): ApiResponse<Json> {

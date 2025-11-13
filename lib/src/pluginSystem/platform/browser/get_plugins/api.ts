@@ -13,8 +13,7 @@ export async function getAPIPlugins(): Promise<
 > {
     return await mapSuccessAsync(
         get_api_data("get_api_plugins"),
-        (r) => {
-            const plugins = r.filter(s => s.type === "iframe");
+        (plugins) => {
             const ret: Record<string, ExecutablePlugin> = {};
             for (const p of plugins) {
                 ret[p.name] = {

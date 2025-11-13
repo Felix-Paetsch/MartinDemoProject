@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { TimeoutException } from "effect/Cause";
 import { BackendIframePluginData } from "./api";
-import { KernelEnvironment, Plugin, PluginEnvironment, PluginIdentWithInstanceId, PluginReference } from "../../../kernel_exports";
+import { KernelEnvironment, PluginIdentWithInstanceId, PluginReference } from "../../../kernel_exports";
 import { Initialization } from "../../../kernel_exports";
 import { Address, Json } from "../../../../messaging/exports";
 import { cacheFun } from "../../../../utils/defer";

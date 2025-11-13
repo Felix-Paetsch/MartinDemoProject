@@ -3,8 +3,6 @@ import { Json } from "../../utils/exports";
 import { PluginEnvironment } from "../../pluginSystem/plugin_exports";
 import Library from "./library";
 
-import { process_operations_core } from "lib/assets/local/process_operation";
-
 type local_method<Args extends Json[]> = (
     add: Address,
     ...args: Args

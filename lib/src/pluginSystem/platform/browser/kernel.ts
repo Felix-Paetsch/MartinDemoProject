@@ -11,19 +11,19 @@ import { ExecutablePlugin } from "../types";
 import { cacheFun } from "../../../utils/exports";
 
 const localPlugins = cacheFun(() => getLocalPlugins().catch(r => r as Error));
-// const apiPlugins = getAPIPlugins().catch(r => r as Error);
+const apiPlugins = cacheFun(() => getAPIPlugins().catch(r => r as Error));
 
-// async function available_plugins() {
-//     const [r1, r2] = await Promise.all([apiPlugins, localPlugins]);
-//     const res: Record<string, ExecutablePlugin> = {};
-//     if (!(r1 instanceof Error)) {
-//         Object.assign(res, r1);
-//     }
-//     if (!(r2 instanceof Error)) {
-//         Object.assign(res, r2);
-//     }
-//     return res;
-// }
+async function available_plugins() {
+    const [r1, r2] = await Promise.all([apiPlugins(), localPlugins()]);
+    const res: Record<string, ExecutablePlugin> = {};
+    if (!(r1 instanceof Error)) {
+        Object.assign(res, r1);
+    }
+    if (!(r2 instanceof Error)) {
+        Object.assign(res, r2);
+    }
+    return res;
+}
 
 export class BrowserKernelEnvironment extends KernelEnvironment {
     async create_plugin(plugin_ident: PluginIdent) {
@@ -32,8 +32,9 @@ export class BrowserKernelEnvironment extends KernelEnvironment {
             ...plugin_ident
         }
 
-        let plugin = await mapBothAsync(localPlugins(), (plugins) => {
+        let plugin = await mapBothAsync(available_plugins(), (plugins) => {
             const p = plugins[ident_with_id.name]
+            console.log(plugins, plugin_ident);
             if (!p) {
                 return false as const;
             }

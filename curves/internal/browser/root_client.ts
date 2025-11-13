@@ -1,8 +1,7 @@
 import { Failure, Logging } from "pc-messaging-kernel/messaging";
 import {
     PluginEnvironment,
-    BrowserPlatform,
-    LibraryEnvironment
+    BrowserPlatform
 } from "pc-messaging-kernel/kernel"
 
 Failure.setAnomalyHandler((e) => {
@@ -27,14 +26,10 @@ class KernelImpl extends BrowserPlatform.KernelEnvironment {
         env.use_middleware(Logging.log_middleware(), "monitoring");
         //env.use_middleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
-
-    register_local_library_middleware(env: LibraryEnvironment) {
-        //env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        env.use_middleware(Logging.log_middleware(), "monitoring");
-        //env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
-    }
 }
 
-const kernel = new KernelImpl();
-kernel.start();
+setTimeout(() => {
+    const kernel = new KernelImpl();
+    kernel.start();
+}, 400)
 
