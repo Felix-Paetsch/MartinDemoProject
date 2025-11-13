@@ -1,4 +1,4 @@
-import { cacheFun, Json } from "../../utils/exports";
+import { Json } from "../../utils/exports";
 import { Address } from "../../messaging/exports";
 import { add_library, addressToMessagePartner } from "./index";
 import { call_local_library_method, call_plugin_method } from "./protocol";
@@ -33,7 +33,7 @@ export default abstract class Library {
         }
 
         return mp.run_message_partner_protocol(
-            call_plugin_method,
+            call_local_library_method,
             {
                 lib: this.name,
                 method: name,
@@ -60,7 +60,7 @@ export default abstract class Library {
     }
 
     abstract evalue_library_method(address: Address, name: string, ...args: Json[]): Json | Error | Promise<Json | Error>;
-    abstract evalue_plugin_method(name: string, ...args: Json[]): Json | Error | Promise<Json | Error>;
+    abstract evalue_plugin_method(env: PluginEnvironment, name: string, ...args: Json[]): Json | Error | Promise<Json | Error>;
 
     on_message_partner_remove(a: Address): Promise<void> {
         return Promise.resolve();

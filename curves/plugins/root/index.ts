@@ -1,11 +1,12 @@
 import {
     PluginEnvironment
 } from "pc-messaging-kernel/kernel"
+import "./ui";
 
 export default async (env: PluginEnvironment) => {
     console.log("<< STARTING ROOT PLUGIN >>")
     const mp = await env.get_plugin({
-        name: "test",
+        name: "ui_test",
         version: "1.0.0"
     });
 

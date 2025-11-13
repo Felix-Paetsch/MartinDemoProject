@@ -63,10 +63,10 @@ export const call_plugin_method = message_partner_protocol(
         if (!lib) return;
 
         const res = await lib.evalue_plugin_method(
+            responder.env,
             data.method,
             ...data.args
         );
-
         if (res instanceof Error) return;
         mc.send_encoded(libResponseTranscoder, res);
     }
