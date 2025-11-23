@@ -1,6 +1,7 @@
 import {
     PluginEnvironment
 } from "pc-messaging-kernel/kernel"
+import "./ui"
 
 export default async (env: PluginEnvironment) => {
     const mp = await env.get_plugin({
@@ -9,8 +10,6 @@ export default async (env: PluginEnvironment) => {
     });
 
     if (mp instanceof Error) {
-        console.log("EARLY RETURNING");
-        return;
         throw mp;
     }
 

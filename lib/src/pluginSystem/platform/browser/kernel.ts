@@ -34,7 +34,6 @@ export class BrowserKernelEnvironment extends KernelEnvironment {
 
         let plugin = await mapBothAsync(available_plugins(), (plugins) => {
             const p = plugins[ident_with_id.name]
-            console.log(plugins, plugin_ident);
             if (!p) {
                 return false as const;
             }

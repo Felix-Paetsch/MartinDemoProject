@@ -5,6 +5,7 @@ import { KernelEnvironment, PluginIdentWithInstanceId, PluginReference } from ".
 import { Initialization } from "../../../kernel_exports";
 import { Address, Json } from "../../../../messaging/exports";
 import { cacheFun } from "../../../../utils/defer";
+import { IframeCallbackMap, IframeCallbacks } from "../iframe/callbacks";
 
 const appContainer = cacheFun(() => {
     return document.getElementById("app")!;
@@ -51,6 +52,10 @@ export async function execute_iframe_plugin(
         }
     );
     await res.run_plugin();
+    IframeCallbacks.on_iframe_plugin(
+        iframe, plugin_reference
+    )
+
     return plugin_reference;
 }
 
