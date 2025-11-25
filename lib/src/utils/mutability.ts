@@ -1,12 +1,10 @@
 export type MakeMutable<T> = T extends (...args: any) => any
     ? T // don't modify functions
     : T extends readonly (infer U)[]
-    ? MakeMutableArray<U> // handle arrays separately
+    ? MakeMutable<U>[] // handle arrays directly
     : T extends object
     ? { -readonly [K in keyof T]: MakeMutable<T[K]> }
     : T;
-
-interface MakeMutableArray<T> extends Array<MakeMutable<T>> { }
 
 export type MakeImmutable<T> = T extends (...args: any[]) => any
     ? T // functions stay callable
@@ -23,3 +21,4 @@ export function asImmutable<T>(r: T) {
 export function asMutable<T>(r: T) {
     return r as MakeMutable<T>;
 }
+

@@ -1,7 +1,10 @@
 import { Operation } from "./operations";
 import { LocalMethods } from "../library";
-import { Json, PluginEnvironment } from "pc-messaging-kernel/plugin";
-import { FileReference } from "lib/assets_2/types";
+import { PluginEnvironment } from "pc-messaging-kernel/plugin";
+import { FileReference } from "../types";
+import { BackendOperationReturnType, SubscribeResult, UnsubscribeResult } from "../operation_result";
+import { perform_operation } from "../local/process_operation";
+import { active_subscriptions } from "./subscriptions";
 
 export type BackendOperation =
     Exclude<Operation, {
@@ -21,7 +24,15 @@ export type BackendOperation =
         ops: BackendOperation[]
     }
 
-export function to_backend_operation(op: Operation): BackendOperation {
+export type SBackendOperation<S extends BackendOperation["type"]> = BackendOperation & {
+    type: S
+};
+
+export type BackendOperationFromOperation<S extends Operation> = BackendOperation & {
+    type: S["type"]
+};
+
+export function to_backend_operation<O extends Operation>(op: Operation): BackendOperationFromOperation<O> {
     if (op.type == "SUBSCRIBE_OP") {
         return {
             type: op.type,
@@ -47,11 +58,42 @@ export function to_backend_operation(op: Operation): BackendOperation {
     return op;
 }
 
+export async function process_operations_plugin(env: PluginEnvironment, op: Operation[]) {
+    const arg = {
+        type: "BATCH_OPERATION",
+        ops: op.map(p => to_backend_operation(p))
+    } as const;
 
-export function process_operations_plugin(env: PluginEnvironment, op: Operation[]) {
-    LocalMethods.process_operations(
+    const res: BackendOperationReturnType<any>[] | Error = await LocalMethods.perform_operation(
         env,
-        op.map(p => to_backend_operation(p))
-    );
+        arg
+    ) as any;
+
+    if (res instanceof Error) return res;
+
+    for (let i = 0; i < op.length; i++) {
+        if (op[i]?.type === "SUBSCRIBE_OP") {
+            const r = res[i] as SubscribeResult;
+            const o = op[i] as Operation & { type: "SUBSCRIBE_OP" };
+            if (!(typeof r === "string")) {
+                active_subscriptions.push({
+                    ...r,
+                    cb: o.cb,
+                    own_address: env.address
+                });
+            }
+        }
+        if (op[i]?.type === "UNSUBSCRIBE_OP") {
+            const o = op[i] as Operation & { type: "UNSUBSCRIBE_OP" };
+            for (let i = active_subscriptions.length - 1; i >= 0; i--) {
+                if (
+                    active_subscriptions[i]?.fr == o.fr
+                    && active_subscriptions[i]?.key == o.key
+                ) {
+                    active_subscriptions.splice(i, 1);
+                }
+            }
+        }
+    }
 }
 

@@ -2,10 +2,12 @@ import {
     PluginEnvironment
 } from "pc-messaging-kernel/kernel"
 import "./ui"
+import "../../lib/assets/library"
+// import * as Assets from "../../lib/assets/exports";
 
 export default async (env: PluginEnvironment) => {
     const mp = await env.get_plugin({
-        name: "plugin1",
+        name: "main_react",
         version: "1.0.0"
     });
 

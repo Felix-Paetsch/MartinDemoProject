@@ -23,6 +23,7 @@ export default class MessageChannel {
     private _on_close: (reason: MessageChannelCloseReason) => void | Promise<void> = () => { };
     private message_queue: ChannelMessage[] = [];
     private message_promise_queue: [string, (message: ChannelMessage) => void][] = [];
+    // @ts-ignore
     private _inactivity_timeout: NodeJS.Timeout | null = null;
     public readonly config: MessageChannelConfig;
     public last_message_received: number = Date.now();

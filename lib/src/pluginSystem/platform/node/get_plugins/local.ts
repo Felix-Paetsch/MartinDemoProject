@@ -36,6 +36,7 @@ async function findLocalPlugins(): Promise<
     const results: Record<string, NodeLocalPluginData> = {};
 
     async function walk(dir: string): Promise<void> {
+        // @ts-ignore
         let entries: fs.Dirent[];
         try {
             entries = await fs.promises.readdir(dir, { withFileTypes: true });

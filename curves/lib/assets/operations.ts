@@ -1,7 +1,6 @@
 import { JsonPatch, mapSuccessAsync } from "pc-messaging-kernel/utils";
-import { FileContents, FileReference, RecencyToken } from "../types";
+import { SubscriptionCallback, FileContents, FileReference, RecencyToken } from "./types";
 import { uuidv4 } from "pc-messaging-kernel/plugin";
-import { SubscriptionCallback } from "../types";
 
 export function create_operation(fr: FileReference = uuidv4(), meta_data: { [key: string]: string } = {}, contents: FileContents = "") {
     return {
@@ -51,12 +50,18 @@ export function force_write_operation(fr: FileReference, contents: FileContents)
 }
 
 export function patch_operation(fr: FileReference, token: RecencyToken, patches: JsonPatch.Operation[]) {
-    return {
+    const r: {
+        fr: FileReference,
+        patches: JsonPatch.Operation[],
+        token: RecencyToken,
+        type: "PATCH"
+    } = {
         fr,
         patches,
         token,
         type: "PATCH"
-    } as const;
+    };
+    return r;
 }
 
 export function set_meta_data_operation(fr: FileReference, token: RecencyToken, meta_data: { [key: string]: string }) {
@@ -102,7 +107,7 @@ export function delete_by_meta_data_operation(delete_by: { [key: string]: string
 
 export function subscribe_operation(to: FileReference, callback: SubscriptionCallback, key: string = uuidv4()) {
     return {
-        type: "SUBSCRIBE_CB",
+        type: "SUBSCRIBE_OP",
         fr: to,
         key,
         cb: callback
@@ -111,7 +116,7 @@ export function subscribe_operation(to: FileReference, callback: SubscriptionCal
 
 export function unsubscribe_operation(fr: FileReference, key: string) {
     return {
-        type: "UNSUBSCRIBE_CB",
+        type: "UNSUBSCRIBE_OP",
         key,
         fr
     } as const;

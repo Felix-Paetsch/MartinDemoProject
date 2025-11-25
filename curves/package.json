@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "typecheck": "tsc --noEmit",
+        "typecheck": "tsc --noEmit --jsx react-jsx",
         "node": "tsx watch node.ts",
         "browser1": "cross-env BROWSER=true vite",
         "browser2": "tsx watch browser.ts",

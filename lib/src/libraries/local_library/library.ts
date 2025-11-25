@@ -50,7 +50,7 @@ export default abstract class Library {
         const mp = addressToMessagePartner(address);
         if (!mp) return new Error("MessagePartner not found.");
         return mp.run_message_partner_protocol(
-            call_local_library_method,
+            call_plugin_method,
             {
                 lib: this.name,
                 method: name,

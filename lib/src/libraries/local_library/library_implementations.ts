@@ -42,7 +42,7 @@ export class RecordLibrary<
             return new Error("Method '" + method + "' not found");
         }
 
-        return method(address, name, ...args);
+        return method(address, ...args);
     }
 
     evalue_plugin_method(
@@ -55,7 +55,7 @@ export class RecordLibrary<
             return new Error("Method '" + method + "' not found");
         }
 
-        return method(env, name, ...args);
+        return method(env, ...args);
     }
 
     library_methods_record(): {
@@ -72,27 +72,28 @@ export class RecordLibrary<
         };
 
         for (const k of Object.keys(this.LocalMethods) as Array<keyof L>) {
-            res[k] = ((env: PluginEnvironment, ...args: any[]) =>
-                this.call_library_method(env, k as any, ...args)) as any;
+            res[k] = ((env: PluginEnvironment, ...args: any[]) => {
+                return this.call_library_method(env, k as any, ...args);
+            }) as any;
         }
 
         return res;
     }
 
     plugin_methods_record(): {
-        [K in keyof L]: (
+        [K in keyof P]: (
             address: Address,
-            ...args: TailArgs<Parameters<L[K]>>
-        ) => Promise<Awaited<ReturnType<L[K]>>>;
+            ...args: TailArgs<Parameters<P[K]>>
+        ) => Promise<Awaited<ReturnType<P[K]>>>;
     } {
         const res = {} as {
-            [K in keyof L]: (
+            [K in keyof P]: (
                 address: Address,
-                ...args: TailArgs<Parameters<L[K]>>
-            ) => Promise<Awaited<ReturnType<L[K]>>>;
+                ...args: TailArgs<Parameters<P[K]>>
+            ) => Promise<Awaited<ReturnType<P[K]>>>;
         };
 
-        for (const k of Object.keys(this.LocalMethods) as Array<keyof L>) {
+        for (const k of Object.keys(this.PluginMethods) as Array<keyof P>) {
             res[k] = ((address: Address, ...args: any[]) =>
                 this.call_plugin_method(address, k as any, ...args)) as any;
         }

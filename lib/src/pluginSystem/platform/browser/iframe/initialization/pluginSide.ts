@@ -33,7 +33,7 @@ export async function initializeExternalPlugin_PluginSide(
                 };
 
                 const connection = Connection.create(
-                    Address.generic(_data.kernel_process_id),
+                    Address.generic(), //_data.kernel_process_id),
                     (msg) => synchronizer.call_command("send_message", msg)
                 ).open();
 

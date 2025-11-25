@@ -53,8 +53,9 @@
     "author": "Felix Pätch",
     "license": "MIT",
     "scripts": {
-        "typecheck": "npx tsc -p tsconfig.node.json --noEmit && npx tsc -p tsconfig.browser.json --noEmit",
-
+        "typecheck_node": "npx tsc -p tsconfig.node.json --noEmit",
+        "typecheck_browser": "npx tsc -p tsconfig.browser.json --noEmit",
+        "typecheck": "npm run typecheck_node && npm run typecheck_browser",
         "build:browser:js": "cross-env TARGET=browser vite build",
         "build:node:js": "cross-env TARGET=node vite build",
         "build:browser:types": "tsc --emitDeclarationOnly -p tsconfig.browser.json",
@@ -62,11 +63,9 @@
         "build:browser": "npm run build:browser:js && npm run build:browser:types",
         "build:node": "npm run build:node:js && npm run build:node:types",
         "build:full": "npm run build:browser && npm run build:node",
-
         "watch:build:node": "./scripts/build_watch.sh 'npm run build:node' 2",
         "watch:build:browser": "./scripts/build_watch.sh 'npm run build:browser' 2",
         "watch:build:full": "./scripts/build_watch.sh 'npm run build:full' 2",
-
         "package": "npm run typecheck && npm run build:full && npm pack"
     },
     "peerDependencies": {
@@ -84,7 +83,7 @@
     "devDependencies": {
         "@effect/language-service": "^0.35.2",
         "@eslint/js": "^9.33.0",
-        "@types/node": "^20.11.24",
+        "@types/node": "^20.19.25",
         "@types/uuid": "^10.0.0",
         "dotenv": "^17.2.2",
         "effect": "^3.15.2",

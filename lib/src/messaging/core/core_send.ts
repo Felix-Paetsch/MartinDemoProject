@@ -42,6 +42,11 @@ export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, 
         });
     }
     if (!outConnection) {
+        outConnection = Connection.open_connections.find(c => {
+            return c.address.equals(Address.generic())
+        });
+    }
+    if (!outConnection) {
         return yield* HandledError.handleA(new AddressNotFound(msg.target));
     }
 

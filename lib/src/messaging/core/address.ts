@@ -49,7 +49,7 @@ export class Address implements Equal.Equal {
         return new Address(this.process_id, port);
     }
 
-    static generic(process_id: Address.ProcessID): Address {
+    static generic(process_id: Address.ProcessID = "*"): Address {
         return new Address(process_id, "*");
     }
 

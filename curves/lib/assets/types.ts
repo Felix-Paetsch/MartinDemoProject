@@ -27,7 +27,6 @@ export type FileStore = Map<FileReference, File>;
 
 export type DeleteFileEvent = {
     type: "DELETE";
-    recency_token: RecencyToken;
     file_reference: FileReference;
 };
 
@@ -41,7 +40,6 @@ export type ChangeFileContentEvent = {
 
 export type ChangeMetaDataEvent = {
     type: "CHANGE_META_DATA";
-    contents: FileContents;
     meta_data: MetaData;
     recency_token: RecencyToken;
     file_reference: FileReference;

@@ -9,9 +9,13 @@ async function startServer(port = 3001) {
 
     app.post("/available_iframe_plugins", async (req, res) => {
         const plugins: PluginServer.PluginsAPIData = [{
-            root_url: `http://localhost:3002/plugin1`,
+            root_url: `http://localhost:3002/main_react`,
             type: "iframe",
-            name: "plugin1"
+            name: "main_react"
+        }, {
+            root_url: `http://localhost:3002/side_react`,
+            type: "iframe",
+            name: "side_react"
         }];
 
         return res.json(plugins);

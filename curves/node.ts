@@ -3,7 +3,6 @@ import {
     PluginEnvironment,
     NodePlatform,
     PsLogging,
-    LibraryEnvironment
 } from "pc-messaging-kernel/kernel"
 
 Failure.setAnomalyHandler((e) => {
@@ -28,12 +27,6 @@ class KernelImpl extends NodePlatform.KernelEnvironment {
         // env.use_middleware(CommonMiddleware.addAnnotationData(), "preprocessing");
         env.use_middleware(Logging.log_middleware(), "monitoring");
         //env.use_middleware(DebugMiddleware.plugin(this.address), "monitoring");
-    }
-
-    register_local_library_middleware(env: LibraryEnvironment) {
-        //env.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");
-        env.use_middleware(Logging.log_middleware(), "monitoring");
-        //env.useMiddleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 }
 
