@@ -2,7 +2,6 @@ import { Plugin } from "pc-messaging-kernel/plugin";
 import { BrowserPlatform } from "pc-messaging-kernel/kernel";
 import React, { useEffect, useRef, useState } from "react";
 import * as Assets from "../../../lib/assets/exports";
-import { CreateResult, WriteResult } from "../../../lib/assets/operation_result";
 
 let pluginStarted = false;
 
@@ -24,9 +23,11 @@ export default function MainReact() {
             console.log("<< STARTING Main React PLUGIN >>");
             envRef.current = env;
 
-            const res: CreateResult | Error = await Assets.LocalMethods.perform_operation(
+            const res = await Assets.create(
                 env,
-                Assets.create_operation("shared_value", {}, "Hello")
+                "shared_value",
+                {},
+                "Hello"
             );
 
             if (res instanceof Error || typeof res === "string") {
@@ -57,9 +58,8 @@ export default function MainReact() {
         }
 
         try {
-            const result: WriteResult | Error = await Assets.LocalMethods.perform_operation(
-                env,
-                Assets.write_operation("shared_value", token, inputValue)
+            const result = await Assets.write(
+                env, "shared_value", token, inputValue
             );
 
             if (!(result instanceof Error || typeof result === "string")) {

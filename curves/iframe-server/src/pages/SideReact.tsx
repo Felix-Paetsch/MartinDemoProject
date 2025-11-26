@@ -12,21 +12,21 @@ export default function SideReact() {
         const plugin: Plugin = async (env) => {
             console.log("<< STARTING Side React PLUGIN >>");
 
-            const readRes: any = await Assets.process_operations_plugin(
-                env,
-                [Assets.read_operation("shared_value")]
+            const BoundEnv = new Assets.AssetManager(env);
+            const readRes = await BoundEnv.read_file(
+                "shared_value"
             );
 
             const initialContent = readRes?.contents ?? "(no contents)";
             setMessage(initialContent);
 
-            await Assets.process_operations_plugin(
-                env,
-                [Assets.subscribe_operation("shared_value", (e: Assets.FileEvent) => {
+            await BoundEnv.subscribe(
+                "shared_value",
+                (e: Assets.FileEvent) => {
                     if (e.type === "CHANGE_FILE_CONTENT") {
                         setMessage(e.contents);
                     }
-                })]
+                }
             );
         };
 

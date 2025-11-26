@@ -1,14 +1,5 @@
-// export {
-//     type ManagedFile,
-//     create_managed_file,
-//     manage_file
-// } from "./library/managed_file";
-//
-// export { AssetManager } from "./library/bound_environment";
-
-export * from "./library";
-export { process_operations_plugin } from "./plugin/process_operation";
-
+export * from "./operations"
+export * from "./lib/base_methods"
 export type {
     FileEvent,
     FileType,
@@ -19,3 +10,9 @@ export type {
     MetaData
 } from "./types"
 
+export { AssetManager } from "./lib/asset_manager";
+export {
+    ManagedFile,
+    manage_file,
+    create_managed_file
+} from "./lib/managed_file";

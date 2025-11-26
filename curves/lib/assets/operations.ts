@@ -1,5 +1,5 @@
 import { JsonPatch, mapSuccessAsync } from "pc-messaging-kernel/utils";
-import { SubscriptionCallback, FileContents, FileReference, RecencyToken } from "./types";
+import { SubscriptionCallback, FileContents, FileReference, RecencyToken, RegexString } from "./types";
 import { uuidv4 } from "pc-messaging-kernel/plugin";
 
 export function create_operation(fr: FileReference = uuidv4(), meta_data: { [key: string]: string } = {}, contents: FileContents = "") {
@@ -90,7 +90,6 @@ export function update_meta_data_operation(fr: FileReference, token: RecencyToke
     } as const;
 }
 
-export type RegexString = string;
 export function filter_by_meta_data_operation(filter_by: { [key: string]: RegexString }) {
     return {
         type: "FILTER_BY_META_DATA",
@@ -122,14 +121,13 @@ export function unsubscribe_operation(fr: FileReference, key: string) {
     } as const;
 }
 
-export function active_subscriptions_operation(fr: FileReference) {
+export function active_subscriptions_operation() {
     return {
-        type: "GET_ACTIVE_SUBSCRIPTIONS_FILE_REFERENCE",
-        fr: fr
+        type: "GET_ACTIVE_SUBSCRIPTIONS_FILE_REFERENCE"
     } as const;
 }
 
-type Operation =
+export type Operation =
     | ReturnType<typeof create_operation>
     | ReturnType<typeof delete_file_operation>
     | ReturnType<typeof description_operation>

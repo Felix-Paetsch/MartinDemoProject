@@ -1,9 +1,10 @@
-import { type UUID, ReadonlyJson } from "pc-messaging-kernel/utils";
+import { ReadonlyJson } from "pc-messaging-kernel/utils";
 
 export type FileType = "LOCAL" | "SYSTEM" | "PERSISTED";
 export type RecencyToken = string;
+export type RegexString = string;
 
-export type FileReference = UUID;
+export type FileReference = string;
 export type FileContents = ReadonlyJson;
 export type MetaData = {
     readonly fileType: FileType,

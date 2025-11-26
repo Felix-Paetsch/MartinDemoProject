@@ -20,8 +20,6 @@ import {
 import { is_system_file } from "./system_files";
 import { is_settable_meta_data } from "./files";
 import { change_file_event, change_meta_data_event, delete_file_event, handleGetActiveSubscriptionsOperation, handleSubscriptionOperation, handleUnsubscripeOperation, trigger_file_events } from "./subscriptions";
-import { PluginMethods } from "../library";
-import { delete_file_operation } from "../plugin/operations";
 
 type commulativeOperation = BackendOperation & {
     type: "BATCH_OPERATION" | "ATOMIC_OPERATION";

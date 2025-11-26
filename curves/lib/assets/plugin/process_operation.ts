@@ -1,9 +1,8 @@
-import { Operation } from "./operations";
+import { Operation } from "../operations";
 import { LocalMethods } from "../library";
 import { PluginEnvironment } from "pc-messaging-kernel/plugin";
 import { FileReference } from "../types";
-import { BackendOperationReturnType, SubscribeResult, UnsubscribeResult } from "../operation_result";
-import { perform_operation } from "../local/process_operation";
+import { BackendOperationReturnType, SubscribeResult } from "../operation_result";
 import { active_subscriptions } from "./subscriptions";
 
 export type BackendOperation =
@@ -95,5 +94,7 @@ export async function process_operations_plugin(env: PluginEnvironment, op: Oper
             }
         }
     }
+
+    return res;
 }
 
