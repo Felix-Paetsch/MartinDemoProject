@@ -40,7 +40,7 @@ export const mapSuccessAsync = async <
     MaybeError,
     SuccessResult
 >(
-    b: Promise<MaybeError>,
+    b: Promise<MaybeError> | MaybeError,
     cb: (arg: Exclude<MaybeError, Error>) => SuccessResult
 ): Promise<Awaited<SuccessResult> | (MaybeError & Error)> => {
     const a = await b;

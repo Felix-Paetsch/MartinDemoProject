@@ -1,7 +1,6 @@
 GOALS
 ================
-1. Expose correct Asset API
-2. Write Docs for behaviour of Asset API
+2. Write Docs (or types) for desired behaviour of Asset API
 3. Write Docs for and implement Plugin Lifecycle - including batched events
 4. UI management
 

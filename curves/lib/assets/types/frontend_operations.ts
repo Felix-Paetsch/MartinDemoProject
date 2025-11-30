@@ -1,6 +1,7 @@
-import { JsonPatch, mapSuccessAsync } from "pc-messaging-kernel/utils";
-import { SubscriptionCallback, FileContents, FileReference, RecencyToken, RegexString } from "./types";
+import { JsonPatch, MakeMutable, mapSuccessAsync } from "pc-messaging-kernel/utils";
+import { FileContents, FileReference, RecencyToken, RegexString } from "./base";
 import { uuidv4 } from "pc-messaging-kernel/plugin";
+import { SubscriptionCallback } from "./frontend_file_events";
 
 export function create_operation(fr: FileReference = uuidv4(), meta_data: { [key: string]: string } = {}, contents: FileContents = "") {
     return {
@@ -81,6 +82,15 @@ export function force_set_meta_data_operation(fr: FileReference, meta_data: { [k
     } as const;
 }
 
+
+export function force_update_meta_data_operation(fr: FileReference, update_with: { [key: string]: string }) {
+    return {
+        fr,
+        type: "FORCE_UPDATE_META_DATA",
+        update_with
+    } as const;
+}
+
 export function update_meta_data_operation(fr: FileReference, token: RecencyToken, update_with: { [key: string]: string }) {
     return {
         fr,
@@ -127,8 +137,8 @@ export function active_subscriptions_operation() {
     } as const;
 }
 
-export type Operation =
-    | ReturnType<typeof create_operation>
+export type FrontendOperation =
+    ReturnType<typeof create_operation>
     | ReturnType<typeof delete_file_operation>
     | ReturnType<typeof description_operation>
     | ReturnType<typeof read_operation>
@@ -138,6 +148,7 @@ export type Operation =
     | ReturnType<typeof set_meta_data_operation>
     | ReturnType<typeof force_set_meta_data_operation>
     | ReturnType<typeof update_meta_data_operation>
+    | ReturnType<typeof force_update_meta_data_operation>
     | ReturnType<typeof filter_by_meta_data_operation>
     | ReturnType<typeof delete_by_meta_data_operation>
     | ReturnType<typeof subscribe_operation>
@@ -145,22 +156,24 @@ export type Operation =
     | ReturnType<typeof active_subscriptions_operation>
     | {
         type: "ATOMIC_OPERATION",
-        ops: Operation[]
+        ops: FrontendOperation[]
     } | {
         type: "BATCH_OPERATION",
-        ops: Operation[]
+        ops: FrontendOperation[]
     }
 
-export function atomic_operation(ops: Operation[]): Operation {
+export type SFrontendOperation<T extends FrontendOperation["type"]> = FrontendOperation & { type: T }
+
+export function atomic_operation(ops: FrontendOperation[]): SFrontendOperation<"ATOMIC_OPERATION"> {
     return {
         type: "ATOMIC_OPERATION",
         ops
-    } as const;
+    };
 }
 
-export function batch_operation(ops: Operation[]): Operation {
+export function batch_operation(ops: FrontendOperation[]): SFrontendOperation<"BATCH_OPERATION"> {
     return {
         type: "BATCH_OPERATION",
         ops
-    } as const;
+    };
 }

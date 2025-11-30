@@ -62,7 +62,7 @@ export class RecordLibrary<
         [K in keyof L]: (
             env: PluginEnvironment,
             ...args: TailArgs<Parameters<L[K]>>
-        ) => Promise<Awaited<ReturnType<L[K]>>>;
+        ) => Promise<Error | Awaited<ReturnType<L[K]>>>;
     } {
         const res = {} as {
             [K in keyof L]: (
@@ -84,13 +84,13 @@ export class RecordLibrary<
         [K in keyof P]: (
             address: Address,
             ...args: TailArgs<Parameters<P[K]>>
-        ) => Promise<Awaited<ReturnType<P[K]>>>;
+        ) => Promise<Error | Awaited<ReturnType<P[K]>>>;
     } {
         const res = {} as {
             [K in keyof P]: (
                 address: Address,
                 ...args: TailArgs<Parameters<P[K]>>
-            ) => Promise<Awaited<ReturnType<P[K]>>>;
+            ) => Promise<Error | Awaited<ReturnType<P[K]>>>;
         };
 
         for (const k of Object.keys(this.PluginMethods) as Array<keyof P>) {

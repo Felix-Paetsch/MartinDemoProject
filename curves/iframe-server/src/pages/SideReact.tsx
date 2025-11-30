@@ -1,6 +1,7 @@
 import { Plugin } from "pc-messaging-kernel/plugin";
 import {
-    BrowserPlatform
+    BrowserPlatform,
+    Json
 } from "pc-messaging-kernel/kernel";
 import React, { useEffect, useState } from "react";
 import * as Assets from "../../../lib/assets/exports";
@@ -16,15 +17,16 @@ export default function SideReact() {
             const readRes = await BoundEnv.read_file(
                 "shared_value"
             );
+            if (readRes instanceof Error) throw readRes;
 
-            const initialContent = readRes?.contents ?? "(no contents)";
-            setMessage(initialContent);
+            const initialContent: Json = readRes?.contents || "(no contents)";
+            setMessage("" + initialContent);
 
             await BoundEnv.subscribe(
                 "shared_value",
                 (e: Assets.FileEvent) => {
                     if (e.type === "CHANGE_FILE_CONTENT") {
-                        setMessage(e.contents);
+                        setMessage("" + e.contents);
                     }
                 }
             );

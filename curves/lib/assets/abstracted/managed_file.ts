@@ -1,10 +1,11 @@
 import { PluginEnvironment, uuidv4 } from "pc-messaging-kernel/plugin";
-import { FileContents, FileDescription, FileEvent, FileReference, RecencyToken, SubscriptionCallback } from "../types";
+import { FileContents, FileDescription, FileReference, RecencyToken } from "../types/base";
 import { AssetManager } from "./asset_manager";
 import { JsonPatch, mapSuccessAsync } from "pc-messaging-kernel/utils";
 import { create, subscribe } from "./base_methods";
+import { FileEvent, SubscriptionCallback } from "../types/frontend_file_events";
 
-export class ManagedFile {
+class ManagedFile {
     private _deleted = false;
     private AssetManager: AssetManager;
     private _token: RecencyToken = "";
@@ -137,9 +138,11 @@ export class ManagedFile {
     }
 }
 
+export type ManagedFileType = ManagedFile;
+
 export async function manage_file(env: PluginEnvironment, fr: FileReference) {
     let on_msg: SubscriptionCallback = async () => { };
-    const r = await subscribe(env, fr, (event) => {
+    const r = await subscribe(env, fr, (event: FileEvent) => {
         return on_msg(event);
     });
     if (r instanceof Error) return r;

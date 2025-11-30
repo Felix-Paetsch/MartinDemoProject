@@ -1,18 +1,23 @@
-export * from "./operations"
-export * from "./lib/base_methods"
+export * from "./types/frontend_operations"
+export * from "./abstracted/base_methods"
 export type {
-    FileEvent,
     FileType,
     FileReference,
     FileContents,
     File,
     RecencyToken,
     MetaData
-} from "./types"
+} from "./types/base"
 
-export { AssetManager } from "./lib/asset_manager";
 export {
-    ManagedFile,
+    type FileEvent,
+    type DeleteFileEvent,
+    type ChangeFileContentEvent,
+    type SubscriptionCallback
+} from "./types/frontend_file_events"
+export { AssetManager } from "./abstracted/asset_manager";
+export {
+    type ManagedFileType as ManagedFile,
     manage_file,
     create_managed_file
-} from "./lib/managed_file";
+} from "./abstracted/managed_file";

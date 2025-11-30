@@ -1,4 +1,4 @@
-import { SystemFile, MetaData, FileReference } from "../types";
+import { SystemFile, MetaData, FileReference } from "../types/base";
 
 export const systemFiles: SystemFile[] = []
 

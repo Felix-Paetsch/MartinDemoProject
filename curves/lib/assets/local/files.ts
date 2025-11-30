@@ -1,4 +1,4 @@
-import { MetaData } from "../types"
+import { MetaData } from "../types/base"
 
 export function is_settable_meta_data(md: { [key: string]: string }): md is MetaData {
     return (
