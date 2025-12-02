@@ -1,5 +1,5 @@
 import { Address, Message, Port } from "../../messaging/exports";
-import uuidv4 from "../../utils/uuid";
+import { uuidv4 } from "../../utils/uuid";
 import { Deferred, Duration, Effect, Schedule, Schema } from "effect";
 import { MessageChannelInitializationContextEncoded, MessageChannelInitializationContextWithId } from "./schemas/context";
 import { MessageChannelConfig, MessageChannelConfigEncoded, MessageChannelConfigSchema } from "./schemas/config";

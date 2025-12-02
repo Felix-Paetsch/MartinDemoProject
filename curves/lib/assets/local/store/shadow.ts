@@ -1,4 +1,4 @@
-import { FileReference, File, RecencyToken } from "lib/assets/types/base";
+import { FileReference, File, RecencyToken } from "../../types/base";
 import { SBackendOperation } from "../../types/backend_operations";
 import { AssetStore } from "./base";
 import {
@@ -19,8 +19,8 @@ import {
     BackendUnsubscribeResult,
     BackendActiveSubscriptionResult,
 } from "../../types/backend_result";
-import { uuidv4 } from "pc-messaging-kernel/plugin";
-import { is_settable_meta_data } from "../files";
+import { uuidv4 } from "pc-messaging-kernel/utils";
+import { fill_meta_data_values, is_settable_meta_data } from "../meta_data_tools";
 import { is_system_file } from "../system_files";
 import { Address } from "pc-messaging-kernel/messaging";
 import { Subscription } from "./subscription";
@@ -122,12 +122,15 @@ export class ShadowStore extends AssetStore {
         newRT: RecencyToken = uuidv4()
     ): BackendCreateResult {
         if (this.has_file(op.fr)) return `File ${op.fr} already exists.`;
-        if (!is_settable_meta_data(op.meta_data) || op.fr !== op.meta_data.fileReference) {
+
+        const meta_data = fill_meta_data_values(op.meta_data, op.fr);
+        if (
+            !is_settable_meta_data(meta_data, op.fr)
+        ) {
             return "Tried to set invalid meta data";
         }
-
         const entry: File = {
-            meta_data: { ...op.meta_data },
+            meta_data,
             contents: op.contents,
             recency_token: newRT,
         };
@@ -233,16 +236,19 @@ export class ShadowStore extends AssetStore {
         if (is_system_file(file.meta_data.fileReference)) {
             return "Cant set meta data of system file";
         }
+
+
+        const meta_data = fill_meta_data_values(op.meta_data, op.fr, file.meta_data.fileType as any);
+
         if (
-            !is_settable_meta_data(op.meta_data) ||
-            op.fr !== file.meta_data.fileReference
+            !is_settable_meta_data(meta_data, op.fr)
         ) {
             return "Tried to set invalid meta data";
         }
 
         this.writtenFilesStore[op.fr] = {
             ...file,
-            meta_data: op.meta_data,
+            meta_data,
             recency_token: newRT,
         };
         this.operationHistory.push({ op, rt: newRT });
@@ -262,16 +268,19 @@ export class ShadowStore extends AssetStore {
             fr: op.fr
         });
         if (typeof file === "string") return `File ${op.fr} doesnt exists.`;
+
+
+
+        const meta_data = fill_meta_data_values(op.meta_data, op.fr, file.meta_data.fileType as any);
         if (
-            !is_settable_meta_data(op.meta_data) ||
-            op.fr !== file.meta_data.fileReference
+            !is_settable_meta_data(meta_data, op.fr)
         ) {
             return "Tried to set invalid meta data";
         }
 
         this.writtenFilesStore[op.fr] = {
             ...file,
-            meta_data: op.meta_data,
+            meta_data,
             recency_token: newRT,
         };
         this.operationHistory.push({ op, rt: newRT });
@@ -293,7 +302,7 @@ export class ShadowStore extends AssetStore {
         if (typeof file === "string") return `File ${op.fr} doesnt exists.`;
 
         const md = { ...file.meta_data, ...op.update_with };
-        if (!is_settable_meta_data(md) || op.fr !== md.fileReference) {
+        if (!is_settable_meta_data(md, op.fr)) {
             return "Tried to set invalid meta data";
         }
         if (op.token !== file.recency_token) {
@@ -324,7 +333,7 @@ export class ShadowStore extends AssetStore {
         if (typeof file === "string") return `File ${op.fr} doesnt exists.`;
 
         const md = { ...file.meta_data, ...op.update_with };
-        if (!is_settable_meta_data(md) || op.fr !== md.fileReference) {
+        if (!is_settable_meta_data(md, op.fr)) {
             return "Tried to set invalid meta data";
         }
 

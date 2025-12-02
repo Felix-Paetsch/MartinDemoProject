@@ -2,9 +2,9 @@ import { Effect } from "effect";
 import { TimeoutException } from "effect/Cause";
 import {
     Initialization,
-    Plugin,
-    Json
+    Plugin
 } from "../../../plugin_exports";
+import { Json } from "../../../../utils/exports";
 
 export async function execute_plugin(plugin: Plugin) {
     const channel: Initialization.MessageChannel = await registerChannelPlugin();

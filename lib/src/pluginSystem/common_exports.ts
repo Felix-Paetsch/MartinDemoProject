@@ -1,6 +1,4 @@
-export * from "../utils/json"
-
-import * as PluginStuff from "../pluginSystem/plugin_lib/plugin_ident";
+import * as PluginStuff from "./plugin_lib/plugin_ident";
 export type PluginIdent = PluginStuff.PluginIdent;
 export type PluginIdentWithInstanceId = PluginStuff.PluginIdentWithInstanceId;
 
@@ -8,16 +6,10 @@ import * as LoggingStuff from "../pluginSystem/debug/logging";
 import { Severity as _Severity } from "./debug/severity";
 import { prevent_loops } from "./common_lib/middleware/prevent_loops";
 
-import uuidv4 from "../utils/uuid";
-export {
-    uuidv4
-}
-
 export namespace PsLogging {
     export const Severity = _Severity;
     export type Severity = _Severity;
-    export const init_external_logging = LoggingStuff.init_external_logging;
-    export const start_kernel_log_to_file = LoggingStuff.start_kernel_log_to_file;
+    export const log_to_file = LoggingStuff.log_to_file;
 }
 
 export namespace PsMiddleware {

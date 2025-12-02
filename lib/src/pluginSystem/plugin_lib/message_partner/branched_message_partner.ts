@@ -1,8 +1,7 @@
-import { PluginDescriptor, PluginEnvironment } from "../plugin_environment";
-import { MessagePartner, MessagePartnerPairDistinguisher } from "./base";
+import { MessagePartner } from "./base";
 import PluginMessagePartner from "./plugin_message_partner";
-import { Json, uuidv4 } from "../../common_exports";
-import { promisify } from "../../../utils/exports";
+import { Json, promisify } from "../../../utils/exports";
+import { uuidv4 } from "../../../utils/uuid";
 
 export default class BranchedMessagePartner extends MessagePartner {
     constructor(

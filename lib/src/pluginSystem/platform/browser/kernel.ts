@@ -1,6 +1,5 @@
 import {
     KernelEnvironment,
-    uuidv4,
     PluginIdent,
 } from "../../kernel_exports";
 import { mapBothAsync } from "../../../utils/error_handling";
@@ -9,6 +8,7 @@ import { getLocalPlugins } from "./get_plugins/local";
 import { getAPIPlugins } from "./get_plugins/api";
 import { ExecutablePlugin } from "../types";
 import { cacheFun } from "../../../utils/exports";
+import { uuidv4 } from "../../../utils/uuid";
 
 const localPlugins = cacheFun(() => getLocalPlugins().catch(r => r as Error));
 const apiPlugins = cacheFun(() => getAPIPlugins().catch(r => r as Error));
@@ -33,7 +33,7 @@ export class BrowserKernelEnvironment extends KernelEnvironment {
         }
 
         let plugin = await mapBothAsync(available_plugins(), (plugins) => {
-            const p = plugins[ident_with_id.name]
+            const p = plugins[ident_with_id.name];
             if (!p) {
                 return false as const;
             }

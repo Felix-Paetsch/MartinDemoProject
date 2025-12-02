@@ -17,12 +17,6 @@ import { empty_middleware as emw } from "./middleware/empty";
 import { comsume_message as cm } from "./middleware/consume";
 import * as amw from "./middleware/annotation";
 
-import * as LoggingMain from "./debug/logging"
-import * as LoggingLog from "./debug/logging/log"
-import * as LoggingInvestigator from "./debug/logging/parse/logInverstigator";
-import * as LoggingCollection from "./debug/logging/parse/logCollection";
-import * as LoggingFormatter from "./debug/logging/parse/formatter";
-
 export namespace Failure {
     export type MessagingError = Errors.MessagingError;
     export type Anomaly = Anomalies.Anomaly;
@@ -68,29 +62,7 @@ export namespace Middleware {
     export const isMiddlewareInterrupt = MW.isMiddlewareInterrupt;
 }
 
-export namespace Logging {
-    export const set_logging_target = LoggingMain.set_logging_target;
-    export const log_middleware = LoggingMain.log_middleware;
-    export const process_middleware_logs_using = LoggingMain.process_middleware_logs_using;
-    export const log = LoggingMain.log;
-
-    export const log_to_address = LoggingMain.log_to_address;
-    export const log_to_url = LoggingMain.log_to_url;
-
-    export type LogProcessor = LoggingMain.LogProcessor;
-    export type Log = LoggingLog.Log;
-    export type MessageLog = LoggingLog.MessageLog;
-    export type DataLog = LoggingLog.DataLog;
-
-    export type LogInvestigator = LoggingInvestigator.LogInvestigator;
-    export const LogInvestigator = LoggingInvestigator.LogInvestigator;
-    export const LogCollection = LoggingCollection.LogCollection;
-    export const MessageLogCollection = LoggingCollection.MessageLogCollection;
-    export const DataLogCollection = LoggingCollection.DataLogCollection;
-
-    export type LogFormatter = LoggingFormatter.Formatter;
-    export const DefaultLogFormatter = LoggingFormatter.DefaultFormatter;
-}
+export * as Logging from "./debug/logging/exports"
 
 export {
     Connection,

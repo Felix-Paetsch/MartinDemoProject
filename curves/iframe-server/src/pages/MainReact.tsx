@@ -31,7 +31,9 @@ export default function MainReact() {
             );
 
             if (res instanceof Error || typeof res === "string") {
-                throw res;
+                console.log("Could not create", res);
+                // throw res;
+                return;
             }
 
             console.log("Created shared_value with token:", res.recency_token);

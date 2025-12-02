@@ -5,14 +5,18 @@ import {
 } from "pc-messaging-kernel/kernel"
 
 Failure.setAnomalyHandler((e) => {
+    console.log("Throwing Anomaly", e.message)
     throw e;
 });
 
 Failure.setErrorHandler((e) => {
+    console.log("Throwing Error", e.message)
     throw e;
 });
 
-
+Logging.process_logs_using(
+    Logging.LogInvestigator.GlobalInstance().collect_logs()
+)
 class KernelImpl extends BrowserPlatform.KernelEnvironment {
     register_kernel_middleware() {
         //this.useMiddleware(CommonMiddleware.addAnnotationData(), "preprocessing");

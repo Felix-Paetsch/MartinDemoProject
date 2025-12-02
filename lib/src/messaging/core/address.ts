@@ -1,5 +1,5 @@
 import { Effect, Equal, Hash, Schema } from "effect";
-import uuidv4, { type UUID } from "../../utils/uuid";
+import { uuidv4, type UUID } from "../../utils/uuid";
 import { deserializeAddressFromUnknown } from "../../messagingEffect/schemas";
 import { SerializedAddressSchema } from "../../messagingEffect/schemas";
 import { AddressDeserializationError } from "./errors/anomalies";

@@ -1,10 +1,10 @@
 import { Plugin } from "pc-messaging-kernel/plugin";
 import {
     BrowserPlatform,
-    Json
 } from "pc-messaging-kernel/kernel";
 import React, { useEffect, useState } from "react";
 import * as Assets from "../../../lib/assets/exports";
+import { Json } from "pc-messaging-kernel/utils";
 
 export default function SideReact() {
     const [message, setMessage] = useState<string | null>(null);

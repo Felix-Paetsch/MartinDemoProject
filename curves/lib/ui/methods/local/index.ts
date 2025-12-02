@@ -1,5 +1,5 @@
 import { LocalCallbackMap } from "../../root/index";
-import { uuidv4 } from "pc-messaging-kernel/plugin";
+import { uuidv4 } from "pc-messaging-kernel/utils";
 
 export type UIWindow = HTMLDivElement;
 export async function create_window() {

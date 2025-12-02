@@ -1,9 +1,10 @@
-import { JsonPatch, PluginEnvironment, uuidv4 } from "pc-messaging-kernel/plugin";
+import { PluginEnvironment } from "pc-messaging-kernel/plugin";
+import { uuidv4, JsonPatch } from "pc-messaging-kernel/utils";
 import { FileContents, FileReference, RecencyToken, RegexString } from "../types/base";
 import { active_subscriptions, atomic, batch, create, delete_by_meta_data, delete_file, description, filter_by_meta_data, force_set_meta_data, force_write, patch, read_file, set_meta_data, subscribe, unsubscribe, update_meta_data, write } from "./base_methods";
-import { BackendOperation } from "../types/backend_operations";
 import { FrontendOperation } from "../library";
 import { SubscriptionCallback } from "../exports";
+
 
 export class AssetManager {
     constructor(readonly env: PluginEnvironment) { }

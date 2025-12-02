@@ -1,9 +1,9 @@
 import { reportAnomaly } from "../../../messaging/core/errors/anomalies";
 import { PluginReference } from "../../../pluginSystem/kernel_lib/external_references/plugin_reference";
 import { GetPluginError, KernelEnvironment } from "../../../pluginSystem/kernel_lib/kernel_env";
-import { uuidv4 } from "../../../pluginSystem/plugin_exports";
 import { PluginIdent } from "../../../pluginSystem/plugin_lib/plugin_ident";
 import { mapBothAsync } from "../../../utils/error_handling";
+import { uuidv4 } from "../../../utils/uuid";
 import { getLocalPlugins } from "./get_plugins/local";
 
 const localPlugins = getLocalPlugins().catch(r => r as Error);

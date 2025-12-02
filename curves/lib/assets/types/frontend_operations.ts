@@ -1,6 +1,5 @@
-import { JsonPatch, MakeMutable, mapSuccessAsync } from "pc-messaging-kernel/utils";
+import { JsonPatch, uuidv4 } from "pc-messaging-kernel/utils";
 import { FileContents, FileReference, RecencyToken, RegexString } from "./base";
-import { uuidv4 } from "pc-messaging-kernel/plugin";
 import { SubscriptionCallback } from "./frontend_file_events";
 
 export function create_operation(fr: FileReference = uuidv4(), meta_data: { [key: string]: string } = {}, contents: FileContents = "") {

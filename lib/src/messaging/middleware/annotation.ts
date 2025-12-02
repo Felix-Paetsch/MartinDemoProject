@@ -1,5 +1,5 @@
 import { Effect, Schema } from "effect";
-import uuidv4 from "../../utils/uuid";
+import { uuidv4 } from "../../utils/uuid";
 import { Message } from "../core/message";
 import { Middleware, MiddlewareContinue } from "../core/middleware";
 import { Json } from "../../utils/json";
@@ -22,7 +22,6 @@ export function annotation_middleware(
                 );
 
                 const computed_standard_data = computeStandardData(message, oldAnnotation);
-
                 const data = {
                     ...computed_standard_data,
                     ...(computeData ? computeData(message, computed_standard_data) : {})

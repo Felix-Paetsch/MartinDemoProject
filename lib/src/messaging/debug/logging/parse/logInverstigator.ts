@@ -22,5 +22,18 @@ export class LogInvestigator extends LogCollection {
         }
         return new LogInvestigator(logMessages);
     }
+
+    collect_logs() {
+        return ((log: Log): void => {
+            this.logs.push(log);
+        }).bind(this);
+    }
+    private static global_instance: LogInvestigator | null = null;
+    static GlobalInstance(): LogInvestigator {
+        if (this.global_instance) return this.global_instance;
+        this.global_instance = new LogInvestigator();
+        (globalThis as any).GlobalLogInvestigator = this.global_instance;
+        return this.global_instance;
+    }
 }
 

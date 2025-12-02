@@ -1,4 +1,4 @@
-import { SBackendOperation } from "lib/assets/types/backend_operations";
+import { SBackendOperation } from "../../types/backend_operations";
 import {
     BackendDeleteResult,
     BackendFilterByMetaDataResult,
@@ -17,7 +17,7 @@ import {
     BackendActiveSubscriptionResult,
     BackendUnsubscribeResult,
 } from "../../types/backend_result";
-import { FileReference, RecencyToken, File } from "lib/assets/types/base";
+import { FileReference, RecencyToken } from "../../types/base";
 import { Address } from "pc-messaging-kernel/messaging";
 
 export abstract class AssetStore {

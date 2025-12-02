@@ -46,7 +46,7 @@ export async function initializeExternalPlugin_PluginSide(
                 });
 
                 Address.set_process_id(_data.plugin_process_id);
-                Logging.set_logging_target(connection.address);
+                Logging.set_logging_target(new Address(_data.kernel_process_id, "_logging"));
                 const env = new PluginEnvironment(
                     _data.kernel_process_id,
                     _data.pluginIdent

@@ -1,5 +1,5 @@
 import { ParseResult, Schema } from "effect";
-import { Message } from "../../core/message";
+import { Json, Message } from "../../core/message";
 
 const MessageLogSchema = Schema.Struct({
     type: Schema.Literal("Message"),
@@ -13,7 +13,7 @@ const DataLogSchema = Schema.Struct({
     type: Schema.Literal("Data"),
     data: Schema.Any
 });
-export const LogSchema = Schema.Union(MessageLogSchema, DataLogSchema);
+const LogSchema = Schema.Union(MessageLogSchema, DataLogSchema);
 
 export type MessageLog = Schema.Schema.Type<typeof MessageLogSchema>;
 export type DataLog = Schema.Schema.Type<typeof DataLogSchema>;
@@ -40,4 +40,4 @@ const DataToLog = Schema.transform(Schema.Any, DataLogSchema, {
     encode: (log) => log.data
 });
 
-export const ToLog = Schema.Union(MessageToLog, DataToLog);
+export const ToLog = (log: Json | Message) => Schema.decodeSync(Schema.Union(MessageToLog, DataToLog))(log);

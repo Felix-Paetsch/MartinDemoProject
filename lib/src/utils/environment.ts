@@ -1,6 +1,6 @@
 declare const window: any;
 
-function get_environment(): 'browser' | 'node' {
+export function get_environment(): 'browser' | 'node' {
     if (typeof window !== 'undefined' && typeof window.document !== 'undefined') {
         return 'browser' as const;
     }
@@ -10,5 +10,3 @@ function get_environment(): 'browser' | 'node' {
 
     throw new Error("Cant determine environment");
 }
-
-export default get_environment();

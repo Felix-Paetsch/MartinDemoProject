@@ -74,7 +74,8 @@ export function perform_operation_with_store(
 }
 
 export function perform_operation(a: Address, op: BackendOperation) {
+    // console.log("PERFORMING OP", op);
     const res = perform_operation_with_store(a, op, liveStore);
-    const events = liveStore.dispatch_file_events();
+    liveStore.dispatch_file_events();
     return res;
 }

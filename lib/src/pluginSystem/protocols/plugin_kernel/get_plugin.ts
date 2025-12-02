@@ -5,7 +5,7 @@ import MessageChannel from "../../../middleware/channel";
 import { Schema } from "effect";
 import { AddressFromString } from "../../../messagingEffect/schemas";
 import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
-import uuidv4 from "../../../utils/uuid";
+import { uuidv4 } from "../../../utils/uuid";
 import { deferred } from "../../../utils/defer";
 import { protocol } from "../../../middleware/protocol";
 import { Transcoder } from "../../../utils/exports";

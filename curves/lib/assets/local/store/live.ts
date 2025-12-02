@@ -1,14 +1,14 @@
 import { AssetStore } from "./base";
 import { BackendFile, FileReference, RecencyToken } from "../../types/base";
-import { uuidv4 } from "pc-messaging-kernel/plugin";
+import { uuidv4 } from "pc-messaging-kernel/utils";
 import { is_system_file } from "../system_files";
-import { is_settable_meta_data } from "../files";
-import { SBackendOperation } from "lib/assets/types/backend_operations";
-import { BackendActiveSubscriptionResult, BackendSubscribeResult, BackendUnsubscribeResult } from "lib/assets/types/backend_result";
+import { fill_meta_data_values, is_settable_meta_data } from "../meta_data_tools";
+import { SBackendOperation } from "../../types/backend_operations";
+import { BackendActiveSubscriptionResult, BackendSubscribeResult, BackendUnsubscribeResult } from "../../types/backend_result";
 import { Subscription } from "./subscription";
 import { Address } from "pc-messaging-kernel/messaging";
-import { PluginMethods } from "lib/assets/library";
-import { BackendFileEvent, BoundBackendFileEvent } from "lib/assets/types/backend_file_events";
+import { PluginMethods } from "../../library";
+import { BackendFileEvent, BoundBackendFileEvent } from "../../types/backend_file_events";
 
 class LiveStore extends AssetStore {
     private Store: { [key: string]: BackendFile } = {};
@@ -22,16 +22,15 @@ class LiveStore extends AssetStore {
     create_file(op: SBackendOperation<"CREATE">, newRT: RecencyToken = uuidv4()) {
         const existing = this.Store[op.fr];
         if (existing) return `File ${op.fr} already exists.`;
+
+        const meta_data = fill_meta_data_values(op.meta_data, op.fr);
         if (
-            !is_settable_meta_data(op.meta_data)
-            || op.fr !== op.meta_data.fileReference
+            !is_settable_meta_data(meta_data, op.fr)
         ) {
             return "Tried to set invalid meta data";
         }
         const entry: BackendFile = {
-            meta_data: {
-                ...op.meta_data,
-            },
+            meta_data,
             contents: op.contents,
             recency_token: newRT,
         };
@@ -123,14 +122,15 @@ class LiveStore extends AssetStore {
             return `Can't write to system file ${op.fr}`;
         }
 
+        const meta_data = fill_meta_data_values(op.meta_data, op.fr, file.meta_data.fileType as any);
+
         if (
-            !is_settable_meta_data(op.meta_data) ||
-            op.meta_data.fileReference !== file.meta_data.fileReference
+            !is_settable_meta_data(meta_data, op.fr)
         ) {
             return "Tried to set invalid meta data";
         }
 
-        file.meta_data = JSON.parse(JSON.stringify(op.meta_data));
+        file.meta_data = meta_data;
         file.recency_token = newRT;
 
         this.handle_file_event({
@@ -153,14 +153,14 @@ class LiveStore extends AssetStore {
             return `Can't write to system file ${op.fr}`;
         }
 
+        const meta_data = fill_meta_data_values(op.meta_data, op.fr, file.meta_data.fileType as any);
         if (
-            !is_settable_meta_data(op.meta_data) ||
-            op.meta_data.fileReference !== file.meta_data.fileReference
+            !is_settable_meta_data(meta_data, op.fr)
         ) {
             return "Tried to set invalid meta data";
         }
 
-        file.meta_data = op.meta_data;
+        file.meta_data = meta_data;
         file.recency_token = newRT;
 
         this.handle_file_event({
@@ -189,8 +189,7 @@ class LiveStore extends AssetStore {
         };
 
         if (
-            !is_settable_meta_data(md) ||
-            md.fileReference !== file.meta_data.fileReference
+            !is_settable_meta_data(md, op.fr)
         ) {
             return "Tried to set invalid meta data";
         }
@@ -226,8 +225,7 @@ class LiveStore extends AssetStore {
             return "Recency Token Outdated";
         }
         if (
-            !is_settable_meta_data(md) ||
-            md.fileReference !== file.meta_data.fileReference
+            !is_settable_meta_data(md, op.fr)
         ) {
             return "Tried to set invalid meta data";
         }
