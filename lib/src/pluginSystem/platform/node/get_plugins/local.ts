@@ -115,7 +115,10 @@ export async function getLocalPlugins(): Promise<
     const res: Record<string, ExecutablePlugin> = {};
     for (const [key, data] of Object.entries(localPlugins)) {
         res[key] = {
-            name: key,
+            plugin_descr: {
+                type: "local",
+                name: key
+            },
             execute: (k, ident) => mapSuccessAsync(
                 loadPlugin(data.full_path),
                 async (p: Plugin) => {

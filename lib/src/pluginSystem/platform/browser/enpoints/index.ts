@@ -1,6 +1,6 @@
-import { Json } from "../../../utils/exports";
-import { api_endpoints_get_local_plugins } from "./enpoints/get_local_plugins";
-import { api_endpoints_get_api_plugins } from "./enpoints/get_api_plugins";
+import { Json } from "../../../../utils/exports";
+import { api_endpoints_get_local_plugins } from "./get_local_plugins";
+import { api_endpoints_get_api_plugins } from "./get_api_plugins";
 
 let api_endpoint = "http://localhost:3001/";
 export function set_api_endpoint_path(path: string) {

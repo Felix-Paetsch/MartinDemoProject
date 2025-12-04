@@ -1,14 +1,15 @@
 import { mapSuccessAsync } from "../../../../utils/error_handling";
-import { get_api_data } from "../api_endpoints";
+import { get_api_data } from "../enpoints/index";
 import { ExecutablePlugin } from "../../types";
 import { PluginsApiData } from "../../server/api";
-import { execute_iframe_plugin } from "./create_iframe_plugins";
+import { request_canvas } from "../canvas";
+import { cacheFun } from "../../../../utils/defer";
 
 export type BackendIframePluginData = PluginsApiData[number] & {
     type: "iframe"
 }
 
-export async function getAPIPlugins(): Promise<
+async function _getAPIPlugins(): Promise<
     Error | Record<string, ExecutablePlugin>
 > {
     return await mapSuccessAsync(
@@ -17,8 +18,16 @@ export async function getAPIPlugins(): Promise<
             const ret: Record<string, ExecutablePlugin> = {};
             for (const p of plugins) {
                 ret[p.name] = {
-                    name: p.name,
-                    execute: (k, ident) => execute_iframe_plugin(p, ident, k)
+                    plugin_descr: p,
+                    execute: async (k, ident) => {
+                        const canvas = request_canvas();
+                        if (canvas) {
+                            return await canvas.load_iframe_plugin(ident);
+                        }
+
+                        // execute_iframe_plugin(p, ident, k)
+                        return new Error("Cant aquire a canvas for iframe");
+                    }
                 }
             }
 
@@ -26,3 +35,5 @@ export async function getAPIPlugins(): Promise<
         }
     )
 }
+
+export const getAPIPlugins = cacheFun(_getAPIPlugins);

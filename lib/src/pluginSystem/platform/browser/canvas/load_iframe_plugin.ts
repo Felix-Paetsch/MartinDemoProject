@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { TimeoutException } from "effect/Cause";
-import { BackendIframePluginData } from "./api";
+import { BackendIframePluginData } from "../get_plugins/api";
 import { KernelEnvironment, PluginIdentWithInstanceId, PluginReference } from "../../../kernel_exports";
 import { Initialization } from "../../../kernel_exports";
 import { Address, Json } from "../../../../messaging/exports";
@@ -18,16 +18,17 @@ function createIframe(id: string, src: string): HTMLIFrameElement {
     return iframe;
 }
 
-export async function execute_iframe_plugin(
+export async function load_iframe_plugin(
     ifd: BackendIframePluginData,
     plugin_ident: PluginIdentWithInstanceId,
-    kernel: KernelEnvironment
+    kernel: KernelEnvironment,
+    element: HTMLDivElement
 ): Promise<Error | PluginReference> {
     const iframe = createIframe(
         "plugin_" + plugin_ident.instance_id,
         ifd.root_url
     );
-    appContainer().appendChild(iframe);
+    element.appendChild(iframe);
 
     const c: Initialization.MessageChannel | Error = await registerChannelKernel(iframe);
     if (c instanceof Error) {
@@ -51,7 +52,6 @@ export async function execute_iframe_plugin(
         }
     );
     await res.run_plugin();
-
     return plugin_reference;
 }
 

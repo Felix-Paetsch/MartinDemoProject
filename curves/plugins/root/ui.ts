@@ -1,9 +1,15 @@
-import { UILibraryLocalCallbacks } from "../../lib/ui/exports"
-import { UIWindow } from "../../lib/ui/methods/local";
+import { BrowserPlatform } from "pc-messaging-kernel/kernel";
 
-UILibraryLocalCallbacks.on_window(
-    (w: UIWindow) => {
-        console.log("Hello there");
-        document.body.appendChild(w);
+export class Canvas extends BrowserPlatform.Canvas {
+    private el: HTMLDivElement;
+    constructor() {
+        super();
+
+        const app = document.getElementById("app")!;
+        this.el = document.createElement("div");
+        app.appendChild(this.el);
     }
-);
+    element(): HTMLDivElement {
+        return this.el;
+    }
+}

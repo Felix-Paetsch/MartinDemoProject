@@ -3,7 +3,7 @@ import {
     Plugin
 } from "../../../../pluginSystem/kernel_exports";
 import { mapSuccessAsync } from "../../../../utils/error_handling";
-import { get_api_data } from "../api_endpoints";
+import { get_api_data } from "../enpoints/index";
 import { ExecutablePlugin } from "../../types";
 import { BackendLocalPluginData } from "../enpoints/get_local_plugins";
 
@@ -23,7 +23,10 @@ export async function getLocalPlugins(): Promise<
         (r) => {
             const ret: Record<string, ExecutablePlugin> = Object.fromEntries(
                 Object.entries(r).map(([key, value]) => [key, {
-                    name: value.name,
+                    plugin_descr: {
+                        type: "local",
+                        name: value.name
+                    },
                     execute: (kernel, ident_with_id) => {
                         return mapSuccessAsync(
                             load_api_plugin(value),

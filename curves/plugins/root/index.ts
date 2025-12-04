@@ -1,10 +1,11 @@
 import {
-    PluginEnvironment
+    PluginEnvironment,
+    BrowserPlatform
 } from "pc-messaging-kernel/kernel"
 import {
     get_environment
 } from "pc-messaging-kernel/utils"
-import "./ui"
+import { Canvas } from "./ui";
 
 export default async (env: PluginEnvironment) => {
     let plugin_name = "main_react";
@@ -21,6 +22,13 @@ export default async (env: PluginEnvironment) => {
         throw mp;
     }
 
+    const canvas = BrowserPlatform.request_canvas();
+    if (canvas) {
+        const el = canvas.element();
+        el.innerHTML = "Helllllo"
+        el.style.backgroundColor = "red";
+    }
+
     const br = await mp.branch();
     if (br instanceof Error) {
         throw br;
@@ -31,3 +39,7 @@ export default async (env: PluginEnvironment) => {
         console.log(data + ", and I must still scream");
     });
 }
+
+BrowserPlatform.on_canvas_request(
+    () => new Canvas()
+)
