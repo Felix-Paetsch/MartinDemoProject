@@ -1,8 +1,8 @@
 import { Failure, Logging } from "pc-messaging-kernel/messaging";
+import { BrowserPlatform } from "pc-messaging-kernel/platform";
 import {
-    PluginEnvironment,
-    BrowserPlatform
-} from "pc-messaging-kernel/kernel"
+    PluginEnvironment
+} from "pc-messaging-kernel/pluginSystem"
 
 Failure.setAnomalyHandler((e) => {
     console.log("Throwing Anomaly", e.message)

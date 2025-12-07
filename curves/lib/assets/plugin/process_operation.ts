@@ -1,10 +1,10 @@
 import { LocalMethods } from "../library";
-import { PluginEnvironment } from "pc-messaging-kernel/plugin";
 import { active_subscriptions } from "./subscriptions";
 import { to_backend_operation, ToBackendOperation } from "../types/backend_operations";
 import { GenericFrontendOperationResult } from "../types/frontend_result";
 import { BackendOperationError, BackendOperationResult, GenericBackendOperationResult, isBackendOperationError } from "../types/backend_result";
 import { FrontendOperation } from "../types/frontend_operations";
+import { PluginEnvironment } from "pc-messaging-kernel/pluginSystem";
 
 export async function process_operations_plugin(env: PluginEnvironment, op: FrontendOperation[]): Promise<GenericFrontendOperationResult[] | Error> {
     const batch_operation = {

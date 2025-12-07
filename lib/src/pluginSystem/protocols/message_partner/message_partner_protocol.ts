@@ -1,5 +1,5 @@
-import { Protocol, protocol } from "../../../middleware/protocol";
-import { MessagePartner } from "../../plugin_lib/message_partner/base";
+import { protocol } from "../../../middleware/protocol";
+import { MessagePartner } from "../../plugin_side/message_partner/base";
 import MessageChannel from "../../../middleware/channel";
 import { deferred } from "../../../utils/defer";
 

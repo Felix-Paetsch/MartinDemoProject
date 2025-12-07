@@ -1,7 +1,7 @@
 
-import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
-import { KernelEnvironment } from "../../kernel_lib/kernel_env";
-import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
+import { PluginEnvironment } from "../../plugin_side/plugin_environment";
+import { KernelEnvironment } from "../../kernel_side/kernel_env";
+import { pluginIdentWithInstanceIdSchema } from "../../plugin_side/plugin_ident";
 import MessageChannel from "../../../middleware/channel";
 import { Schema } from "effect";
 import { Json } from "../../../messaging/core/message";

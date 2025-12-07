@@ -2,7 +2,7 @@ import { Json } from "../../utils/exports";
 import { Address } from "../../messaging/exports";
 import { add_library, addressToMessagePartner } from "./index";
 import { call_local_library_method, call_plugin_method } from "./protocol";
-import { PluginEnvironment, PluginMessagePartner } from "../../pluginSystem/plugin_exports";
+import { PluginEnvironment, PluginMessagePartner } from "../../pluginSystem/exports";
 
 const local_library_mps: Map<Address, PluginMessagePartner> = new Map();
 

@@ -3,7 +3,7 @@ import { uuidv4 } from "../../utils/uuid";
 import { Message } from "../core/message";
 import { Middleware, MiddlewareContinue } from "../core/middleware";
 import { Json } from "../../utils/json";
-import { EffectToMiddleware } from "../../messagingEffect/effect_middleware";
+import { EffectToMiddleware } from "../../shared_effect/effect_middleware";
 
 export type annotateCustomData = (message: Message, current_annotation: Record<string, Json>) => Record<string, Json>;
 export function annotation_middleware(

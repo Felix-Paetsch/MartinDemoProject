@@ -1,9 +1,9 @@
-import { PluginEnvironment } from "pc-messaging-kernel/plugin";
 import { FileContents, FileDescription, FileReference, RecencyToken } from "../types/base";
 import { AssetManager } from "./asset_manager";
 import { JsonPatch, mapSuccessAsync, uuidv4 } from "pc-messaging-kernel/utils";
 import { create, subscribe } from "./base_methods";
 import { FileEvent, SubscriptionCallback } from "../types/frontend_file_events";
+import { PluginEnvironment } from "pc-messaging-kernel/pluginSystem";
 
 class ManagedFile {
     private _deleted = false;

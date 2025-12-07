@@ -11,19 +11,19 @@
             "require": "./dist/node/index.js",
             "types": "./dist/node/index.d.ts"
         },
-        "./kernel": {
-            "browser": "./dist/browser/pluginSystem/kernel_exports.js",
-            "node": "./dist/node/pluginSystem/kernel_exports.js",
-            "import": "./dist/node/pluginSystem/kernel_exports.js",
-            "require": "./dist/node/pluginSystem/kernel_exports.js",
-            "types": "./dist/node/pluginSystem/kernel_exports.d.ts"
+        "./pluginSystem": {
+            "browser": "./dist/browser/pluginSystem/exports.js",
+            "node": "./dist/node/pluginSystem/exports.js",
+            "import": "./dist/node/pluginSystem/exports.js",
+            "require": "./dist/node/pluginSystem/exports.js",
+            "types": "./dist/node/pluginSystem/exports.d.ts"
         },
-        "./plugin": {
-            "browser": "./dist/browser/pluginSystem/plugin_exports.js",
-            "node": "./dist/node/pluginSystem/plugin_exports.js",
-            "import": "./dist/node/pluginSystem/plugin_exports.js",
-            "require": "./dist/node/pluginSystem/plugin_exports.js",
-            "types": "./dist/node/pluginSystem/plugin_exports.d.ts"
+        "./platform": {
+            "browser": "./dist/browser/platform/exports.js",
+            "node": "./dist/node/platform/exports.js",
+            "import": "./dist/node/platform/exports.js",
+            "require": "./dist/node/platform/exports.js",
+            "types": "./dist/node/platform/exports.d.ts"
         },
         "./messaging": {
             "browser": "./dist/browser/messaging/exports.js",
@@ -56,6 +56,7 @@
         "typecheck_node": "npx tsc -p tsconfig.node.json --noEmit",
         "typecheck_browser": "npx tsc -p tsconfig.browser.json --noEmit",
         "typecheck": "npm run typecheck_node && npm run typecheck_browser",
+        "typecheck_watch": "./scripts/watch_no_queue.sh 'npm run typecheck_browser' 5",
         "build:browser:js": "cross-env TARGET=browser vite build",
         "build:node:js": "cross-env TARGET=node vite build",
         "build:browser:types": "tsc --emitDeclarationOnly -p tsconfig.browser.json",
@@ -63,9 +64,9 @@
         "build:browser": "npm run build:browser:js && npm run build:browser:types",
         "build:node": "npm run build:node:js && npm run build:node:types",
         "build:full": "npm run build:browser && npm run build:node",
-        "watch:build:node": "./scripts/build_watch.sh 'npm run build:node' 2",
-        "watch:build:browser": "./scripts/build_watch.sh 'npm run build:browser' 2",
-        "watch:build:full": "./scripts/build_watch.sh 'npm run build:full' 2",
+        "watch:build:node": "./scripts/watch.sh 'npm run build:node' 2",
+        "watch:build:browser": "./scripts/watch.sh 'npm run build:browser' 2",
+        "watch:build:full": "./scripts/watch.sh 'npm run build:full' 2",
         "package": "npm run typecheck && npm run build:full && npm pack"
     },
     "peerDependencies": {

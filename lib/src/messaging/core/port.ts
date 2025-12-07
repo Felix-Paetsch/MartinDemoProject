@@ -5,7 +5,7 @@ import { Effect, Schema } from "effect";
 import { AddressAlreadyInUseError, HandledError, IgnoreHandled, PortClosedError } from "./errors/errors";
 import { applyMiddlewareEffect } from "./middleware";
 import { Connection, PortConnection } from "./connection";
-import { MessageFromString } from "../../messagingEffect/schemas";
+import { MessageFromString } from "../../shared_effect/schemas";
 import { callbackToEffect } from "./errors/main";
 import { MessageDeserializationError, reportAnomaly } from "./errors/anomalies";
 import { core_send } from "./core_send";

@@ -1,6 +1,6 @@
 import { Address } from "pc-messaging-kernel/messaging";
 import { FileReference } from "../types/base";
-import { PluginEnvironment } from "pc-messaging-kernel/plugin";
+import { PluginEnvironment } from "pc-messaging-kernel/pluginSystem";
 import {
     SubscriptionCallback,
     to_frontend_file_event,

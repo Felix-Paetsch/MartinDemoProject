@@ -19,13 +19,13 @@ export default defineConfig({
     resolve: {
         extensions: [".ts", ".js"],
         alias: {
-            "pc-messaging-kernel/kernel": path.resolve(
+            "pc-messaging-kernel/platform": path.resolve(
                 __dirname,
-                "../lib/src/pluginSystem/kernel_exports.ts"
+                "../lib/src/platform/exports.ts"
             ),
-            "pc-messaging-kernel/plugin": path.resolve(
+            "pc-messaging-kernel/pluginSystem": path.resolve(
                 __dirname,
-                "../lib/src/pluginSystem/plugin_exports.ts"
+                "../lib/src/pluginSystem/exports.ts"
             ),
             "pc-messaging-kernel/messaging": path.resolve(
                 __dirname,

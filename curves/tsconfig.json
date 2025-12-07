@@ -17,8 +17,8 @@
     "baseUrl": ".",
     "paths": {
       "pc-messaging-kernel": ["../lib/src/index.ts"],
-      "pc-messaging-kernel/kernel": ["../lib/src/pluginSystem/kernel_exports.ts"],
-      "pc-messaging-kernel/plugin": ["../lib/src/pluginSystem/plugin_exports.ts"],
+      "pc-messaging-kernel/pluginSystem": ["../lib/src/pluginSystem/exports.ts"],
+      "pc-messaging-kernel/platform": ["../lib/src/platform/exports.ts"],
       "pc-messaging-kernel/messaging": ["../lib/src/messaging/exports.ts"],
       "pc-messaging-kernel/utils": ["../lib/src/utils/exports.ts"],
       "pc-messaging-kernel/libraries": ["../lib/src/libraries/exports.ts"]

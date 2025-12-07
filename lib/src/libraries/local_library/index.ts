@@ -1,6 +1,6 @@
 import { Record } from "effect";
 import { Address } from "../../messaging/exports";
-import { PluginEnvironment, Plugin, PluginMessagePartner } from "../../pluginSystem/plugin_exports"
+import { PluginEnvironment, Plugin, PluginMessagePartner } from "../../pluginSystem/exports"
 import type Library from "./library";
 
 const messagePartnerMap = new Map<Address.StringSerializedAddress, PluginMessagePartner>();

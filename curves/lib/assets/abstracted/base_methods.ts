@@ -1,4 +1,3 @@
-import { PluginEnvironment } from "pc-messaging-kernel/plugin";
 import { active_subscriptions_operation, atomic_operation, create_operation, delete_by_meta_data_operation, delete_file_operation, description_operation, filter_by_meta_data_operation, force_set_meta_data_operation, force_write_operation, read_operation, set_meta_data_operation, SFrontendOperation, subscribe_operation, unsubscribe_operation, update_meta_data_operation } from "../types/frontend_operations";
 import { FileContents, FileReference, RecencyToken } from "../types/base";
 import { batch_operation, FrontendOperation, write_operation } from "../types/frontend_operations";
@@ -6,6 +5,7 @@ import { process_operations_plugin } from "../plugin/process_operation";
 import { FrontendOperationResult } from "../types/frontend_result";
 import { SubscriptionCallback } from "../types/frontend_file_events";
 import { JsonPatch, uuidv4 } from "pc-messaging-kernel/utils";
+import { PluginEnvironment } from "pc-messaging-kernel/pluginSystem";
 
 async function perform_base_operation<O extends FrontendOperation>(env: PluginEnvironment, o: O): Promise<FrontendOperationResult<O> | Error> {
     const r = await process_operations_plugin(

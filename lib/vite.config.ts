@@ -3,11 +3,11 @@ import { defineConfig, type LibraryOptions } from 'vite'
 function sharedLibConfig(): LibraryOptions {
     return {
         entry: {
-            'pluginSystem/kernel_exports': 'src/pluginSystem/kernel_exports.ts',
-            'pluginSystem/plugin_exports': 'src/pluginSystem/plugin_exports.ts',
+            'pluginSystem/exports': 'src/pluginSystem/exports.ts',
             'messaging/exports': 'src/messaging/exports.ts',
             'utils/exports': 'src/utils/exports.ts',
             'libraries/exports': 'src/libraries/exports.ts',
+            'libraries/platform': 'src/platform/exports.ts',
             index: 'src/index.ts',
         },
         formats: ['es'], // now valid because LibraryOptions.formats uses these literal types

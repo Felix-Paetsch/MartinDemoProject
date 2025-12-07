@@ -1,7 +1,7 @@
 import { Effect, Schema } from "effect";
 import { Address } from "./address";
 import { MessageDeserializationError, MessageSerializationError } from "./errors/anomalies";
-import { MessageFromString } from "../../messagingEffect/schemas";
+import { MessageFromString } from "../../shared_effect/schemas";
 
 export type SerializedMessage = string;
 export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };

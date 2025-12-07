@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { BrowserPlatform, PluginServer } from "pc-messaging-kernel/kernel";
+import { BrowserPlatform, PluginServer } from "pc-messaging-kernel/platform";
 
 async function startServer(port = 3001) {
     const app = express();

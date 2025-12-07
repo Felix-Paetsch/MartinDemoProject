@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { Address, Message, Middleware } from "../messaging/exports";
-import { EffectToMiddleware } from "../messagingEffect/effect_middleware";
+import { EffectToMiddleware } from "../shared_effect/effect_middleware";
 
 export function block_address(address: Address, m: BlockingMethod): Middleware.Middleware {
     return EffectToMiddleware(Effect.fn("block_address")(

@@ -1,7 +1,6 @@
-import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
-import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
+import { PluginEnvironment } from "../../plugin_side/plugin_environment";
 import MessageChannel from "../../../middleware/channel";
-import { type PluginReference } from "../../kernel_lib/external_references/plugin_reference";
+import { type PluginReference } from "../../kernel_side/external_references/plugin_reference";
 import { deferred } from "../../../utils/defer";
 import { protocol } from "../../../middleware/protocol";
 

@@ -12,6 +12,10 @@ export default defineConfig({
                 __dirname,
                 "../../lib/src/pluginSystem/kernel_exports.ts"
             ),
+            "pc-messaging-kernel/platform": path.resolve(
+                __dirname,
+                "../../lib/src/platform/exports.ts"
+            ),
             "pc-messaging-kernel/plugin": path.resolve(
                 __dirname,
                 "../../lib/src/pluginSystem/plugin_exports.ts"

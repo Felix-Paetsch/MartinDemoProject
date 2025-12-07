@@ -1,9 +1,6 @@
 import { Failure, Logging, Address } from "pc-messaging-kernel/messaging";
-import {
-    PluginEnvironment,
-    NodePlatform,
-    PsLogging,
-} from "pc-messaging-kernel/kernel"
+import { NodePlatform } from "pc-messaging-kernel/platform";
+import { PluginEnvironment, PsLogging } from "pc-messaging-kernel/pluginSystem";
 
 Failure.setAnomalyHandler((e) => {
     throw e;

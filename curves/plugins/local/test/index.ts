@@ -1,4 +1,4 @@
-import { BranchedMessagePartner, PluginEnvironment, PluginMessagePartner, PsLogging } from "pc-messaging-kernel/plugin";
+import { BranchedMessagePartner, PluginEnvironment, PluginMessagePartner, PsLogging } from "pc-messaging-kernel/pluginSystem";
 import * as Assets from "../../../lib/assets/exports";
 
 export default async (env: PluginEnvironment) => {

@@ -1,4 +1,4 @@
-import { BrowserPlatform } from "pc-messaging-kernel/kernel";
+import { BrowserPlatform } from "pc-messaging-kernel/platform";
 
 export class Canvas extends BrowserPlatform.Canvas {
     private el: HTMLDivElement;

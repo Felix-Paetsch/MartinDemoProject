@@ -1,11 +1,9 @@
 import {
-    PluginEnvironment,
-    BrowserPlatform
-} from "pc-messaging-kernel/kernel"
-import {
     get_environment
 } from "pc-messaging-kernel/utils"
 import { Canvas } from "./ui";
+import { PluginEnvironment } from "pc-messaging-kernel/pluginSystem";
+import { BrowserPlatform } from "pc-messaging-kernel/platform";
 
 export default async (env: PluginEnvironment) => {
     let plugin_name = "main_react";

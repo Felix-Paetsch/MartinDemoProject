@@ -1,6 +1,6 @@
 import { Address } from "../../messaging/exports";
 import { Json } from "../../utils/exports";
-import { PluginEnvironment } from "../../pluginSystem/plugin_exports";
+import { PluginEnvironment } from "../../pluginSystem/exports";
 import Library from "./library";
 
 type local_method<Args extends Json[]> = (

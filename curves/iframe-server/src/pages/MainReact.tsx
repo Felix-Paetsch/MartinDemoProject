@@ -1,5 +1,5 @@
-import { Plugin } from "pc-messaging-kernel/plugin";
-import { BrowserPlatform } from "pc-messaging-kernel/kernel";
+import { Plugin } from "pc-messaging-kernel/pluginSystem";
+import { BrowserPlatform } from "pc-messaging-kernel/platform";
 import React, { useEffect, useRef, useState } from "react";
 import * as Assets from "../../../lib/assets/exports";
 

@@ -1,10 +1,10 @@
-import { PluginEnvironment } from "../../plugin_lib/plugin_environment";
-import { KernelEnvironment } from "../../kernel_lib/kernel_env";
-import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_lib/plugin_ident";
+import { PluginEnvironment } from "../../plugin_side/plugin_environment";
+import { KernelEnvironment } from "../../kernel_side/kernel_env";
+import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_side/plugin_ident";
 import MessageChannel from "../../../middleware/channel";
 import { Schema } from "effect";
-import { AddressFromString } from "../../../messagingEffect/schemas";
-import PluginMessagePartner from "../../plugin_lib/message_partner/plugin_message_partner";
+import { AddressFromString } from "../../../shared_effect/schemas";
+import PluginMessagePartner from "../../plugin_side/message_partner/plugin_message_partner";
 import { uuidv4 } from "../../../utils/uuid";
 import { deferred } from "../../../utils/defer";
 import { protocol } from "../../../middleware/protocol";
