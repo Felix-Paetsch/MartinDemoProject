@@ -2,6 +2,7 @@ import { Plugin } from "pc-messaging-kernel/pluginSystem";
 import { BrowserPlatform } from "pc-messaging-kernel/platform";
 import React, { useEffect, useRef, useState } from "react";
 import * as Assets from "../../../lib/assets/exports";
+import { Logging } from "pc-messaging-kernel";
 
 let pluginStarted = false;
 
@@ -20,6 +21,12 @@ export default function MainReact() {
         pluginStarted = true;
 
         const plugin: Plugin = async (env) => {
+            env.use_middleware(
+                Logging.log_middleware(
+                    Logging.log_to_url("http://localhost:3005/logging")
+                ), "monitoring"
+            );
+
             console.log("<< STARTING Main React PLUGIN >>");
             envRef.current = env;
 
@@ -36,13 +43,16 @@ export default function MainReact() {
                 return;
             }
 
+            env.on_remove(() => {
+                console.log("HI");
+            });
             console.log("Created shared_value with token:", res.recency_token);
             setToken(res.recency_token);
 
-            await env.get_plugin({
-                name: "side_react",
-                version: "1.0.0",
-            });
+            // await env.get_plugin({
+            //     name: "side_react",
+            //     version: "1.0.0",
+            // });
         };
 
         BrowserPlatform.start_iframe_plugin(plugin);

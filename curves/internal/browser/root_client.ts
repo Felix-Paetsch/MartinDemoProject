@@ -15,7 +15,10 @@ Failure.setErrorHandler((e) => {
 });
 
 Logging.process_logs_using(
-    Logging.LogInvestigator.GlobalInstance().collect_logs()
+    (log) => {
+        Logging.LogInvestigator.GlobalInstance().collect_logs()(log);
+        // Logging.log_to_url("http://localhost:3005/logging")(log);
+    }
 )
 class KernelImpl extends BrowserPlatform.KernelEnvironment {
     register_kernel_middleware() {
@@ -31,6 +34,8 @@ class KernelImpl extends BrowserPlatform.KernelEnvironment {
         //env.use_middleware(DebugMiddleware.plugin(this.address), "monitoring");
     }
 }
+
+BrowserPlatform.declare_local_environment();
 
 setTimeout(() => {
     const kernel = new KernelImpl();

@@ -14,7 +14,7 @@
             height: 100vh;
         }
         #app {
-            height: 100vh;
+            height: 80vh;
             width: 100vw;
             overflow: hidden;
             display: flex;
@@ -29,10 +29,17 @@
             width: 100%;
             overflow: hidden;
         }
+
+        #bufferArea{
+            height: 20vh;
+            width: 100vw;
+            background-color: red; 
+        }
     </style>
 </head>
 <body>
     <div id="app"></div>
+    <div id="bufferArea"></div>
     <script type="module" src="./internal/browser/root_client"></script>
 </body>
 </html>

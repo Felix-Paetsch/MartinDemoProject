@@ -21,6 +21,12 @@ async function startServer(port = 3001) {
         return res.json(plugins);
     });
 
+    app.post("/logging", async (req, res) => {
+        const body = req.body;
+        console.log(body);
+        res.send("ok");
+    });
+
     app.post("/:route", async (req, res) => {
         const route = req.params.route;
         const body = req.body;

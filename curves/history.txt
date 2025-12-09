@@ -1,0 +1,562 @@
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "OpenNewChannel",
+        "context": {
+          "target_processor": "protocol_processor",
+          "id": "f3686e53-5a17-4b25-9c0d-b3d80588a7b4",
+          "remotely_initialized": true
+        },
+        "config": {
+          "defaultMessageTimeout": 2000,
+          "timeoutAfterInactivity": 10000
+        },
+        "address": {
+          "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+          "port": "root_0bb13b95-473d-4922-80a7-5de2b8f47887"
+        }
+      },
+      {
+        "type": "SendMessage",
+        "data": {
+          "ident": null,
+          "name": "get_plugin_from_kernel"
+        },
+        "targetID": "f3686e53-5a17-4b25-9c0d-b3d80588a7b4"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "f3686e53-5a17-4b25-9c0d-b3d80588a7b4",
+    "annotation": {
+      "message_id": "4ff1e87c-03a5-4faf-aa59-1e87a6ba98e0",
+      "message_path": [
+        {
+          "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+          "port": "root_0bb13b95-473d-4922-80a7-5de2b8f47887"
+        }
+      ],
+      "source": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "root_0bb13b95-473d-4922-80a7-5de2b8f47887"
+      },
+      "target": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "kernel"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "SendMessage",
+        "data": {
+          "name": "main_react",
+          "version": "1.0.0"
+        },
+        "targetID": "f3686e53-5a17-4b25-9c0d-b3d80588a7b4"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "f3686e53-5a17-4b25-9c0d-b3d80588a7b4",
+    "annotation": {
+      "message_id": "c46e414a-032a-434f-8bed-9b1c6b3ae6fc",
+      "message_path": [
+        {
+          "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+          "port": "root_0bb13b95-473d-4922-80a7-5de2b8f47887"
+        },
+        {
+          "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+          "port": "kernel"
+        }
+      ],
+      "source": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "root_0bb13b95-473d-4922-80a7-5de2b8f47887"
+      },
+      "target": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "kernel"
+      },
+      "at_target": true,
+      "at_source": false,
+      "direction": "incoming"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "OpenNewChannel",
+        "context": {
+          "target_processor": "protocol_processor",
+          "id": "a0f842ac-0d45-4534-8975-e35261917dfb",
+          "remotely_initialized": true
+        },
+        "config": {
+          "defaultMessageTimeout": 2000,
+          "timeoutAfterInactivity": 10000
+        },
+        "address": {
+          "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+          "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+        }
+      },
+      {
+        "type": "SendMessage",
+        "data": {
+          "ident": null,
+          "name": "get_plugin_from_kernel"
+        },
+        "targetID": "a0f842ac-0d45-4534-8975-e35261917dfb"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "a0f842ac-0d45-4534-8975-e35261917dfb",
+    "annotation": {
+      "message_id": "a56e83f0-8590-4f3f-a15a-3e7eb77d53f1",
+      "message_path": [
+        {
+          "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+          "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+        }
+      ],
+      "source": {
+        "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+        "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+      },
+      "target": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "kernel"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "SendMessage",
+        "data": {
+          "name": "local_library"
+        },
+        "targetID": "a0f842ac-0d45-4534-8975-e35261917dfb"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "a0f842ac-0d45-4534-8975-e35261917dfb",
+    "annotation": {
+      "message_id": "81f1855f-6c18-4c8d-bc7a-9c946588d4db",
+      "message_path": [
+        {
+          "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+          "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+        }
+      ],
+      "source": {
+        "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+        "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+      },
+      "target": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "kernel"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "SendMessage",
+        "data": {
+          "address": {
+            "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+            "port": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+          },
+          "plugin_ident": {
+            "name": "local_library",
+            "instance_id": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+          }
+        },
+        "targetID": "a0f842ac-0d45-4534-8975-e35261917dfb"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "a0f842ac-0d45-4534-8975-e35261917dfb",
+    "annotation": {
+      "message_id": "e9831e59-b553-4af4-acb7-201afe36169f",
+      "message_path": [
+        {
+          "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+          "port": "kernel"
+        }
+      ],
+      "source": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "kernel"
+      },
+      "target": {
+        "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+        "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "OpenNewChannel",
+        "context": {
+          "target_processor": "protocol_processor",
+          "id": "83ae96c6-0826-4974-b690-c4c2c90dfde9",
+          "remotely_initialized": true
+        },
+        "config": {
+          "defaultMessageTimeout": 2000,
+          "timeoutAfterInactivity": 10000
+        },
+        "address": {
+          "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+          "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+        }
+      },
+      {
+        "type": "SendMessage",
+        "data": {
+          "ident": {
+            "name": "local_library",
+            "instance_id": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+          },
+          "name": "create_plugin_message_partner"
+        },
+        "targetID": "83ae96c6-0826-4974-b690-c4c2c90dfde9"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "83ae96c6-0826-4974-b690-c4c2c90dfde9",
+    "annotation": {
+      "message_id": "322e5e0a-6877-4efd-90ed-9fc2948385db",
+      "message_path": [
+        {
+          "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+          "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+        }
+      ],
+      "source": {
+        "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+        "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+      },
+      "target": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "SendMessage",
+        "data": {
+          "mp_uuid": "2c172159-2990-4be0-b181-7eb0f9a3d335",
+          "plugin_ident": {
+            "name": "main_react",
+            "version": "1.0.0",
+            "instance_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+          },
+          "address": {
+            "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+            "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+          }
+        },
+        "targetID": "83ae96c6-0826-4974-b690-c4c2c90dfde9"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "83ae96c6-0826-4974-b690-c4c2c90dfde9",
+    "annotation": {
+      "message_id": "858fb801-8b92-4099-892c-9292fbbc756d",
+      "message_path": [
+        {
+          "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+          "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+        }
+      ],
+      "source": {
+        "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+        "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+      },
+      "target": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "SendMessage",
+        "data": "OK",
+        "targetID": "83ae96c6-0826-4974-b690-c4c2c90dfde9"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "83ae96c6-0826-4974-b690-c4c2c90dfde9",
+    "annotation": {
+      "message_id": "04dde166-27d6-4915-aed1-7a3d965ade19",
+      "message_path": [
+        {
+          "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+          "port": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+        }
+      ],
+      "source": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+      },
+      "target": {
+        "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+        "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "OpenNewChannel",
+        "context": {
+          "target_processor": "protocol_processor",
+          "id": "048b5538-568f-49b8-8799-4ea29b83c589",
+          "remotely_initialized": true
+        },
+        "config": {
+          "defaultMessageTimeout": 2000,
+          "timeoutAfterInactivity": 10000
+        },
+        "address": {
+          "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+          "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+        }
+      },
+      {
+        "type": "SendMessage",
+        "data": {
+          "ident": "2c172159-2990-4be0-b181-7eb0f9a3d335_0",
+          "name": "local_library_call_lib_method"
+        },
+        "targetID": "048b5538-568f-49b8-8799-4ea29b83c589"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "048b5538-568f-49b8-8799-4ea29b83c589",
+    "annotation": {
+      "message_id": "f97c11a4-4984-43cb-94ed-63a883599a19",
+      "message_path": [
+        {
+          "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+          "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+        }
+      ],
+      "source": {
+        "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+        "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+      },
+      "target": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "SendMessage",
+        "data": {
+          "lib": "asset_library",
+          "method": "perform_operation",
+          "args": [
+            {
+              "type": "BATCH_OPERATION",
+              "ops": [
+                {
+                  "type": "CREATE",
+                  "fr": "shared_value",
+                  "contents": "\"Hello\"",
+                  "meta_data": {}
+                }
+              ]
+            }
+          ]
+        },
+        "targetID": "048b5538-568f-49b8-8799-4ea29b83c589"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "048b5538-568f-49b8-8799-4ea29b83c589",
+    "annotation": {
+      "message_id": "df12d95b-f9be-4139-97ce-c435e1cbadf7",
+      "message_path": [
+        {
+          "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+          "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+        }
+      ],
+      "source": {
+        "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+        "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+      },
+      "target": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "SendMessage",
+        "data": [
+          {
+            "recency_token": "e45a8e7f-37ae-45ca-a280-80cdfbdd99e4",
+            "meta_data": {
+              "fileType": "LOCAL",
+              "fileReference": "shared_value"
+            }
+          }
+        ],
+        "targetID": "048b5538-568f-49b8-8799-4ea29b83c589"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "048b5538-568f-49b8-8799-4ea29b83c589",
+    "annotation": {
+      "message_id": "2dffd6a5-4af1-4cfb-bba5-b92af90b1c43",
+      "message_path": [
+        {
+          "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+          "port": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+        }
+      ],
+      "source": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "local_library_e778d1e0-20b2-4cca-97d3-24044240d6ad"
+      },
+      "target": {
+        "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+        "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
+{
+  "type": "Message",
+  "content": {
+    "messages": [
+      {
+        "type": "SendMessage",
+        "data": {
+          "address": {
+            "process_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562",
+            "port": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+          },
+          "plugin_ident": {
+            "name": "main_react",
+            "version": "1.0.0",
+            "instance_id": "main_react_96fe72a5-ec15-4d2c-97a7-2649c407b562"
+          }
+        },
+        "targetID": "f3686e53-5a17-4b25-9c0d-b3d80588a7b4"
+      }
+    ]
+  },
+  "meta_data": {
+    "message_channel_middleware": "f3686e53-5a17-4b25-9c0d-b3d80588a7b4",
+    "annotation": {
+      "message_id": "f07bee73-1a84-49d9-9bd4-b443d34fba8a",
+      "message_path": [
+        {
+          "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+          "port": "kernel"
+        }
+      ],
+      "source": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "kernel"
+      },
+      "target": {
+        "process_id": "ee01bf31-997d-4129-960e-28571a087707",
+        "port": "root_0bb13b95-473d-4922-80a7-5de2b8f47887"
+      },
+      "at_target": false,
+      "at_source": true,
+      "direction": "outgoing"
+    }
+  }
+}
