@@ -8,7 +8,7 @@ const localPlugins = getLocalPlugins().catch(r => r as Error);
 export class NodeKernelEnvironment extends KernelEnvironment {
     async create_plugin(plugin_ident: PluginIdent): Promise<PluginReference | GetPluginError> {
         const ident_with_id = {
-            instance_id: uuidv4(),
+            instance_id: plugin_ident.name + "_" + uuidv4(),
             ...plugin_ident
         }
 

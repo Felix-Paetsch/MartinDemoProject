@@ -8,7 +8,7 @@ export type PrimitiveMessageChannel = {
 export class Synchronizer {
     private triggerMap: Map<string, (data: Json) => void | Promise<void>> = new Map();
 
-    private otherSideExists: Promise<void>;
+    private otherSideExists!: Promise<void>;
     private otherSideExistsHelperBool: boolean = false;
     private resolveOtherSideExists: (() => void) = () => {
         this.otherSideExistsHelperBool = true;
@@ -16,13 +16,7 @@ export class Synchronizer {
 
     constructor(private channel: PrimitiveMessageChannel) {
         this.channel.receive(this.#receive.bind(this) as any);
-        this.otherSideExists = new Promise((resolve) => {
-            if (this.otherSideExistsHelperBool === true) resolve();
-            this.resolveOtherSideExists = () => {
-                this.otherSideExistsHelperBool = true;
-                resolve();
-            };
-        });
+        this.#set_up_unsync();
     }
 
     add_command(name: string, method: (data: Json) => void | Promise<void>) {
@@ -36,7 +30,18 @@ export class Synchronizer {
     }
     #on_pong() { this.resolveOtherSideExists(); }
 
+    #set_up_unsync() {
+        this.otherSideExistsHelperBool = false;
+        this.otherSideExists = new Promise((resolve) => {
+            if (this.otherSideExistsHelperBool === true) resolve();
+            this.resolveOtherSideExists = () => {
+                this.otherSideExistsHelperBool = true;
+                resolve();
+            };
+        });
+    }
     async sync() {
+        this.#set_up_unsync()
         this.#ping();
         return await this.otherSideExists;
     }
@@ -46,6 +51,7 @@ export class Synchronizer {
             type: "call",
             data: { name, args }
         });
+
         return await this.otherSideExists;
     }
 

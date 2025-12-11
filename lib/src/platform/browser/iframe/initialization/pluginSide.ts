@@ -32,7 +32,9 @@ export async function initializeExternalPlugin_PluginSide(
 
                 const connection = Connection.create(
                     Address.generic(), //_data.kernel_process_id),
-                    (msg) => synchronizer.call_command("send_message", msg)
+                    (msg) => {
+                        return synchronizer.call_command("send_message", msg)
+                    }
                 ).open();
 
                 if (connection instanceof Failure.AddressAlreadyInUseError) {
@@ -40,7 +42,7 @@ export async function initializeExternalPlugin_PluginSide(
                 }
 
                 synchronizer.add_command("send_message", (data: Json) => {
-                    return connection.receive(data as any);
+                    return connection.receive(data as string);
                 });
 
                 Address.set_process_id(_data.plugin_process_id);

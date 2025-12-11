@@ -52,8 +52,8 @@ export class MessagePartner {
 
     remove() {
         if (this.is_removed) return;
-        this.removed = true;
         this._send_message_partner_message("remove");
+        this.removed = true;
         this._internal_remove();
     }
     async _internal_remove(trigger_callback = true) {

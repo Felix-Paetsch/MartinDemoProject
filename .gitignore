@@ -4,3 +4,4 @@
 .cursorignore
 **/*.tgz
 .vscode
+**/*.swp

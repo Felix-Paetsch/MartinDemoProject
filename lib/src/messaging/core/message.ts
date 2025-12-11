@@ -8,6 +8,7 @@ export type Json = string | number | boolean | null | Json[] | { [key: string]: 
 
 export class Message {
     public local_data: LocalMessageData;
+    readonly __tag: "message" = "message";
 
     constructor(
         public target: Address,

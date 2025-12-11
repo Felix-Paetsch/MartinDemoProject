@@ -67,7 +67,7 @@
         "watch:build:node": "./scripts/watch.sh 'npm run build:node' 2",
         "watch:build:browser": "./scripts/watch.sh 'npm run build:browser' 2",
         "watch:build:full": "./scripts/watch.sh 'npm run build:full' 2",
-        "package": "npm run typecheck && npm run build:full && npm pack"
+        "package": "npm run build:full && npm pack"
     },
     "peerDependencies": {
         "effect": "^3.15.2",

@@ -48,7 +48,6 @@ const protocolProcessor: MessageChannelProcessor = async (mc: MessageChannel) =>
         }
         const responder = protocol.findResponder(decodedIdent, mc);
         if (responder) {
-            await mc.send("ok");
             return await protocol.respond(mc, responder);
         }
     }

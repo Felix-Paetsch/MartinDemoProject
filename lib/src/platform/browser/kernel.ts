@@ -2,12 +2,12 @@ import {
     KernelEnvironment,
     PluginIdent,
 } from "../../pluginSystem/exports";
-import { mapBothAsync } from "../../utils/error_handling";
-import { reportAnomaly } from "../../messaging/core/errors/anomalies";
+import { mapBothAsync } from "../../utils/exports";
 import { getLocalPlugins } from "./get_plugins/local";
 import { getAPIPlugins } from "./get_plugins/api";
 import { ExecutablePlugin } from "../types";
 import { cacheFun, uuidv4 } from "../../utils/exports";
+import { Failure } from "../../messaging/exports";
 
 const localPlugins = cacheFun(() => getLocalPlugins().catch(r => r as Error));
 const apiPlugins = cacheFun(() => getAPIPlugins().catch(r => r as Error));
@@ -27,7 +27,7 @@ async function available_plugins() {
 export class BrowserKernelEnvironment extends KernelEnvironment {
     async create_plugin(plugin_ident: PluginIdent) {
         const ident_with_id = {
-            instance_id: uuidv4(),
+            instance_id: plugin_ident.name + "_" + uuidv4(),
             ...plugin_ident
         }
 
@@ -41,7 +41,7 @@ export class BrowserKernelEnvironment extends KernelEnvironment {
         }, () => false as const);
 
         if (plugin instanceof Error) {
-            reportAnomaly(plugin);
+            Failure.reportAnomaly(plugin);
             plugin = false;
         }
 

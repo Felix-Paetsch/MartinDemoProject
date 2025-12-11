@@ -71,7 +71,7 @@ export abstract class KernelEnvironment extends EnvironmentCommunicator {
 
     async remove_plugin(p: PluginReference) {
         await p.remove();
-        const index = this.registered_plugins.findIndex(q => q.plugin_ident.instance_id !== p.plugin_ident.instance_id);
+        const index = this.registered_plugins.findIndex(q => q.plugin_ident.instance_id === p.plugin_ident.instance_id);
         if (index < 0) return;
         this.registered_plugins.splice(index, 1);
     }

@@ -38,6 +38,7 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     }
 
     log(data: Json, severity: Severity = Severity.INFO) {
+        console.log("Logging.Log");
         return Logging.log({
             data,
             severity

@@ -1,5 +1,7 @@
 import { Effect } from "effect";
 
+export type MaybePromise<T> = T | Promise<T>;
+
 export function UnblockFiberDeamon<R>(e: Effect.Effect<void, never, R>) {
     return Effect.gen(function* () {
         yield* Effect.forkDaemon(e)

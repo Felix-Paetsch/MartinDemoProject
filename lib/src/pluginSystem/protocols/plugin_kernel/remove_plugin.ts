@@ -3,6 +3,7 @@ import MessageChannel from "../../../middleware/channel";
 import { type PluginReference } from "../../kernel_side/external_references/plugin_reference";
 import { deferred } from "../../../utils/defer";
 import { protocol } from "../../../middleware/protocol";
+import { KernelEnvironment } from "../../kernel_side/kernel_env";
 
 export type GetPluginError = Error;
 export const remove_plugin_protocol = protocol(
@@ -10,7 +11,8 @@ export const remove_plugin_protocol = protocol(
     deferred(() => PluginEnvironment.findTranscoder),
     deferred(() => PluginEnvironment.find),
     async (mc: MessageChannel, initiator: PluginReference) => {
-        return await mc.next()
+        const next = await mc.next()
+        return next;
     },
     async (mc: MessageChannel, responder: PluginEnvironment) => {
         await responder._trigger_remove_environment();

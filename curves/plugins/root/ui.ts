@@ -23,22 +23,8 @@ export class Canvas extends BrowserPlatform.Canvas {
         closeBtn.addEventListener("click", () => this.onClose());
 
         setTimeout(() => {
-            console.log("=================0")
-            console.log("=================0")
-            console.log("=================0")
-            console.log("=================0")
-            console.log("=================0")
-            console.log("=================0")
-            console.log("=================0")
-            console.log("=================0")
-            console.log("=================0")
             this.onClose()
-        }, 5000);
-        // this.on_close(() => {
-        //     return new Promise((resolve) => {
-        //         setTimeout(resolve, 1000);
-        //     });
-        // })
+        }, 1000);
     }
 
     on_close(cb: () => void | Promise<void>) {
@@ -47,7 +33,7 @@ export class Canvas extends BrowserPlatform.Canvas {
 
     private async onClose(): Promise<void> {
         this.clear();
-        // this.wrapper.remove();
+        this.wrapper.remove();
     }
 
     element(): HTMLDivElement {

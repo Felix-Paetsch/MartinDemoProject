@@ -51,7 +51,7 @@ export const processMessageBody = async (body: InternalChannelMessage[], port: P
         });
 
         if (!channel) {
-            Failure.reportAnomaly(new Error("Channel for message channel message not found."));
+            Failure.reportAnomaly(new Error(`Channel for message channel message not found.`));
             continue;
         }
 

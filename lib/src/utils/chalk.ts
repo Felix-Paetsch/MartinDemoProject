@@ -1,3 +1,5 @@
+import * as Util from "util";
+
 type ColorFn = (...args: any[]) => string;
 
 /**
@@ -6,8 +8,7 @@ type ColorFn = (...args: any[]) => string;
 let format: (...args: any[]) => string;
 try {
     // @ts-ignore - util isn't available in browser
-    const nodeUtil = require("util");
-    format = nodeUtil.format;
+    format = Util.format;
 } catch {
     // Fallback for browsers (no %s substitution, just join)
     format = (...args: any[]) => args.join(" ");

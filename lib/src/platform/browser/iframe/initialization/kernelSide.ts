@@ -18,7 +18,9 @@ export async function initializeExternalPlugin_KernelSide(
         const synchronizer = new Synchronizer(channel);
         const connection = Connection.create(
             Address.generic(pluginIdent.instance_id),
-            (msg) => synchronizer.call_command("send_message", msg)
+            (msg) => {
+                return synchronizer.call_command("send_message", msg)
+            }
         );
 
         synchronizer.add_command("send_message", (data: Json) => {

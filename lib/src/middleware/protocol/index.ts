@@ -1,5 +1,5 @@
-import { Effect, Schema } from "effect";
-import { Address, Connection, Port } from "../../messaging/exports";
+import { Schema } from "effect";
+import { Address, Port } from "../../messaging/exports";
 import MessageChannel from "../channel";
 import { registerProtocol } from "./respond";
 import { Json } from "../../utils/json";
@@ -52,8 +52,6 @@ export function protocol<
             return new Error("Port is closed");
         }
 
-        const res = await mc.next();
-        if (res !== "ok") return new Error("Failed to find responder");
         return await localizeErrorAsync(initiate(mc, sender, with_data));
     }
 }

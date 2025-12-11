@@ -19,7 +19,11 @@ export type MessageLog = Schema.Schema.Type<typeof MessageLogSchema>;
 export type DataLog = Schema.Schema.Type<typeof DataLogSchema>;
 export type Log = Schema.Schema.Type<typeof LogSchema>;
 
-const MessageToLog = Schema.transformOrFail(Schema.instanceOf(Message), MessageLogSchema, {
+const MessageToLog = Schema.transformOrFail(Schema.Struct({
+    __tag: Schema.Literal("message"),
+    content: Schema.Any,
+    meta_data: Schema.Any
+}), MessageLogSchema, {
     decode: (message, _, ast) => ParseResult.succeed({
         type: "Message" as const,
         content: message.content,
@@ -40,4 +44,4 @@ const DataToLog = Schema.transform(Schema.Any, DataLogSchema, {
     encode: (log) => log.data
 });
 
-export const ToLog = (log: Json | Message) => Schema.decodeSync(Schema.Union(MessageToLog, DataToLog))(log);
+export const ToLog = (log: Json | Message): Log => Schema.decodeSync(Schema.Union(MessageToLog, DataToLog))(log);

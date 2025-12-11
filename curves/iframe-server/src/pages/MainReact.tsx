@@ -44,7 +44,7 @@ export default function MainReact() {
             }
 
             env.on_remove(() => {
-                console.log("HI");
+                console.log("On remove CB");
             });
             console.log("Created shared_value with token:", res.recency_token);
             setToken(res.recency_token);
