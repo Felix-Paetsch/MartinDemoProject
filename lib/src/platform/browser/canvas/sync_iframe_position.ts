@@ -1,4 +1,6 @@
-export function sync_iframe_position(iframe: HTMLIFrameElement, el: HTMLDivElement) {
+import { PluginIframe } from "./load_iframe_plugin";
+
+export function sync_iframe_position(iframe: PluginIframe, el: HTMLDivElement) {
     const rec = el.getBoundingClientRect();
 
     iframe.style.position = "fixed";
@@ -10,7 +12,7 @@ export function sync_iframe_position(iframe: HTMLIFrameElement, el: HTMLDivEleme
 }
 
 export function init_iframe_sync(
-    iframe: HTMLIFrameElement,
+    iframe: PluginIframe,
     el: HTMLDivElement
 ): () => void {
     const sync = () => sync_iframe_position(iframe, el);

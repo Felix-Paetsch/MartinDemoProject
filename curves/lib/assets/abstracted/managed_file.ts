@@ -1,14 +1,16 @@
 import { FileContents, FileDescription, FileReference, RecencyToken } from "../types/base";
 import { AssetManager } from "./asset_manager";
-import { JsonPatch, mapSuccessAsync, uuidv4 } from "pc-messaging-kernel/utils";
-import { create, subscribe } from "./base_methods";
+import { JsonPatch, MakeMutable, mapSuccessAsync, uuidv4 } from "pc-messaging-kernel/utils";
+import { create, perform_atomic, subscribe } from "./base_methods";
 import { FileEvent, SubscriptionCallback } from "../types/frontend_file_events";
 import { PluginEnvironment } from "pc-messaging-kernel/pluginSystem";
+import { atomic_operation, create_operation, description_operation, subscribe_operation } from "../library";
+import { FrontendAtomicOperationResult, FrontendOperationError, FrontendOperationResult } from "../types/frontend_result";
 
 class ManagedFile {
     private _deleted = false;
     private AssetManager: AssetManager;
-    private _token: RecencyToken = "";
+    private _token: RecencyToken;
     private subscriptions: {
         key: string,
         cb: SubscriptionCallback,
@@ -18,13 +20,21 @@ class ManagedFile {
         readonly env: PluginEnvironment,
         readonly fr: FileReference,
         on_event: (cb: SubscriptionCallback) => void,
-        readonly subscription_key: string
+        readonly subscription_key: string,
+        token: string
     ) {
         this.AssetManager = new AssetManager(env);
         on_event(this.#callback.bind(this));
+        this._token = token;
     }
 
     get recency_token() {
+        return this._token;
+    }
+
+    async update_recency_token() {
+        const descrResult = await this.description(); // Updates Recency Token
+        if (descrResult instanceof Error) return descrResult;
         return this._token;
     }
 
@@ -142,20 +152,46 @@ export type ManagedFileType = ManagedFile;
 
 export async function manage_file(env: PluginEnvironment, fr: FileReference) {
     let on_msg: SubscriptionCallback = async () => { };
-    const r = await subscribe(env, fr, (event: FileEvent) => {
+    const subscription_cb = (event: FileEvent) => {
         return on_msg(event);
-    });
-    if (r instanceof Error) return r;
+    };
+
+    const operations = [
+        subscribe_operation(fr, subscription_cb),
+        description_operation(fr)
+    ] as const;
+
+    const res = await perform_atomic(env, operations);
+    if (res instanceof Error) return res;
+
     return new ManagedFile(
         env,
         fr,
         (cb: SubscriptionCallback) => { on_msg = cb; },
-        r.key
+        res[0].key,
+        res[1].recency_token
     )
 }
 
 export async function create_managed_file(env: PluginEnvironment, fr: FileReference = uuidv4()) {
-    const created = await create(env, fr);
-    if (created instanceof Error) return created;
-    return await manage_file(env, fr);
+    let on_msg: SubscriptionCallback = async () => { };
+    const subscription_cb = (event: FileEvent) => {
+        return on_msg(event);
+    };
+
+    const operations = [
+        create_operation(fr),
+        subscribe_operation(fr, subscription_cb)
+    ] as const;
+
+    const res = await perform_atomic(env, operations);
+    if (res instanceof Error) return res;
+
+    return new ManagedFile(
+        env,
+        fr,
+        (cb: SubscriptionCallback) => { on_msg = cb; },
+        res[1].key,
+        res[0].recency_token
+    )
 }

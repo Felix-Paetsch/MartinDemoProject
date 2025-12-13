@@ -21,10 +21,7 @@ export class Canvas extends BrowserPlatform.Canvas {
         app.appendChild(this.wrapper);
 
         closeBtn.addEventListener("click", () => this.onClose());
-
-        setTimeout(() => {
-            this.onClose()
-        }, 1000);
+        this.on_iframe_plugin_close(this.onClose.bind(this));
     }
 
     on_close(cb: () => void | Promise<void>) {
@@ -32,8 +29,10 @@ export class Canvas extends BrowserPlatform.Canvas {
     }
 
     private async onClose(): Promise<void> {
+        console.log("ONN CLOOOSE");
         this.clear();
         this.wrapper.remove();
+        this.on_close_cb();
     }
 
     element(): HTMLDivElement {
@@ -41,15 +40,15 @@ export class Canvas extends BrowserPlatform.Canvas {
     }
 }
 
-const CanvasTemplateString = `<div class="canvas-box" style="border:1px solid #ccc; width:300px; height: 100%; display: flex; flex-direction: column;">
+const CanvasTemplateString = `<div class="canvas-box" style="border:2px solid #666; box-sizing: border-box; width:300px; height: 100%; display: flex; flex-direction: column; overflow: hidden; color: white">
         <div class="canvas-header" 
-             style="background:#f0f0f0; padding:4px; display:flex; justify-content:space-between; align-items:center;">
+             style="background:#666; padding:4px; display:flex; justify-content:space-between; align-items:center;">
           <span>Canvas</span>
           <button class="close-btn" 
-                  style="border:none; background:transparent; font-weight:bold; cursor:pointer;">×</button>
+                  style="border:none; background:transparent; font-weight:bold; color: white; cursor:pointer;">×</button>
         </div>
         <div class="canvas-content" 
-             style="padding:8px; background:white; height: 100%">
+             style="height: 100%; overflow: hidden">
         </div>
       </div>
     `;

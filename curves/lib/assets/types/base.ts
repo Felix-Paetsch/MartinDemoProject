@@ -31,3 +31,11 @@ export type BackendSystemFile = BackendFile & {
         fileType: "SYSTEM"
     }
 }
+
+export function backendFile_to_File(f: BackendFile): File {
+    return {
+        meta_data: f.meta_data,
+        recency_token: f.recency_token,
+        contents: JSON.parse(f.contents)
+    }
+}

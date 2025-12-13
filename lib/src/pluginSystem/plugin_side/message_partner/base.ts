@@ -131,6 +131,9 @@ export class MessagePartner {
     static find<S extends MessagePartner, T extends new (...args: any[]) => S>(type?: T):
         (ident: string) => S | null {
         return (ident: string) => {
+            const r = (MessagePartner.message_partners.find(
+                mp => (mp.own_uuid === ident) && (type ? mp instanceof type : true)
+            ) as S | undefined) || null;
             return (MessagePartner.message_partners.find(
                 mp => (mp.own_uuid === ident) && (type ? mp instanceof type : true)
             ) as S | undefined) || null;

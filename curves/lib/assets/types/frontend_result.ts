@@ -45,13 +45,13 @@ export type FrontendSubscribeResult =
     | {
         key: string;
         fr: FileReference;
+
     };
 export type FrontendUnsubscribeResult = null;
 
-type FrontendAtomicOperationResult<T extends any[]> = Exclude<
-    T[number],
-    FrontendOperationError
->[];
+export type FrontendAtomicOperationResult<T extends readonly any[]> = {
+    [K in keyof T]: Exclude<T[K], FrontendOperationError>;
+};
 
 export type FrontendOperationResult<T extends FrontendOperation> =
     (

@@ -3,13 +3,19 @@ import { TimeoutException } from "effect/Cause";
 import { BackendIframePluginData } from "../get_plugins/api";
 import { Initialization, KernelEnvironment, PluginIdentWithInstanceId, PluginReference } from "../../../pluginSystem/exports";
 import { Address, Json } from "../../../messaging/exports";
-import { init_iframe_sync, sync_iframe_position } from "./sync_iframe_position";
+import { init_iframe_sync } from "./sync_iframe_position";
 
-function createIframe(id: string, src: string): HTMLIFrameElement {
-    const iframe = document.createElement('iframe');
+export type PluginIframe = HTMLIFrameElement & {
+    is_closing: boolean
+}
+
+function createIframe(id: string, src: string): PluginIframe {
+    const iframe = document.createElement('iframe') as PluginIframe;
     iframe.id = id;
     iframe.src = src;
     document.body.appendChild(iframe);
+
+    iframe.is_closing = false;
     return iframe;
 }
 
@@ -17,10 +23,11 @@ export async function load_iframe_plugin(
     ifd: BackendIframePluginData,
     plugin_ident: PluginIdentWithInstanceId,
     kernel: KernelEnvironment,
-    el: HTMLDivElement
+    el: HTMLDivElement,
+    close_cb: () => void | Promise<void> = () => { }
 ): Promise<Error | {
     ref: PluginReference,
-    iframe: HTMLIFrameElement
+    iframe: PluginIframe
 }> {
     const iframe = createIframe(
         "plugin_" + plugin_ident.instance_id,
@@ -51,8 +58,9 @@ export async function load_iframe_plugin(
         plugin_ident,
         kernel,
         () => {
-            // res.connection.close();
-            // iframe.remove();
+            res.connection.close();
+            iframe.remove();
+            close_cb()
         }
     );
 
@@ -63,7 +71,7 @@ export async function load_iframe_plugin(
     }
 }
 
-export function registerChannelKernel(iframe: HTMLIFrameElement) {
+export function registerChannelKernel(iframe: PluginIframe) {
     return Effect.async<{
         send: (data: Json) => void,
         receive: (cb: (data: Json) => void) => void
@@ -90,7 +98,7 @@ export function registerChannelKernel(iframe: HTMLIFrameElement) {
     );
 }
 
-export function registerPortChannelKernel(iframe: HTMLIFrameElement) {
+export function registerPortChannelKernel(iframe: PluginIframe) {
     return Effect.async<{
         send: (data: Json) => void,
         receive: (cb: (data: Json) => void) => void
@@ -117,7 +125,7 @@ export function registerPortChannelKernel(iframe: HTMLIFrameElement) {
     );
 }
 
-function add_port_init_event_listener(iframe: HTMLIFrameElement, iframePort: MessagePort, resume: () => void) {
+function add_port_init_event_listener(iframe: PluginIframe, iframePort: MessagePort, resume: () => void) {
     const listener = (event: MessageEvent) => {
         if (
             event.source === iframe.contentWindow &&

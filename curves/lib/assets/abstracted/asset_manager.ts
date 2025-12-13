@@ -1,6 +1,6 @@
 import { uuidv4, JsonPatch } from "pc-messaging-kernel/utils";
 import { FileContents, FileReference, RecencyToken, RegexString } from "../types/base";
-import { active_subscriptions, atomic, batch, create, delete_by_meta_data, delete_file, description, filter_by_meta_data, force_set_meta_data, force_write, patch, read_file, set_meta_data, subscribe, unsubscribe, update_meta_data, write } from "./base_methods";
+import { active_subscriptions, perform_atomic, perform_batch, create, delete_by_meta_data, delete_file, description, filter_by_meta_data, force_set_meta_data, force_write, patch, read_file, set_meta_data, subscribe, unsubscribe, update_meta_data, write } from "./base_methods";
 import { FrontendOperation } from "../library";
 import { SubscriptionCallback } from "../exports";
 import { PluginEnvironment } from "pc-messaging-kernel/pluginSystem";
@@ -78,10 +78,18 @@ export class AssetManager {
     }
 
     atomic(operations: FrontendOperation[]) {
-        return atomic(this.env, operations);
+        return perform_atomic(this.env, operations);
     }
 
     batch(operations: FrontendOperation[]) {
-        return batch(this.env, operations);
+        return perform_atomic(this.env, operations);
+    }
+
+    manage_file() {
+        throw new Error("unimplemented")
+    }
+
+    create_managed_file() {
+        throw new Error("unimplemented")
     }
 }

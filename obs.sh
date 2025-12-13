@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SESSION="martin_logging"
-DIR="$HOME/work/Martin"   # fixed directory
+DIR="$HOME/work/PinsAndCurves"   # fixed directory
 
 # check if the session already exists
 tmux has-session -t "$SESSION" 2>/dev/null

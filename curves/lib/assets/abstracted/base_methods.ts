@@ -2,7 +2,7 @@ import { active_subscriptions_operation, atomic_operation, create_operation, del
 import { FileContents, FileReference, RecencyToken } from "../types/base";
 import { batch_operation, FrontendOperation, write_operation } from "../types/frontend_operations";
 import { process_operations_plugin } from "../plugin/process_operation";
-import { FrontendOperationResult } from "../types/frontend_result";
+import { FrontendAtomicOperationResult, FrontendOperationError, FrontendOperationResult } from "../types/frontend_result";
 import { SubscriptionCallback } from "../types/frontend_file_events";
 import { JsonPatch, uuidv4 } from "pc-messaging-kernel/utils";
 import { PluginEnvironment } from "pc-messaging-kernel/pluginSystem";
@@ -72,7 +72,6 @@ export function force_write(env: PluginEnvironment, fr: FileReference, contents:
         )
     )
 }
-
 
 export function patch(env: PluginEnvironment, fr: FileReference, token: RecencyToken, patches: JsonPatch.Operation[]) {
     return new Error("Unimplemented");
@@ -159,18 +158,19 @@ export function active_subscriptions(env: PluginEnvironment) {
 }
 
 
-export function atomic<OPS extends FrontendOperation[]>(env: PluginEnvironment, operations: OPS) {
+export function perform_atomic<OPS extends readonly FrontendOperation[]>(env: PluginEnvironment, operations: OPS):
+    Promise<
+        FrontendOperationError | FrontendAtomicOperationResult<{
+            [K in keyof OPS]: FrontendOperationResult<OPS[K]>
+        }>
+    > {
     return perform_base_operation(
         env,
         atomic_operation(operations)
-    ) as Promise<
-        FrontendOperationResult<
-            SFrontendOperation<"ATOMIC_OPERATION"> & { ops: OPS }
-        >
-    >
+    ) as any;
 }
 
-export function batch<OPS extends FrontendOperation[]>(env: PluginEnvironment, operations: OPS) {
+export function perform_batch<OPS extends readonly FrontendOperation[]>(env: PluginEnvironment, operations: OPS) {
     return perform_base_operation(
         env,
         batch_operation(operations)

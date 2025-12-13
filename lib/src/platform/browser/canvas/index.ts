@@ -1,13 +1,13 @@
-import { KernelEnvironment, PluginIdent, PluginIdentWithInstanceId, PluginReference } from "../../../pluginSystem/exports";
+import { KernelEnvironment, PluginIdentWithInstanceId, PluginReference } from "../../../pluginSystem/exports";
 import { is_iframe_plugin } from "../../types";
 import { getAPIPlugins } from "../get_plugins/api";
-import { load_iframe_plugin } from "./load_iframe_plugin";
+import { load_iframe_plugin, PluginIframe } from "./load_iframe_plugin";
 import { terminate_plugin } from "./remove_iframe_plugin_cb";
 import { sync_iframe_position } from "./sync_iframe_position";
 
 export type CanvasDescr = {
     type: "iframe",
-    iframe: HTMLIFrameElement,
+    iframe: PluginIframe,
     ref: PluginReference
 } | {
     type: "local"
@@ -21,6 +21,7 @@ export abstract class Canvas {
     private _descr: CanvasDescr = {
         type: "local"
     };
+
     get descr(): CanvasDescr {
         return this._descr;
     }
@@ -47,7 +48,8 @@ export abstract class Canvas {
             plugin.plugin_descr,
             ident,
             kernel,
-            this.element()
+            this.element(),
+            this.clear.bind(this)
         );
 
         if (res instanceof Error) {
@@ -85,12 +87,22 @@ export abstract class Canvas {
         this.element().innerHTML = "";
     }
 
-    static async close_iframe_plugin(iframe: HTMLIFrameElement, pref: PluginReference) {
+    private on_iframe_plugin_close_cb: () => void | Promise<void> = () => {
+        this.clear();
+    };
+    on_iframe_plugin_close(cb: () => void | Promise<void>) {
+        this.on_iframe_plugin_close_cb = cb;
+    }
+
+    static async close_iframe_plugin(iframe: PluginIframe, pref: PluginReference) {
         muteIframe(iframe);
         iframe.style.width = "0";
         iframe.style.height = "0";
         iframe.style.top = "0";
         iframe.style.left = "0"
+        if (pref.is_removed) {
+            return;
+        }
         await terminate_plugin(pref);
         iframe.remove();
     }
@@ -125,7 +137,7 @@ function createDisposabelDiv(): HTMLDivElement {
     return hiddenDiv;
 }
 
-function muteIframe(iframe: HTMLIFrameElement) {
+function muteIframe(iframe: PluginIframe) {
     try {
         iframe.setAttribute("muted", "");
         // iframe.setAttribute("allow", "autoplay; encrypted-media");

@@ -9,13 +9,13 @@ async function startServer(port = 3001) {
 
     app.post("/available_iframe_plugins", async (req, res) => {
         const plugins: PluginServer.PluginsAPIData = [{
-            root_url: `http://localhost:3002/main_react`,
+            root_url: `http://localhost:3002/color_display`,
             type: "iframe",
-            name: "main_react"
+            name: "color_display"
         }, {
-            root_url: `http://localhost:3002/side_react`,
+            root_url: `http://localhost:3002/color_picker`,
             type: "iframe",
-            name: "side_react"
+            name: "color_picker"
         }];
 
         return res.json(plugins);

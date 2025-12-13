@@ -163,16 +163,16 @@ export type FrontendOperation =
 
 export type SFrontendOperation<T extends FrontendOperation["type"]> = FrontendOperation & { type: T }
 
-export function atomic_operation(ops: FrontendOperation[]): SFrontendOperation<"ATOMIC_OPERATION"> {
+export function atomic_operation(ops: readonly FrontendOperation[]): SFrontendOperation<"ATOMIC_OPERATION"> {
     return {
         type: "ATOMIC_OPERATION",
-        ops
+        ops: ops as any
     };
 }
 
-export function batch_operation(ops: FrontendOperation[]): SFrontendOperation<"BATCH_OPERATION"> {
+export function batch_operation(ops: readonly FrontendOperation[]): SFrontendOperation<"BATCH_OPERATION"> {
     return {
         type: "BATCH_OPERATION",
-        ops
+        ops: ops as any
     };
 }

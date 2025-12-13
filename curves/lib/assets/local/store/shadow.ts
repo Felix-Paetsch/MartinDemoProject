@@ -25,24 +25,35 @@ import { is_system_file } from "../system_files";
 import { Address } from "pc-messaging-kernel/messaging";
 import { Subscription } from "./subscription";
 
+type HistoryEntry = {
+    op: SBackendOperation<
+        | "CREATE"
+        | "WRITE"
+        | "DELETE"
+        | "UPDATE_META_DATA"
+        | "PATCH"
+        | "SET_META_DATA"
+    >;
+    rt: RecencyToken;
+} | {
+    op: SBackendOperation<
+        | "CREATE"
+        | "FORCE_WRITE"
+        | "FORCE_SET_META_DATA"
+        | "FORCE_UPDATE_META_DATA"
+        | "DELETE_BY_META_DATA"
+    >;
+} | {
+    op: SBackendOperation<
+        | "UNSUBSCRIBE_OP"
+        | "SUBSCRIBE_OP"
+    >;
+    address: Address;
+}
+
+
 export class ShadowStore extends AssetStore {
-    private operationHistory: {
-        op: SBackendOperation<
-            | "CREATE"
-            | "WRITE"
-            | "FORCE_WRITE"
-            | "DELETE"
-            | "PATCH"
-            | "SET_META_DATA"
-            | "FORCE_SET_META_DATA"
-            | "FORCE_UPDATE_META_DATA"
-            | "UPDATE_META_DATA"
-            | "DELETE_BY_META_DATA"
-            | "SUBSCRIBE_OP"
-            | "UNSUBSCRIBE_OP"
-        >;
-        rt: RecencyToken;
-    }[] = [];
+    private operationHistory: HistoryEntry[] = [];
 
     private deleted_files: FileReference[] = [];
     private writtenFilesStore: { [key: string]: File } = {};
@@ -52,16 +63,23 @@ export class ShadowStore extends AssetStore {
     }
 
     commit() {
-        for (const { op, rt } of this.operationHistory) {
+        for (const op_history_entry of this.operationHistory) {
+            const saturated_op_history_entry: {
+                op: typeof op_history_entry.op,
+                rt?: RecencyToken,
+                address?: Address
+            } = op_history_entry;
+            const op = saturated_op_history_entry.op;
+
             switch (op.type) {
                 case "CREATE":
-                    this.store.create_file(op, rt);
+                    this.store.create_file(op, saturated_op_history_entry.rt!);
                     break;
                 case "WRITE":
-                    this.store.write(op, rt);
+                    this.store.write(op, saturated_op_history_entry.rt!);
                     break;
                 case "FORCE_WRITE":
-                    this.store.force_write(op, rt);
+                    this.store.force_write(op, saturated_op_history_entry.rt!);
                     break;
                 case "DELETE":
                     this.store.delete(op);
@@ -70,21 +88,30 @@ export class ShadowStore extends AssetStore {
                     this.store.patch(op);
                     break;
                 case "SET_META_DATA":
-                    this.store.set_meta_data(op, rt);
+                    this.store.set_meta_data(op, saturated_op_history_entry.rt!);
                     break;
                 case "FORCE_SET_META_DATA":
-                    this.store.force_set_meta_data(op, rt);
+                    this.store.force_set_meta_data(op, saturated_op_history_entry.rt!);
                     break;
                 case "UPDATE_META_DATA":
-                    this.store.update_meta_data(op, rt);
+                    this.store.update_meta_data(op, saturated_op_history_entry.rt!);
                     break;
                 case "FORCE_UPDATE_META_DATA":
-                    this.store.force_update_meta_data(op, rt);
+                    this.store.force_update_meta_data(op, saturated_op_history_entry.rt!);
                     break;
                 case "DELETE_BY_META_DATA":
                     this.store.delete_by_meta_data(op);
                     break;
+                case "SUBSCRIBE_OP":
+                    this.store.subscribe(saturated_op_history_entry.address!, op);
+                    break;
+                case "UNSUBSCRIBE_OP":
+                    this.store.unsubscribe(saturated_op_history_entry.address!, op);
+                    break;
+                default:
+                    throw new Error(`Unexpected case: ${(op as any).type}`);
             }
+
         }
 
         this.operationHistory = [];
@@ -421,6 +448,11 @@ export class ShadowStore extends AssetStore {
             fr: op.fr
         });
 
+        this.operationHistory.push({
+            op: op,
+            address: addr
+        });
+
         return {
             key: op.key,
             fr: op.fr
@@ -431,9 +463,16 @@ export class ShadowStore extends AssetStore {
         this.unsubscriptions.push(op);
         this.operationHistory.push({
             op,
-            rt: ""
+            address: addr
         });
+
         this.subscriptions = this.subscriptions.filter(s => s.fr === op.fr && s.key === op.key);
+
+        this.operationHistory.push({
+            op: op,
+            address: addr
+        });
+
         return null;
     }
 

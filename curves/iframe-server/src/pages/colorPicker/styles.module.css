@@ -1,0 +1,12 @@
+.picker {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+}
+
+.flash {
+    box-shadow: 0 0 10px 3px yellow;
+}

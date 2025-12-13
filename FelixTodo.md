@@ -6,7 +6,12 @@
 3. SOmetimes message channel issues
 
 
+X. Go through all files:
 
+Bug:
+A -> B plugin request
+B tries to register event listener, it goes to A, but it doesnt have anything registered => Error
+[Both are iframes]
 
 
 
