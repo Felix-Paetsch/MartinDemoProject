@@ -4,7 +4,7 @@ import { add_library, addressToMessagePartner } from "./index";
 import { call_local_library_method, call_plugin_method } from "./protocol";
 import { PluginEnvironment, PluginMessagePartner } from "../../pluginSystem/exports";
 
-const local_library_mps: Map<Address, PluginMessagePartner> = new Map();
+const local_library_mps: Map<Address.StringSerializedAddress, Promise<PluginMessagePartner | Error>> = new Map();
 
 export default abstract class Library {
     constructor(
@@ -16,19 +16,26 @@ export default abstract class Library {
     async call_library_method(
         env: PluginEnvironment, name: string, ...args: Json[]
     ): Promise<Json | Error> {
-        let mp = local_library_mps.get(env.address) || new Error();
+        let mp: Error | PluginMessagePartner = new Error("No plugin initialized yet");
+
+        const existing_mp_promise = local_library_mps.get(env.address.toString());
+        if (existing_mp_promise) {
+            mp = await existing_mp_promise;
+        }
+
         if (mp instanceof Error) {
-            mp = await env.get_plugin({
+            const new_mp_promise = env.get_plugin({
                 "name": "local_library"
             });
 
+            local_library_mps.set(env.address.toString(), new_mp_promise);
+            mp = await new_mp_promise;
             if (mp instanceof Error) {
                 return mp;
             }
 
-            local_library_mps.set(env.address, mp);
             env.on_remove(() => {
-                local_library_mps.delete(env.address);
+                local_library_mps.delete(env.address.toString());
             })
         }
 

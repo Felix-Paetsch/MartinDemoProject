@@ -76,7 +76,6 @@ async function set_up_color_picker_stuff(env: PluginEnvironment) {
         });
 
         mp.on_remove(() => {
-            console.log("THIS should be triggered");
             colorPickers = colorPickers.filter(p => p.color_id !== id);
         });
 

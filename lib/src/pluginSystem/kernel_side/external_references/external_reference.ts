@@ -1,7 +1,8 @@
-import { Address, Middleware } from "../../../messaging/exports";
+import { Address } from "../../../messaging/exports";
 
 export class ExternalReference {
     public is_removed = false;
+    public is_removing = false;
 
     constructor(
         readonly address: Address,
@@ -9,7 +10,10 @@ export class ExternalReference {
     ) { }
 
     async remove() {
-        if (this.is_removed) return Promise.resolve();
-        return await this.on_remove();
+        if (this.is_removing) return Promise.resolve();
+        this.is_removing = true;
+        await this.on_remove();
+        this.is_removing = false;
+        this.is_removed = true;
     }
 }

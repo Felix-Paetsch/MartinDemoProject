@@ -50,11 +50,11 @@ export class MessagePartner {
         return this.pair_uuid + (this.pair_distinguisher ? "_0" : "_1");
     }
 
-    remove() {
+    async remove() {
         if (this.is_removed) return;
-        this._send_message_partner_message("remove");
-        this.removed = true;
+        await this._send_message_partner_message("remove");
         this._internal_remove();
+
     }
     async _internal_remove(trigger_callback = true) {
         if (this.is_removed) return;

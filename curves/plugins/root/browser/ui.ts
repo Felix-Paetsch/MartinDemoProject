@@ -3,7 +3,6 @@ import { BrowserPlatform } from "pc-messaging-kernel/platform";
 export class Canvas extends BrowserPlatform.Canvas {
     private wrapper: HTMLDivElement;
     private content: HTMLDivElement;
-    private on_close_cb: () => void | Promise<void> = () => { };
 
     constructor() {
         super();
@@ -24,15 +23,9 @@ export class Canvas extends BrowserPlatform.Canvas {
         this.on_iframe_plugin_close(this.onClose.bind(this));
     }
 
-    on_close(cb: () => void | Promise<void>) {
-        this.on_close_cb = cb;
-    }
-
     private async onClose(): Promise<void> {
-        console.log("ONN CLOOOSE");
         this.clear();
         this.wrapper.remove();
-        this.on_close_cb();
     }
 
     element(): HTMLDivElement {

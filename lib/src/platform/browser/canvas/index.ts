@@ -44,12 +44,16 @@ export abstract class Canvas {
             return new Error("Kernel not found");
         }
 
+        let iframe: HTMLIFrameElement | null = null as any;
         const res = await load_iframe_plugin(
             plugin.plugin_descr,
             ident,
             kernel,
             this.element(),
-            this.clear.bind(this)
+            (() => {
+                const closed_externally = iframe?.getAttribute("x-iframe-closed-externally") === "true";
+                this.on_iframe_plugin_close_cb(closed_externally)
+            }).bind(this)
         );
 
         if (res instanceof Error) {
@@ -87,10 +91,8 @@ export abstract class Canvas {
         this.element().innerHTML = "";
     }
 
-    private on_iframe_plugin_close_cb: () => void | Promise<void> = () => {
-        this.clear();
-    };
-    on_iframe_plugin_close(cb: () => void | Promise<void>) {
+    private on_iframe_plugin_close_cb: (plugin_closed_externally: Boolean) => void | Promise<void> = () => { };
+    on_iframe_plugin_close(cb: (plugin_closed_extenally: Boolean) => void | Promise<void>) {
         this.on_iframe_plugin_close_cb = cb;
     }
 
@@ -103,6 +105,8 @@ export abstract class Canvas {
         if (pref.is_removed) {
             return;
         }
+
+        iframe.setAttribute("x-iframe-closed-externally", "true");
         await terminate_plugin(pref);
         iframe.remove();
     }

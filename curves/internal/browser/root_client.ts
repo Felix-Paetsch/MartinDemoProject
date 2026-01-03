@@ -1,3 +1,4 @@
+import { get_environment } from "pc-messaging-kernel/utils";
 import { Failure, Logging } from "pc-messaging-kernel/messaging";
 import { BrowserPlatform } from "pc-messaging-kernel/platform";
 import {
@@ -5,7 +6,7 @@ import {
 } from "pc-messaging-kernel/pluginSystem"
 
 Failure.setAnomalyHandler((e) => {
-    console.log("Throwing Anomaly", e.message)
+    console.log("Throwing Anomaly", e.message, "AnomKernel", get_environment())
     throw e;
 });
 
@@ -17,7 +18,7 @@ Failure.setErrorHandler((e) => {
 Logging.process_logs_using(
     (log) => {
         Logging.LogInvestigator.GlobalInstance().collect_logs()(log);
-        // Logging.log_to_url("http://localhost:3005/logging")(log);
+        Logging.log_to_url("http://localhost:3005/logging")(log);
     }
 )
 class KernelImpl extends BrowserPlatform.KernelEnvironment {
