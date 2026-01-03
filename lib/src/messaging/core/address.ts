@@ -1,4 +1,4 @@
-import { Effect, Equal, Hash, Schema } from "effect";
+import { Effect, Schema } from "effect";
 import { uuidv4, type UUID } from "../../utils/uuid";
 import { deserializeAddressFromUnknown } from "../../shared_effect/schemas";
 import { SerializedAddressSchema } from "../../shared_effect/schemas";
@@ -16,7 +16,7 @@ export namespace Address {
     export type StringSerializedAddress = `${string}::${string}`
 }
 
-export class Address implements Equal.Equal {
+export class Address {
     private _process_id: Address.ProcessID;
     private _port: Address.PortID;
     static process_id: Address.ProcessID = uuidv4();
@@ -53,23 +53,8 @@ export class Address implements Equal.Equal {
         return new Address(process_id, "*");
     }
 
-    [Equal.symbol](that: Equal.Equal): boolean {
-        if (that instanceof Address) {
-            return (
-                Equal.equals(this.process_id, that.process_id) &&
-                Equal.equals(this.port, that.port)
-            )
-        }
-
-        return false
-    }
-
     equals(that: Address): boolean {
-        return Equal.equals(this, that);
-    }
-
-    [Hash.symbol](): number {
-        return Hash.hash(this.port)
+        return this.toString() == that.toString()
     }
 
     serialize(): Address.SerializedAddress {

@@ -1,4 +1,4 @@
-import { Effect, Equal, flow } from "effect";
+import { Effect } from "effect";
 import { Address } from "./address";
 import { SerializedMessage, TransmittableMessage } from "./message";
 import { isMiddlewareContinue, Middleware } from "./middleware";
@@ -135,8 +135,8 @@ export class Connection {
         }
 
         if (Connection.open_connections.some(c => {
-            return Equal.equals(c.address, this.address)
-                || Equal.equals(this.address, Address.local_address)
+            return c.address.equals(this.address)
+                || this.address.equals(Address.local_address)
         })) {
             return new AddressAlreadyInUseError({ address: this.address });
         }

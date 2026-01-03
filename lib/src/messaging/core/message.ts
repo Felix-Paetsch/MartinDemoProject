@@ -62,3 +62,9 @@ export type LocalMessageData = {
 
     [key: string]: any;
 }
+
+export namespace Message {
+    export type SerializedMessage = string;
+    export type TransmittableMessage = Message | SerializedMessage;
+}
+

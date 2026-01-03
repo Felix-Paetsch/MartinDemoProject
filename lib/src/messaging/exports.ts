@@ -1,4 +1,4 @@
-import { Connection } from "./core/connection";
+import { Connection, PortConnection } from "./core/connection";
 import Port from "./core/port";
 
 import * as MW from "./core/middleware";
@@ -66,6 +66,7 @@ export * as Logging from "./debug/logging/exports"
 
 export {
     Connection,
+    PortConnection,
     Port,
     Address,
     LocalAddress,

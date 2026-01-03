@@ -1,4 +1,4 @@
-import { Effect, Equal, Schema } from "effect";
+import { Effect, Schema } from "effect";
 import { Address } from "./address";
 import { applyMiddlewareEffect } from "./middleware";
 import { TransmittableMessage } from "./message";
@@ -7,8 +7,7 @@ import { HandledError, IgnoreHandled } from "./errors/errors";
 import { AddressNotFound, MessageDeserializationError } from "./errors/anomalies";
 import { MessageFromString } from "../../shared_effect/schemas";
 import { global_middleware } from "./middleware";
-import { Connection } from "./connection";
-import { UnblockFiberDeamon } from "../../utils/promisify";
+import { Connection } from "./connection"; import { UnblockFiberDeamon } from "../../utils/promisify";
 
 export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, never> = Effect.fn("send")(function* (msg: TransmittableMessage) {
     // console.log(msg);
@@ -35,7 +34,7 @@ export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, 
         return yield* Effect.void;
     }
 
-    let outConnection = Connection.open_connections.find(c => Equal.equals(c.address, msg.target));
+    let outConnection = Connection.open_connections.find(c => c.address.equals(msg.target));
     if (!outConnection) {
         const generic_target = msg.target.as_generic();
         outConnection = Connection.open_connections.find(c => {

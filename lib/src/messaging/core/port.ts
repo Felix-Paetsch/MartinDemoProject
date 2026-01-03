@@ -4,7 +4,7 @@ import { Message, TransmittableMessage } from "./message";
 import { Effect, Schema } from "effect";
 import { AddressAlreadyInUseError, HandledError, IgnoreHandled, PortClosedError } from "./errors/errors";
 import { applyMiddlewareEffect } from "./middleware";
-import { Connection, PortConnection } from "./connection";
+import { PortConnection } from "./connection";
 import { MessageFromString } from "../../shared_effect/schemas";
 import { callbackToEffect } from "./errors/main";
 import { MessageDeserializationError, reportAnomaly } from "./errors/anomalies";
@@ -18,7 +18,6 @@ export default class Port {
     readonly connection: PortConnection;
 
     static readonly open_ports: Port[] = [];
-    static readonly connection: Connection;
 
     constructor(
         portID: Address.PortID,

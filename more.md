@@ -7,4 +7,5 @@ Speed improvements
 - look at each level seperately (ideally verify again they have a nice, workable API)
 - Demo / Testing Environments for each Layer
 
-
+CleanUp:
+Cleaner Export files for subfolders, e.g. the middleware subfolder

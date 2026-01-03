@@ -20,7 +20,7 @@ fi
 
 CMD="$1"
 DELAY="${2:-1}"              # default 1s
-WATCH_DIR="./src"
+WATCH_DIR="./" #  "./src"
 PROJECT_ROOT="$(dirname "$(dirname "$0")")"  # go up one level from ./scripts/
 cd "$PROJECT_ROOT"
 

@@ -234,8 +234,43 @@ export default class MessageChannel {
 
     static middleware = processMessageChannelMessage;
 
-// Compare Effect stream API
-// Compare Socket API
-// Errors
-// Direct responses to messages - and there errors (?)
+    static localChannels = (
+        port1: Port,
+        port2: Port,
+        cfg: MessageChannelConfigEncoded = {}
+    ) => {
+        const id = uuidv4();
+
+        return [
+            new MessageChannel(
+                port2.address,
+                port1,
+                [],
+                {
+                    id,
+                    remotely_initialized: true,
+                    target_processor: "no_processor"
+                },
+                cfg
+            ),
+            new MessageChannel(
+                port1.address,
+                port2,
+                [],
+                {
+                    id,
+                    remotely_initialized: true,
+                    target_processor: "no_processor"
+                },
+                cfg
+            )
+        ]
+    }
+
+    // Compare Effect stream API
+    // Compare Socket API
+    // Errors
+    // Direct responses to messages - and there errors (?)
 }
+
+MessageChannel.register_processor("no_processor", () => { });
