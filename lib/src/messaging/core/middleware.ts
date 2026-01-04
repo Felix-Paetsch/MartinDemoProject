@@ -2,8 +2,9 @@ import { Message } from "./message";
 
 export const MiddlewareInterrupt = true as const;
 export const MiddlewareContinue = false as const;
-type MiddlewareInterrupt = typeof MiddlewareInterrupt;
-type MiddlewareContinue = typeof MiddlewareContinue | void | undefined;
+
+export type MiddlewareInterrupt = typeof MiddlewareInterrupt;
+export type MiddlewareContinue = typeof MiddlewareContinue | void | undefined;
 export type MiddlewarePassthrough = MiddlewareInterrupt | MiddlewareContinue;
 
 export function isMiddlewareInterrupt(interrupt: MiddlewarePassthrough): interrupt is MiddlewareInterrupt {

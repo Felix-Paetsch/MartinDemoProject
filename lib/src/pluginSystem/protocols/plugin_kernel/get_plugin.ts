@@ -3,7 +3,7 @@ import { KernelEnvironment } from "../../kernel_side/kernel_env";
 import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_side/plugin_ident";
 import MessageChannel from "../../../middleware/channel";
 import { Schema } from "effect";
-import { AddressFromString } from "../../../shared_effect/schemas";
+import { MessagingEffect } from "../../../messaging/exports";
 import PluginMessagePartner from "../../plugin_side/message_partner/plugin_message_partner";
 import { uuidv4 } from "../../../utils/uuid";
 import { deferred } from "../../../utils/defer";
@@ -11,7 +11,7 @@ import { protocol } from "../../../middleware/protocol";
 import { Transcoder } from "../../../utils/exports";
 
 const pluginData = Schema.Struct({
-    address: AddressFromString,
+    address: MessagingEffect.Address.AddressFromString,
     plugin_ident: pluginIdentWithInstanceIdSchema
 })
 
@@ -42,7 +42,7 @@ export const get_plugin_from_kernel = protocol(
 const getPluginMessageData = Schema.Struct({
     mp_uuid: Schema.String,
     plugin_ident: pluginIdentWithInstanceIdSchema,
-    address: AddressFromString
+    address: MessagingEffect.Address.AddressFromString
 });
 
 export const make_plugin_message_partner = protocol(

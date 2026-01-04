@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { MessageChannelInitializationContextWithIdSchema } from "./context";
 import { MessageChannelConfigSchema } from "./config";
-import { AddressFromString } from "../../../shared_effect/schemas";
+import { MessagingEffect } from "../../../messaging/exports";
 
 export const OpenChannelBodySchema = Schema.Struct({
     type: Schema.Literal("OpenNewChannel"),
@@ -10,7 +10,7 @@ export const OpenChannelBodySchema = Schema.Struct({
         remotely_initialized: Schema.Literal(true)
     }),
     config: MessageChannelConfigSchema,
-    address: AddressFromString
+    address: MessagingEffect.Address.AddressFromString
 });
 
 export const SendMessageBodySchema = Schema.Struct({

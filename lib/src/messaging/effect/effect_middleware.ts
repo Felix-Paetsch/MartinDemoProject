@@ -1,11 +1,11 @@
 import { Effect, flow } from "effect";
-import { Middleware } from "../messaging/exports";
-import { CallbackError } from "../messaging/core/errors/errors";
-import { Message } from "../messaging/core/message";
+import { Message } from "../core/message";
+import { MiddlewarePassthrough, Middleware } from "../core/middleware";
+import { CallbackError } from "../../utils/exports";
 
-export type MiddlewareEffect = (message: Message) => Effect.Effect<Middleware.Passthrough, CallbackError>;
+export type MiddlewareEffect = (message: Message) => Effect.Effect<MiddlewarePassthrough, CallbackError>;
 
-export const EffectToMiddleware = (middleware: MiddlewareEffect): Middleware.Middleware => {
+export const EffectToMiddleware = (middleware: MiddlewareEffect): Middleware => {
     return flow(middleware, (e) => {
         let err: CallbackError | undefined;
         return e.pipe(

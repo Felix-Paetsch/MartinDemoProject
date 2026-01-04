@@ -3,7 +3,12 @@ import Port from "./core/port";
 
 import * as MW from "./core/middleware";
 import { Message } from "./core/message";
-import { Address, LocalAddress } from "./core/address";
+import {
+    Address,
+    LocalAddress,
+    AddressNotFoundError as ANFE,
+    AddressDeserializationError as ADE
+} from "./core/address";
 import type { Json } from "../utils/json";
 
 import * as Errors from "./core/errors/errors";
@@ -25,11 +30,11 @@ export namespace Failure {
     export const PortClosedError = Errors.PortClosedError;
     export const AddressAlreadyInUseError = Errors.AddressAlreadyInUseError;
     export const CallbackError = Errors.CallbackError;
-    export const AddressNotFound = Anomalies.AddressNotFound;
+    export const AddressNotFoundError = ANFE;
     export const MessageSerializationError = Anomalies.MessageSerializationError;
     export const MessageDeserializationError = Anomalies.MessageDeserializationError;
     export const MessageChannelTransmissionError = Anomalies.MessageChannelTransmissionError;
-    export const AddressDeserializationError = Anomalies.AddressDeserializationError;
+    export const AddressDeserializationError = ADE;
     export const ReportedAnomaly = Anomalies.ReportedAnomaly;
 
     export type ErrorHandler = ErrorsMain.ErrorHandler;
@@ -73,3 +78,5 @@ export {
     Message,
     type Json
 };
+
+export * as MessagingEffect from "./effect/exports";

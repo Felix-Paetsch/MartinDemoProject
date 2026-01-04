@@ -1,16 +1,8 @@
 import { Data, Effect } from "effect";
-import { Address } from "../address";
+import { AddressDeserializationError, AddressNotFoundError } from "../address";
 import { Message, SerializedMessage, TransmittableMessage } from "../message";
 import { applyAnomalyHandler } from "./main";
-import { MiddlewareInterrupt, MiddlewarePassthrough } from "../middleware";
-
-export class AddressNotFound extends Error {
-    constructor(readonly address: Address) {
-        super(`Address: '${address.toString()}' not found`, {
-            cause: address
-        });
-    }
-}
+import { MiddlewareInterrupt } from "../middleware";
 
 export class MessageSerializationError extends Data.TaggedError("MessageSerializationError")<{
     msg: Message
@@ -32,21 +24,22 @@ export class MessageChannelTransmissionError extends Data.TaggedError("MessageCh
     }
 }
 
-export class AddressDeserializationError extends Error {
-    constructor(readonly wanna_be_address: any) {
-        super("Address not deserializable", { cause: wanna_be_address });
-    }
-}
-
 export class ReportedAnomaly extends Error {
     constructor(readonly anomaly: Error) {
+        // @ts-ignore
         super(anomaly.message, { cause: anomaly });
     }
 }
 
-export type Anomaly = AddressNotFound | MessageSerializationError | MessageDeserializationError | MessageChannelTransmissionError | ReportedAnomaly;
+export type Anomaly =
+    AddressNotFoundError
+    | AddressDeserializationError
+    | MessageSerializationError
+    | MessageDeserializationError
+    | MessageChannelTransmissionError
+    | ReportedAnomaly;
 
-export function reportAnomaly(anomaly: Error): typeof MiddlewareInterrupt {
+export function reportAnomaly(anomaly: Error): MiddlewareInterrupt {
     applyAnomalyHandler(new ReportedAnomaly(anomaly)).pipe(Effect.runPromise);
     return MiddlewareInterrupt;
 }

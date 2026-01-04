@@ -1,19 +1,21 @@
 import { Effect, Schema } from "effect";
 import { uuidv4, type UUID } from "../../utils/uuid";
-import { deserializeAddressFromUnknown } from "../../shared_effect/schemas";
-import { SerializedAddressSchema } from "../../shared_effect/schemas";
-import { AddressDeserializationError } from "./errors/anomalies";
+import { deserializeAddressFromUnknown, SerializedAddressSchema } from "../effect/address";
 
-export namespace Address {
-    export type ProcessID = UUID;
-    export type PortID = UUID;
+export class AddressNotFoundError extends Error {
+    constructor(readonly address: Address) {
+        // @ts-ignore
+        super(`Address: '${address.toString()}' not found`, {
+            cause: address
+        });
+    }
+}
 
-    export type SerializedAddress = {
-        process_id: ProcessID;
-        port: PortID;
-    };
-
-    export type StringSerializedAddress = `${string}::${string}`
+export class AddressDeserializationError extends Error {
+    constructor(readonly wanna_be_address: any) {
+        // @ts-ignore
+        super("Address not deserializable", { cause: wanna_be_address });
+    }
 }
 
 export class Address {
@@ -76,9 +78,7 @@ export class Address {
     }
 
     static deserialize(serialized: Address.SerializedAddress): Address {
-        return deserializeAddressFromUnknown(serialized).pipe(
-            Effect.runSync
-        );
+        return new Address(serialized.process_id, serialized.port);
     }
 
     static deserialize_unknown(serialized: unknown): Address | AddressDeserializationError {
@@ -127,4 +127,16 @@ export class LocalAddress extends Address {
     static set_process_id(process_id: Address.ProcessID): void {
         Address.set_process_id(process_id);
     }
+}
+
+export namespace Address {
+    export type ProcessID = UUID;
+    export type PortID = UUID;
+
+    export type SerializedAddress = {
+        process_id: ProcessID;
+        port: PortID;
+    };
+
+    export type StringSerializedAddress = `${string}::${string}`
 }

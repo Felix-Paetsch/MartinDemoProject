@@ -3,7 +3,6 @@ import { uuidv4 } from "../../utils/uuid";
 import { Message } from "../core/message";
 import { Middleware, MiddlewareContinue } from "../core/middleware";
 import { Json } from "../../utils/json";
-import { EffectToMiddleware } from "../../shared_effect/effect_middleware";
 
 export type annotateCustomData = (message: Message, current_annotation: Record<string, Json>) => Record<string, Json>;
 export function annotation_middleware(
@@ -52,4 +51,7 @@ function computeStandardData(
         at_source: message.local_data.at_source,
         direction: message.local_data.direction,
     }
+}
+function EffectToMiddleware(arg0: (this: unknown, message: Message) => Effect.Effect<false, never, never>): Middleware {
+    throw new Error("Function not implemented.");
 }

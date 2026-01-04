@@ -1,7 +1,7 @@
 import { Effect, Schema } from "effect";
 import { Address } from "./address";
 import { MessageDeserializationError, MessageSerializationError } from "./errors/anomalies";
-import { MessageFromString } from "../../shared_effect/schemas";
+import { MessageFromString } from "../effect/message";
 
 export type SerializedMessage = string;
 export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
@@ -23,16 +23,15 @@ export class Message {
         }
     }
 
-    serialize(): SerializedMessage {
-        // Errors: MessageSerializationError
+    serialize(): SerializedMessage | MessageSerializationError {
         return Schema.encode(MessageFromString)(this).pipe(
             Effect.mapError(() => new MessageSerializationError({ msg: this })),
+            Effect.merge,
             Effect.runSync
         );
     }
 
     static deserialize(serialized: SerializedMessage): Message {
-        // Errors: MessageDeserializationError
         return Schema.decode(MessageFromString)(serialized)
             .pipe(
                 Effect.mapError(() => new MessageDeserializationError({ serialized })),

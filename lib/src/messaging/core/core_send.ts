@@ -1,9 +1,8 @@
-import { Address } from "./address";
+import { Address, AddressNotFoundError } from "./address";
 import { applyMiddleware } from "./middleware";
 import { Message, TransmittableMessage } from "./message";
 import { isMiddlewareInterrupt } from "./middleware";
 import { HandledError } from "./errors/errors";
-import { AddressNotFound } from "./errors/anomalies";
 import { global_middleware } from "./middleware";
 import { Connection } from "./connection";
 
@@ -38,7 +37,7 @@ export async function core_send(msg: TransmittableMessage) {
         });
     }
     if (!outConnection) {
-        return HandledError.handleAnomary(new AddressNotFound(msg.target));
+        return HandledError.handleAnomary(new AddressNotFoundError(msg.target));
     }
 
     outConnection.__send_message(msg);
