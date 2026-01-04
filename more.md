@@ -1,6 +1,14 @@
 Speed improvements
 
-- Effect Alternative
+We are done (for now) looking at messaging.
+Next we look at protocols/channels
+=> Reduce back and forth
+
+THen look at loading iframes
+
+- Alternative for effect (de)serialization/validation?
+
+
 - Less messages back and forth
 - Metric for speed (?)
 - Less (de)serialization

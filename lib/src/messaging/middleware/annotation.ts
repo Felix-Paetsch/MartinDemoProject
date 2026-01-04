@@ -5,18 +5,18 @@ import { Middleware, MiddlewareContinue } from "../core/middleware";
 import { Json } from "../../utils/json";
 
 export type annotateCustomData = (message: Message, current_annotation: Record<string, Json>) => Record<string, Json>;
-
 export function annotation_middleware(
     computeData?: annotateCustomData
 ): Middleware {
-    return async (message: Message) => {
-        const oldAnnotation: Record<string, any> = Schema.decodeUnknownSync(
+    return (message: Message) => {
+        const oldAnnotation: Record<string, any> = Schema.decodeUnknown(
             Schema.Record({
                 key: Schema.String,
                 value: Schema.Any
             })
         )(message.meta_data.annotation).pipe(
-            Effect.orElse(() => Effect.succeed({} as Record<string, Json>))
+            Effect.orElse(() => Effect.succeed({} as Record<string, Json>)),
+            Effect.runSync
         );
 
         const computed_standard_data = computeStandardData(message, oldAnnotation);
