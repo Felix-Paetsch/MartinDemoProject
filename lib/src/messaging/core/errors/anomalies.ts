@@ -1,4 +1,3 @@
-import { Effect } from "effect";
 import { AddressDeserializationError } from "../address";
 import { MessageDeserializationError, MessageSerializationError } from "../message";
 import { applyAnomalyHandler } from "./main";
@@ -20,6 +19,6 @@ export type Anomaly =
     | ReportedAnomaly;
 
 export function reportAnomaly(anomaly: Error): MiddlewareInterrupt {
-    applyAnomalyHandler(new ReportedAnomaly(anomaly)).pipe(Effect.runPromise);
+    applyAnomalyHandler(new ReportedAnomaly(anomaly));
     return MiddlewareInterrupt;
 }

@@ -13,7 +13,6 @@ import { AddressAlreadyInUseError as AAIUE } from "./core/connection";
 
 import type { Json } from "../utils/json";
 
-import * as Errors from "./core/errors/errors";
 import * as Anomalies from "./core/errors/anomalies";
 import * as ErrorsMain from "./core/errors/main";
 
@@ -26,13 +25,11 @@ import * as amw from "./middleware/annotation";
 import { PortClosedError as _PortClosedError } from "./core/port";
 
 export namespace Failure {
-    export type MessagingError = Errors.MessagingError;
     export type Anomaly = Anomalies.Anomaly;
     export const reportAnomaly = Anomalies.reportAnomaly;
 
     export const PortClosedError = _PortClosedError;
     export const AddressAlreadyInUseError = AAIUE;
-    export const CallbackError = Errors.CallbackError;
     export const AddressNotFoundError = ANFE;
     export const MessageSerializationError = MSE;
     export const MessageDeserializationError = MDE;

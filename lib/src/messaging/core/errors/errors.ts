@@ -1,20 +1,19 @@
-import { Data, Effect } from "effect";
+import { Effect } from "effect";
 import { Anomaly } from "./anomalies";
 import { applyAnomalyHandler, applyErrorHandler } from "./main";
 
-export class HandledError extends Data.TaggedError("HandledError")<{
-    error: Error;
-}> {
+export class HandledError extends Error {
     constructor(readonly error: Error) {
-        super({ error });
+        // @ts-ignore
+        super(error.name, { error });
     }
 
-    static async handleException(error: MessagingError | HandledError) {
+    static async handleException(error: Error | HandledError) {
         if (error instanceof HandledError) {
             return error;
         }
-        await applyErrorHandler(error).pipe(Effect.runPromise);
-        return new HandledError(error.error);
+        await applyErrorHandler(error);
+        return new HandledError(error);
     }
 
     static async handleAnomary(error: Anomaly | HandledError) {
@@ -22,7 +21,7 @@ export class HandledError extends Data.TaggedError("HandledError")<{
             return error;
         }
 
-        await applyAnomalyHandler(error).pipe(Effect.runPromise);
+        await applyAnomalyHandler(error);
         return new HandledError(error);
     }
 }
@@ -37,9 +36,3 @@ export function IgnoreHandled<R, S, T>(e: Effect.Effect<R, S, T>): Effect.Effect
         })
     )
 }
-
-export class CallbackError extends Data.TaggedError("CallbackError")<{
-    error: Error
-}> { }
-
-export type MessagingError = CallbackError;
