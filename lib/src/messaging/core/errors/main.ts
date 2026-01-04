@@ -33,9 +33,16 @@ export const callbackToEffectFnUnhandled = <R, Args extends any[]>(cb: (...args:
 ).pipe(
     Effect.withSpan("callbackToEffectUnhandled"))
 
-export const callbackToEffectFn = flow(callbackToEffectFnUnhandled, (cb) => flow(cb, Effect.catchAll(HandledError.handleE)))
+export const callbackToEffectFn = flow(
+    callbackToEffectFnUnhandled,
+    (cb) => flow(
+        cb, Effect.catchAll((e) => Effect.fail(HandledError.handleException(e)))
+    )
+)
 export const callbackToEffectUnhandled = <R, Args extends any[]>(cb: (...args: Args) => R | Promise<R>, ...args: Args) => callbackToEffectFnUnhandled(cb)(...args);
-export const callbackToEffect = flow(callbackToEffectUnhandled, Effect.catchAll(HandledError.handleE))
+export const callbackToEffect = flow(
+    callbackToEffectUnhandled, Effect.catchAll((e) => Effect.fail(HandledError.handleException(e)))
+)
 
 export type AnomalyHandler = (e: Anomaly) => void | Promise<void>;
 

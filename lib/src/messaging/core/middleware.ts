@@ -1,6 +1,4 @@
-import { Effect } from "effect";
 import { Message } from "./message";
-import { callbackToEffect } from "./errors/main";
 
 export const MiddlewareInterrupt = true as const;
 export const MiddlewareContinue = false as const;
@@ -26,14 +24,13 @@ export const clear_global_middleware = (): void => {
     global_middleware.length = 0;
 }
 
-export const applyMiddlewareEffect =
-    Effect.fn("applyMiddlewareEffect")(function* (msg: Message, middlewares: Middleware[]) {
-        for (const middleware of middlewares) {
-            const interrupt = yield* callbackToEffect(middleware, msg);
-            if (isMiddlewareInterrupt(interrupt)) {
-                return MiddlewareInterrupt;
-            }
+export async function applyMiddleware(msg: Message, middlewares: Middleware[]) {
+    for (const middleware of middlewares) {
+        const interrupt = await middleware(msg);
+        if (isMiddlewareInterrupt(interrupt)) {
+            return MiddlewareInterrupt;
         }
+    }
 
-        return MiddlewareContinue;
-    }); 
+    return MiddlewareContinue;
+}

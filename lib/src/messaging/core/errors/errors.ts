@@ -11,24 +11,21 @@ export class HandledError extends Data.TaggedError("HandledError")<{
         super({ error });
     }
 
-    static handleE(error: MessagingError | HandledError) {
-        return Effect.gen(function* () {
-            if (error instanceof HandledError) {
-                return yield* Effect.fail(error);
-            }
-            yield* applyErrorHandler(error);
-            return yield* Effect.fail(new HandledError(error.error));
-        })
+    static async handleException(error: MessagingError | HandledError) {
+        if (error instanceof HandledError) {
+            return error;
+        }
+        await applyErrorHandler(error).pipe(Effect.runPromise);
+        return new HandledError(error.error);
     }
 
-    static handleA(error: Anomaly | HandledError) {
-        return Effect.gen(function* () {
-            if (error instanceof HandledError) {
-                return yield* Effect.fail(error);
-            }
-            yield* applyAnomalyHandler(error);
-            return yield* Effect.fail(new HandledError(error));
-        })
+    static async handleAnomary(error: Anomaly | HandledError) {
+        if (error instanceof HandledError) {
+            return error;
+        }
+
+        await applyAnomalyHandler(error).pipe(Effect.runPromise);
+        return new HandledError(error);
     }
 }
 

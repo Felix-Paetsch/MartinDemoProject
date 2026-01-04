@@ -1,15 +1,10 @@
-import { Effect } from "effect";
 import { Address } from "./address";
-import { SerializedMessage, TransmittableMessage } from "./message";
-import { isMiddlewareContinue, Middleware } from "./middleware";
+import { Message, SerializedMessage, TransmittableMessage } from "./message";
+import { applyMiddleware, isMiddlewareContinue, Middleware } from "./middleware";
 import Port from "./port";
-import { AddressAlreadyInUseError, HandledError, IgnoreHandled } from "./errors/errors";
-import { MessageDeserializationError, MessageSerializationError } from "./errors/anomalies";
-import { Schema } from "effect";
-import { MessageFromString } from "../../shared_effect/schemas";
-import { applyMiddlewareEffect } from "./middleware";
+import { AddressAlreadyInUseError, HandledError } from "./errors/errors";
+import { MessageSerializationError } from "./errors/anomalies";
 import { core_send } from "./core_send";
-import { callbackToEffect } from "./errors/main";
 import { promisify } from "../../utils/exports";
 
 function TransmittableMessageToSerializedMessage(msg: TransmittableMessage) {
@@ -45,9 +40,8 @@ export class Connection {
             (m: TransmittableMessage) => {
                 const res = TransmittableMessageToSerializedMessage(m);
                 if (res instanceof Error) {
-                    return HandledError.handleA(res as MessageSerializationError).pipe(
-                        Effect.runPromise
-                    );
+                    HandledError.handleAnomary(res as MessageSerializationError);
+                    return;
                 }
                 return send(res as string);
             }
@@ -67,9 +61,7 @@ export class Connection {
             (m: TransmittableMessage) => {
                 const res = TransmittableMessageToSerializedMessage(m);
                 if (res instanceof Error) {
-                    HandledError.handleA(res as MessageSerializationError).pipe(
-                        Effect.runPromise
-                    );
+                    HandledError.handleAnomary(res as MessageSerializationError);
                     return Promise.resolve();
                 }
                 return promisify(send)(res as string);
@@ -81,36 +73,26 @@ export class Connection {
         this._send = send;
     }
 
-    receive(msg: TransmittableMessage): Promise<void> {
-        const e: Effect.Effect<void> = Effect.gen(this, function* (this: Connection) {
-            if (this.is_closed()) {
-                return;
-            }
+    async receive(msg: TransmittableMessage): Promise<void> {
+        if (this.is_closed()) {
+            return;
+        }
 
-            if (typeof msg === "string") {
-                msg = yield* Schema.decode(MessageFromString)(msg).pipe(
-                    Effect.mapError(e => new MessageDeserializationError({ serialized: msg as string }))
-                );
-            }
+        if (typeof msg === "string") {
+            msg = Message.deserialize(msg);
+        }
 
-            Object.assign(msg.local_data, {
-                at_target: false,
-                at_source: false,
-                current_address: this.address,
-                direction: "incomming"
-            });
+        Object.assign(msg.local_data, {
+            at_target: false,
+            at_source: false,
+            current_address: this.address,
+            direction: "incomming"
+        });
 
-            const res = yield* applyMiddlewareEffect(msg, this.middleware);
-            if (isMiddlewareContinue(res)) {
-                yield* core_send(msg);
-            }
-        }).pipe(
-            Effect.catchAll(HandledError.handleA),
-            IgnoreHandled
-        );
-        return e.pipe(
-            Effect.runPromise
-        )
+        const res = await applyMiddleware(msg, this.middleware);
+        if (isMiddlewareContinue(res)) {
+            await core_send(msg);
+        }
     }
 
     use_middleware(middleware: Middleware): void {
@@ -149,28 +131,21 @@ export class Connection {
     is_open(): boolean { return this._is_open; }
     is_closed(): boolean { return !this._is_open; }
 
-    __send_message(msg: TransmittableMessage): Effect.Effect<void, never, never> {
-        return Effect.gen(this, function* (this: Connection) {
-            if (typeof msg === "string") {
-                msg = yield* Schema.decode(MessageFromString)(msg).pipe(
-                    Effect.mapError(e => new MessageDeserializationError({ serialized: msg as string }))
-                );
-            }
+    async __send_message(msg: TransmittableMessage): Promise<void> {
+        if (typeof msg === "string") {
+            msg = Message.deserialize(msg);
+        }
 
-            Object.assign(msg.local_data, {
-                at_target: false,
-                at_source: false,
-                current_address: this.address,
-                direction: "outgoing"
-            });
-            const res = yield* applyMiddlewareEffect(msg, this.middleware);
-            if (isMiddlewareContinue(res)) {
-                yield* callbackToEffect(this._send, msg);
-            }
-        }).pipe(
-            Effect.catchAll(HandledError.handleA),
-            IgnoreHandled
-        );
+        Object.assign(msg.local_data, {
+            at_target: false,
+            at_source: false,
+            current_address: this.address,
+            direction: "outgoing"
+        });
+        const res = await applyMiddleware(msg, this.middleware);
+        if (isMiddlewareContinue(res)) {
+            await this._send(msg);
+        }
     }
 }
 

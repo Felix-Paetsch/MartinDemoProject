@@ -1,13 +1,9 @@
 import { Address, LocalAddress } from "./address";
-import { isMiddlewareContinue, Middleware, MiddlewareInterrupt } from "./middleware";
+import { applyMiddleware, isMiddlewareContinue, Middleware } from "./middleware";
 import { Message, TransmittableMessage } from "./message";
-import { Effect, Schema } from "effect";
-import { AddressAlreadyInUseError, HandledError, IgnoreHandled, PortClosedError } from "./errors/errors";
-import { applyMiddlewareEffect } from "./middleware";
+import { AddressAlreadyInUseError, PortClosedError } from "./errors/errors";
 import { PortConnection } from "./connection";
-import { MessageFromString } from "../../shared_effect/schemas";
-import { callbackToEffect } from "./errors/main";
-import { MessageDeserializationError, reportAnomaly } from "./errors/anomalies";
+import { reportAnomaly } from "./errors/anomalies";
 import { core_send } from "./core_send";
 
 export default class Port {
@@ -95,40 +91,28 @@ export default class Port {
             direction: "outgoing"
         });
 
-        const interrupt = await applyMiddlewareEffect(msg, this.middleware).pipe(
-            Effect.catchAll(() => Effect.succeed(MiddlewareInterrupt)),
-            Effect.runPromise
-        );
-
+        const interrupt = await applyMiddleware(msg, this.middleware);
         if (isMiddlewareContinue(interrupt)) {
-            await core_send(msg).pipe(Effect.runPromise);
+            await core_send(msg);
         }
     }
 
-    __receive_message(msg: TransmittableMessage): Promise<void> {
-        const e: Effect.Effect<void> = Effect.gen(this, function* (this: Port) {
-            if (typeof msg === "string") {
-                msg = yield* Schema.decode(MessageFromString)(msg).pipe(
-                    Effect.mapError(e => new MessageDeserializationError({ serialized: msg as string }))
-                );
-            }
+    async __receive_message(msg: TransmittableMessage): Promise<void> {
+        if (typeof msg === "string") {
+            msg = Message.deserialize(msg)
+        }
 
-            Object.assign(msg.local_data, {
-                at_target: true,
-                at_source: false,
-                current_address: this.address,
-                direction: "incoming"
-            });
-            const res = yield* applyMiddlewareEffect(msg, this.middleware);
-            if (isMiddlewareContinue(res)) {
-                yield* callbackToEffect(this._receive, msg);
-            }
-        }).pipe(
-            Effect.catchAll(HandledError.handleA),
-            IgnoreHandled
-        );
-        return e.pipe(
-            Effect.runPromise
-        )
+        Object.assign(msg.local_data, {
+            at_target: true,
+            at_source: false,
+            current_address: this.address,
+            direction: "incoming"
+        });
+
+        const res = await applyMiddleware(msg, this.middleware);
+
+        if (isMiddlewareContinue(res)) {
+            await this._receive(msg);
+        }
     }
 }

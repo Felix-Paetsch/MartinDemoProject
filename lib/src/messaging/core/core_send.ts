@@ -1,25 +1,15 @@
-import { Effect, Schema } from "effect";
 import { Address } from "./address";
-import { applyMiddlewareEffect } from "./middleware";
-import { TransmittableMessage } from "./message";
+import { applyMiddleware } from "./middleware";
+import { Message, TransmittableMessage } from "./message";
 import { isMiddlewareInterrupt } from "./middleware";
-import { HandledError, IgnoreHandled } from "./errors/errors";
-import { AddressNotFound, MessageDeserializationError } from "./errors/anomalies";
-import { MessageFromString } from "../../shared_effect/schemas";
+import { HandledError } from "./errors/errors";
+import { AddressNotFound } from "./errors/anomalies";
 import { global_middleware } from "./middleware";
-import { Connection } from "./connection"; import { UnblockFiberDeamon } from "../../utils/promisify";
+import { Connection } from "./connection";
 
-export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, never> = Effect.fn("send")(function* (msg: TransmittableMessage) {
-    // console.log(msg);
-
+export async function core_send(msg: TransmittableMessage) {
     if (typeof msg === "string") {
-        msg = yield* Schema.decode(MessageFromString)(msg)
-            .pipe(
-                Effect.mapError(() => new MessageDeserializationError({
-                    serialized: msg as string
-                })),
-                Effect.catchAll(HandledError.handleA)
-            );
+        msg = Message.deserialize(msg);
     }
 
     Object.assign(msg.local_data, {
@@ -29,9 +19,10 @@ export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, 
         direction: "at_kernel"
     });
 
-    const interrupt = yield* applyMiddlewareEffect(msg, global_middleware);
+    const interrupt = await applyMiddleware(msg, global_middleware);
+
     if (isMiddlewareInterrupt(interrupt)) {
-        return yield* Effect.void;
+        return;
     }
 
     let outConnection = Connection.open_connections.find(c => c.address.equals(msg.target));
@@ -47,11 +38,8 @@ export const core_send: (m: TransmittableMessage) => Effect.Effect<void, never, 
         });
     }
     if (!outConnection) {
-        return yield* HandledError.handleA(new AddressNotFound(msg.target));
+        return HandledError.handleAnomary(new AddressNotFound(msg.target));
     }
 
-    yield* outConnection.__send_message(msg);
-}, e => e.pipe(
-    IgnoreHandled,
-    UnblockFiberDeamon
-))
+    outConnection.__send_message(msg);
+}
