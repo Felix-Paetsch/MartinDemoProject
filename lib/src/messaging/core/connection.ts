@@ -1,20 +1,17 @@
 import { Address } from "./address";
-import { Message, SerializedMessage, TransmittableMessage } from "./message";
+import { Message, MessageSerializationError, SerializedMessage, TransmittableMessage } from "./message";
 import { applyMiddleware, isMiddlewareContinue, Middleware } from "./middleware";
 import Port from "./port";
-import { AddressAlreadyInUseError, HandledError } from "./errors/errors";
-import { MessageSerializationError } from "./errors/anomalies";
+import { HandledError } from "./errors/errors";
 import { core_send } from "./core_send";
 import { promisify } from "../../utils/exports";
 
-function TransmittableMessageToSerializedMessage(msg: TransmittableMessage) {
-    if (typeof msg === "string") {
-        return msg;
-    }
-    try {
-        return msg.serialize();
-    } catch (e) {
-        return e as MessageSerializationError;
+export class AddressAlreadyInUseError extends Error {
+    constructor(readonly address: Address) {
+        // @ts-ignore
+        super(`Address: '${address.toString()}' not found`, {
+            cause: address
+        });
     }
 }
 
@@ -38,7 +35,7 @@ export class Connection {
         return new Connection(
             address,
             (m: TransmittableMessage) => {
-                const res = TransmittableMessageToSerializedMessage(m);
+                const res = Message.TransmittableMessageToSerializedMessage(m);
                 if (res instanceof Error) {
                     HandledError.handleAnomary(res as MessageSerializationError);
                     return;
@@ -59,7 +56,7 @@ export class Connection {
     update_send(send: (msg: SerializedMessage) => void | Promise<void>): void {
         this.update_sendTM(
             (m: TransmittableMessage) => {
-                const res = TransmittableMessageToSerializedMessage(m);
+                const res = Message.TransmittableMessageToSerializedMessage(m);
                 if (res instanceof Error) {
                     HandledError.handleAnomary(res as MessageSerializationError);
                     return Promise.resolve();
@@ -120,7 +117,7 @@ export class Connection {
             return c.address.equals(this.address)
                 || this.address.equals(Address.local_address)
         })) {
-            return new AddressAlreadyInUseError({ address: this.address });
+            return new AddressAlreadyInUseError(this.address);
         }
 
         this._is_open = true;

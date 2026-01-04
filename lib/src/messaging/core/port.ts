@@ -1,10 +1,16 @@
 import { Address, LocalAddress } from "./address";
 import { applyMiddleware, isMiddlewareContinue, Middleware } from "./middleware";
 import { Message, TransmittableMessage } from "./message";
-import { AddressAlreadyInUseError, PortClosedError } from "./errors/errors";
-import { PortConnection } from "./connection";
+import { AddressAlreadyInUseError, PortConnection } from "./connection";
 import { reportAnomaly } from "./errors/anomalies";
 import { core_send } from "./core_send";
+
+export class PortClosedError extends Error {
+    constructor(port: Port) {
+        // @ts-ignore
+        super(`The port ${port.address.toString()} is closed`, { cause: port })
+    }
+}
 
 export default class Port {
     private _portID: Address.PortID;
@@ -80,7 +86,7 @@ export default class Port {
 
     async send(msg: Message): Promise<void> {
         if (this.is_closed()) {
-            reportAnomaly(new PortClosedError({ port: this }));
+            reportAnomaly(new PortClosedError(this));
             return;
         }
 

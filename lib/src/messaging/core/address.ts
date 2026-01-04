@@ -2,15 +2,6 @@ import { Effect, Schema } from "effect";
 import { uuidv4, type UUID } from "../../utils/uuid";
 import { deserializeAddressFromUnknown, SerializedAddressSchema } from "../effect/address";
 
-export class AddressNotFoundError extends Error {
-    constructor(readonly address: Address) {
-        // @ts-ignore
-        super(`Address: '${address.toString()}' not found`, {
-            cause: address
-        });
-    }
-}
-
 export class AddressDeserializationError extends Error {
     constructor(readonly wanna_be_address: any) {
         // @ts-ignore

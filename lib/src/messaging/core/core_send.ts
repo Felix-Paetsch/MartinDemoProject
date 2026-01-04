@@ -1,10 +1,20 @@
-import { Address, AddressNotFoundError } from "./address";
+import { Address } from "./address";
 import { applyMiddleware } from "./middleware";
 import { Message, TransmittableMessage } from "./message";
 import { isMiddlewareInterrupt } from "./middleware";
 import { HandledError } from "./errors/errors";
 import { global_middleware } from "./middleware";
 import { Connection } from "./connection";
+
+export class AddressNotFoundError extends Error {
+    constructor(readonly address: Address) {
+        // @ts-ignore
+        super(`Address: '${address.toString()}' not found`, {
+            cause: address
+        });
+    }
+}
+
 
 export async function core_send(msg: TransmittableMessage) {
     if (typeof msg === "string") {

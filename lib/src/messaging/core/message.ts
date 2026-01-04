@@ -1,10 +1,23 @@
 import { Effect, Schema } from "effect";
 import { Address } from "./address";
-import { MessageDeserializationError, MessageSerializationError } from "./errors/anomalies";
 import { MessageFromString } from "../effect/message";
 
 export type SerializedMessage = string;
 export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+
+export class MessageSerializationError extends Error {
+    constructor(readonly msg: Message) {
+        // @ts-ignore
+        super("Message not serializable", { cause: msg });
+    }
+}
+
+export class MessageDeserializationError extends Error {
+    constructor(readonly serialized: SerializedMessage) {
+        // @ts-ignore
+        super("String not deserializable", { cause: serialized });
+    }
+}
 
 export class Message {
     public local_data: LocalMessageData;
@@ -25,7 +38,7 @@ export class Message {
 
     serialize(): SerializedMessage | MessageSerializationError {
         return Schema.encode(MessageFromString)(this).pipe(
-            Effect.mapError(() => new MessageSerializationError({ msg: this })),
+            Effect.mapError(() => new MessageSerializationError(this)),
             Effect.merge,
             Effect.runSync
         );
@@ -34,20 +47,31 @@ export class Message {
     static deserialize(serialized: SerializedMessage): Message {
         return Schema.decode(MessageFromString)(serialized)
             .pipe(
-                Effect.mapError(() => new MessageDeserializationError({ serialized })),
+                Effect.mapError(() => new MessageDeserializationError(serialized)),
                 Effect.runSync
             )
     }
 
     static deserialize_unknown(serialized: unknown): Message | MessageDeserializationError {
         return Schema.decodeUnknown(MessageFromString)(serialized).pipe(
-            Effect.mapError(() => new MessageDeserializationError({
-                serialized: typeof serialized === "string" ?
-                    serialized : serialized?.toString() ?? "<Input is not a string>"
-            })),
+            Effect.mapError(() => new MessageDeserializationError(typeof serialized === "string" ?
+                serialized : serialized?.toString() ?? "<Input is not a string>"
+            )),
             Effect.merge,
             Effect.runSync
         )
+    }
+
+
+    static TransmittableMessageToSerializedMessage(msg: TransmittableMessage) {
+        if (typeof msg === "string") {
+            return msg;
+        }
+        try {
+            return msg.serialize();
+        } catch (e) {
+            return e as MessageSerializationError;
+        }
     }
 }
 

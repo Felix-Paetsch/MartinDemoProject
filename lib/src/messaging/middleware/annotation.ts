@@ -3,12 +3,13 @@ import { uuidv4 } from "../../utils/uuid";
 import { Message } from "../core/message";
 import { Middleware, MiddlewareContinue } from "../core/middleware";
 import { Json } from "../../utils/json";
+import { MessagingEffect } from "../exports";
 
 export type annotateCustomData = (message: Message, current_annotation: Record<string, Json>) => Record<string, Json>;
 export function annotation_middleware(
     computeData?: annotateCustomData
 ): Middleware {
-    return EffectToMiddleware(
+    return MessagingEffect.EffectToMiddleware(
         Effect.fn("annotation_middleware")(
             function* (message: Message) {
                 const oldAnnotation = yield* Schema.decodeUnknown(
@@ -51,7 +52,4 @@ function computeStandardData(
         at_source: message.local_data.at_source,
         direction: message.local_data.direction,
     }
-}
-function EffectToMiddleware(arg0: (this: unknown, message: Message) => Effect.Effect<false, never, never>): Middleware {
-    throw new Error("Function not implemented.");
 }

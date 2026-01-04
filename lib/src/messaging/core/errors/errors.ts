@@ -1,8 +1,6 @@
 import { Data, Effect } from "effect";
 import { Anomaly } from "./anomalies";
 import { applyAnomalyHandler, applyErrorHandler } from "./main";
-import { Address } from "../address";
-import Port from "../port";
 
 export class HandledError extends Data.TaggedError("HandledError")<{
     error: Error;
@@ -39,14 +37,6 @@ export function IgnoreHandled<R, S, T>(e: Effect.Effect<R, S, T>): Effect.Effect
         })
     )
 }
-
-export class PortClosedError extends Data.TaggedError("PortClosedError")<{
-    port: Port
-}> { }
-
-export class AddressAlreadyInUseError extends Data.TaggedError("AddressAlreadyInUseError")<{
-    address: Address
-}> { }
 
 export class CallbackError extends Data.TaggedError("CallbackError")<{
     error: Error
