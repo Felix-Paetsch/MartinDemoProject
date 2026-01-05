@@ -1,9 +1,9 @@
 import { PluginEnvironment } from "../../plugin_side/plugin_environment";
 import { KernelEnvironment } from "../../kernel_side/kernel_env";
-import { PluginIdent, pluginIdentSchema, pluginIdentWithInstanceIdSchema } from "../../plugin_side/plugin_ident";
+import { PluginIdent, pluginIdentWithInstanceIdSchema } from "../../plugin_side/plugin_ident";
 import MessageChannel from "../../../middleware/channel";
 import { Schema } from "effect";
-import { MessagingEffect } from "../../../messaging/exports";
+import { Address, MessagingEffect } from "../../../messaging/exports";
 import PluginMessagePartner from "../../plugin_side/message_partner/plugin_message_partner";
 import { uuidv4 } from "../../../utils/uuid";
 import { deferred } from "../../../utils/defer";
@@ -41,7 +41,6 @@ export const get_plugin_from_kernel = protocol(
 const getPluginMessageData = Schema.Struct({
     mp_uuid: Schema.String,
     plugin_ident: pluginIdentWithInstanceIdSchema,
-    address: MessagingEffect.Address.AddressFromString
 });
 
 export const make_plugin_message_partner = protocol(
@@ -52,27 +51,45 @@ export const make_plugin_message_partner = protocol(
             Transcoder.SchemaTranscoder(getPluginMessageData),
         );
         if (res instanceof Error) return res;
+        mc.send("Ok");
         return new PluginMessagePartner(
             {
                 plugin_ident: res.plugin_ident,
-                address: res.address
+                address: mc.partner
             },
             true,
             res.mp_uuid,
             initiator
         );
     },
-    async (mc: MessageChannel, responder: PluginEnvironment, plugin_ident: typeof pluginData.Encoded) => {
+    async (
+        mc: MessageChannel, responder: PluginEnvironment, plugin_ident: PluginIdent
+    ) => {
+        const mp_uuid = uuidv4();
+        const plugin_ident_w_id = {
+            instance_id: uuidv4(),
+            ...plugin_ident
+        }
+
         const mp = new PluginMessagePartner(
             {
-                address: plugin_ident.address,
-                plugin_ident: plugin_ident.plugin_ident
+                address: mc.partner,
+                plugin_ident: plugin_ident_w_id
             },
             false,
-            data.mp_uuid,
+            mp_uuid,
             responder
         );
+
+        await mc.send_await_next_transcoded(
+            Transcoder.SchemaTranscoder(getPluginMessageData),
+            {
+                mp_uuid,
+                plugin_ident: plugin_ident_w_id
+            },
+            Transcoder.AnythingTranscoder
+        )
+
         await responder._trigger_on_plugin_request(mp).catch(e => e);
-        await mc.send("OK");
     }
 );

@@ -46,15 +46,17 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     }
 
     async get_plugin(plugin_ident: PluginIdent): Promise<PluginMessagePartner | Error> {
-        const res = await this.#execute_kernel_protocol(get_plugin_from_kernel, plugin_ident);
+        const res = await this.#execute_kernel_protocol(
+            get_plugin_from_kernel,
+            null,
+            plugin_ident
+        );
         if (res instanceof Error) return res;
         return await this.#execute_plugin_protocol(
             make_plugin_message_partner,
             res,
-            {
-                address: res.address,
-                plugin_ident: res.plugin_ident
-            }
+            null,
+            res.plugin_ident
         );
     }
     private on_plugin_request_cb: (mp: PluginMessagePartner) => Promise<void> = () => Promise.resolve();
@@ -84,44 +86,67 @@ export class PluginEnvironment extends EnvironmentCommunicator {
     }
 
     _send_kernel_message(msg: Json) {
-        this.#execute_kernel_protocol(send_kernel_message, msg);
+        this.#execute_kernel_protocol(
+            send_kernel_message,
+            null,
+            {
+                data: msg,
+                plugin: this.plugin_ident
+            }
+        );
     }
 
-    #execute_kernel_protocol<Result, InitData>(
+    #execute_kernel_protocol<
+        Result,
+        InitiatorInitData,
+        ResponderInitData extends Json
+    >(
         protocol: Protocol<
             PluginEnvironment,
             KernelEnvironment,
-            InitData,
+            InitiatorInitData,
+            ResponderInitData,
             null,
             Result
         >,
-        initData: InitData
+        initiatorInitData: InitiatorInitData,
+        responderInitData: ResponderInitData
     ): Promise<Result | Error> {
         return protocol(
             this,
             this.port,
             this.kernel_address,
-            initData,
+            initiatorInitData,
+            responderInitData,
             null
         );
     }
 
-    #execute_plugin_protocol<Result, InitData>(
+    #execute_plugin_protocol<
+        Result,
+        InitiatorInitData,
+        ResponderInitData extends Json
+    >(
         protocol: Protocol<
             PluginEnvironment,
             PluginEnvironment,
-            InitData,
+
+            InitiatorInitData,
+            ResponderInitData,
+
             PluginIdentWithInstanceId,
             Result
         >,
         pluginDescriptor: PluginDescriptor,
-        initData: InitData
+        initiatorInitData: InitiatorInitData,
+        responderInitData: ResponderInitData
     ): Promise<Result | Error> {
         return protocol(
             this,
             this.port,
             pluginDescriptor.address,
-            initData,
+            initiatorInitData,
+            responderInitData,
             pluginDescriptor.plugin_ident
         );
     }

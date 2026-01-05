@@ -8,11 +8,9 @@ import { KernelEnvironment } from "../../kernel_side/kernel_env";
 export type GetPluginError = Error;
 export const remove_plugin_protocol = protocol(
     "remove_plugin",
-    deferred(() => PluginEnvironment.findTranscoder),
     deferred(() => PluginEnvironment.find),
     async (mc: MessageChannel, initiator: PluginReference) => {
-        const next = await mc.next()
-        return next;
+        return await mc.next()
     },
     async (mc: MessageChannel, responder: PluginEnvironment) => {
         await responder._trigger_remove_environment();

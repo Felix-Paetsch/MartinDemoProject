@@ -10,15 +10,11 @@ const sendTranscoder = Transcoder.SchemaTranscoder(Schema.Struct({
 
 export const send_message = message_partner_protocol(
     "send_message_partner_message",
-    async (mc, mp, init_data: {
+    async () => { },
+    async (mc, responder, data: {
         type: string,
         data: Json
     }) => {
-        await mc.send_encoded(sendTranscoder, init_data);
-    },
-    async (mc, responder) => {
-        const data = await mc.next_decoded(sendTranscoder);
-        if (data instanceof Error) return;
         responder._trigger_on_message_partner_message(
             data.type,
             data.data
@@ -28,16 +24,13 @@ export const send_message = message_partner_protocol(
 
 export const send_message_acknowledge = message_partner_protocol(
     "send_message_partner_message_acknowledge",
-    async (mc, mp, init_data: {
+    async (mc, mp) => {
+        await mc.next();
+    },
+    async (mc, responder, data: {
         type: string,
         data: Json
     }) => {
-        await mc.send_encoded(sendTranscoder, init_data);
-        await mc.next();
-    },
-    async (mc, responder) => {
-        const data = await mc.next_decoded(sendTranscoder);
-        if (data instanceof Error) return;
         await responder._trigger_on_message_partner_message(
             data.type,
             data.data

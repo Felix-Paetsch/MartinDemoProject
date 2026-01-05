@@ -41,6 +41,7 @@ export default abstract class Library {
 
         return mp.run_message_partner_protocol(
             call_local_library_method,
+            null,
             {
                 lib: this.name,
                 method: name,
@@ -58,6 +59,7 @@ export default abstract class Library {
         if (!mp) return new Error("MessagePartner not found.");
         return mp.run_message_partner_protocol(
             call_plugin_method,
+            null,
             {
                 lib: this.name,
                 method: name,

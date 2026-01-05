@@ -37,7 +37,7 @@ export class MessagePartner {
     }
 
     async is_responsive(max_timeout = 3000): Promise<boolean> {
-        const res: boolean | Error = await this.run_message_partner_protocol(is_responsive, "");
+        const res: boolean | Error = await this.run_message_partner_protocol(is_responsive, null, null);
         if (res instanceof Error) return false;
         return res;
     }
@@ -109,23 +109,34 @@ export class MessagePartner {
 
     _send_message_partner_message(type: string, data: Json = "", acknowledge: boolean = false) {
         return this.run_message_partner_protocol(
-            acknowledge ? send_message_acknowledge : send_message, {
-            type,
-            data
-        });
+            acknowledge ? send_message_acknowledge : send_message,
+            null,
+            {
+                type,
+                data
+            }
+        );
     }
     run_message_partner_protocol<
         Responder extends MessagePartner,
-        InitData,
+        InitiatorInitData,
+        ResponderInitData extends Json,
         Result
     >(
-        protocol: MessagePartnerProtocol<this, Responder, InitData, Result>,
-        initData: InitData
+        protocol: MessagePartnerProtocol<
+            this,
+            Responder,
+            InitiatorInitData,
+            ResponderInitData,
+            Result
+        >,
+        initiator_init_data: InitiatorInitData,
+        responder_init_data: ResponderInitData
     ): Promise<Result | Error> {
         if (this.is_removed) return Promise.resolve(
             new Error("Message partner is removed")
         );
-        return protocol(this, initData);
+        return protocol(this, initiator_init_data, responder_init_data);
     }
 
     static find<S extends MessagePartner, T extends new (...args: any[]) => S>(type?: T):

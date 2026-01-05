@@ -14,20 +14,16 @@ const libResponseTranscoder = Transcoder.SchemaTranscoder(Schema.Any);
 
 export const call_local_library_method = message_partner_protocol(
     "local_library_call_lib_method",
-    async (mc, mp, init_data: {
+    async (mc, mp) => {
+        return await mc.next_decoded(
+            libResponseTranscoder
+        );
+    },
+    async (mc, responder, data: {
         lib: string,
         method: string,
         args: Json[]
     }) => {
-        return await mc.send_await_next_transcoded(
-            libRequestTranscoder, init_data,
-            libResponseTranscoder
-        );
-    },
-    async (mc, responder) => {
-        const data = await mc.next_decoded(libRequestTranscoder);
-        if (data instanceof Error) return;
-
         const lib = get_library(data.lib);
         if (!lib) return;
 
@@ -45,20 +41,16 @@ export const call_local_library_method = message_partner_protocol(
 
 export const call_plugin_method = message_partner_protocol(
     "local_library_call_plugin_method",
-    async (mc, mp, init_data: {
+    async (mc, mp) => {
+        return await mc.next_decoded(
+            libResponseTranscoder
+        );
+    },
+    async (mc, responder, data: {
         lib: string,
         method: string,
         args: Json[]
     }) => {
-        return await mc.send_await_next_transcoded(
-            libRequestTranscoder, init_data,
-            libResponseTranscoder
-        );
-    },
-    async (mc, responder) => {
-        const data = await mc.next_decoded(libRequestTranscoder);
-        if (data instanceof Error) return;
-
         const lib = get_library(data.lib);
         if (!lib) return;
 
