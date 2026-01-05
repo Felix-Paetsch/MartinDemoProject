@@ -72,7 +72,7 @@
         
         "typecheck_dev": "npx tsc -p tsconfig.dev.json --noEmit",
         "typecheck_watch_dev": "./scripts/watch_no_queue.sh 'npm run typecheck_dev' 5",
-        "watch:dev": "tsx watch ./dev/environments/middleware/connections.ts"
+        "watch:dev": "tsx watch ./dev/environments/middleware/protocol.ts"
     },
     "peerDependencies": {
         "effect": "^3.15.2",

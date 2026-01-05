@@ -1,21 +1,21 @@
 import { Schema } from "effect";
-import { Failure, Json } from "../../messaging/exports";
+import { Failure } from "../../messaging/exports";
 import MessageChannel, { MessageChannelProcessor } from "../channel";
 import { TransactionInitDataSchema } from ".";
-import { Transcoder } from "../../utils/transcoder";
 
 const ProtocolMap: Map<string, {
-    responderIdent: Transcoder<any, any>;
-    findResponder: (identData: unknown, mc: MessageChannel) => null | any;
-    respond: (mc: MessageChannel, responder: any) => Promise<void>;
+    findResponder: (identData: any, mc: MessageChannel) => null | any;
+    respond: (mc: MessageChannel, responder: any, with_data: any) => Promise<void>;
 }[]> = new Map();
 export type ProtocolError = Error;
 
-export function registerProtocol(name: string, pData: {
-    responderIdent: Transcoder<any, any>;
-    findResponder: (identData: any, mc: MessageChannel) => null | any;
-    respond: (mc: MessageChannel, responder: any) => Promise<void>;
-}) {
+export function registerProtocol(
+    name: string,
+    pData: {
+        findResponder: (identData: any, mc: MessageChannel) => null | any,
+        respond: (mc: MessageChannel, responder: any, with_data: any) => Promise<void>,
+    }
+) {
     if (!ProtocolMap.has(name)) {
         ProtocolMap.set(name, []);
     }
@@ -29,26 +29,16 @@ const protocolProcessor: MessageChannelProcessor = async (mc: MessageChannel) =>
         return;
     }
 
-    let ident: Json;
-    let name: string;
-    try {
-        const r = Schema.decodeUnknownSync(TransactionInitDataSchema)(msg);
-        ident = r.ident;
-        name = r.name;
-    } catch (e) {
-        Failure.reportAnomaly(new Error("Invoked protocol processor with invalid message"));
-        return;
-    }
+    const r = Schema.decodeUnknownSync(TransactionInitDataSchema)(msg);
+    const ident: any = r.ident;
+    const name: string = r.name;
+    const initData: any = r.initData;
 
     const protocols = ProtocolMap.get(name) || [];
     for (const protocol of protocols) {
-        const decodedIdent = await protocol.responderIdent.decode(ident);
-        if (decodedIdent instanceof Error) {
-            continue;
-        }
-        const responder = protocol.findResponder(decodedIdent, mc);
+        const responder = protocol.findResponder(ident, mc);
         if (responder) {
-            return await protocol.respond(mc, responder);
+            return await protocol.respond(mc, responder, initData);
         }
     }
 

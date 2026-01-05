@@ -21,6 +21,8 @@ export async function core_send(msg: TransmittableMessage) {
         msg = Message.deserialize(msg);
     }
 
+    console.log("Sending", msg.content);
+
     Object.assign(msg.local_data, {
         at_target: false,
         at_source: false,

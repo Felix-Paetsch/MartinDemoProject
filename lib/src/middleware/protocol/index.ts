@@ -3,45 +3,87 @@ import { Address, Port } from "../../messaging/exports";
 import MessageChannel from "../channel";
 import { registerProtocol } from "./respond";
 import { Json } from "../../utils/json";
-import { localizeErrorAsync, Transcoder } from "../../utils/exports";
+import { localizeErrorAsync } from "../../utils/exports";
 
 export const TransactionInitDataSchema = Schema.Struct({
     ident: Schema.Any,
     name: Schema.String,
+    initData: Schema.parseJson()
 });
 
-export type Protocol<Initiator, Responder, InitData, IdentData, Result> = (sender: Initiator, port: Port, target: Address, with_data: InitData, ident_data: IdentData) => Promise<Result | Error>;
+export type Protocol<
+    // The two objects communicationg
+    Initiator,
+    Responder,
+
+    // Their respective start data
+    InitiatorInitData,
+    ResponderInitData extends Json,
+
+    // The data needed to identify responder
+    IdentData extends Json,
+
+    // The result at the initiater side
+    Result
+> = (
+    // Own side thing communicating
+    sender: Initiator,
+    // The port to send the message through (applying port specific middleware)
+    // Default is fine
+    port: Port,
+    // Where to send to
+    target: Address,
+    // Init data
+    initiatorData: InitiatorInitData,
+    responderData: ResponderInitData,
+    // Data to find the object
+    ident_data: IdentData
+) => Promise<Result | Error>;
+
 export function protocol<
     Initiator,
     Responder,
-    IdentData,
-    EncodedIdentData extends Json,
-    InitData,
+
+    InitiatorInitData,
+    ResponderInitData extends Json,
+
+    IdentData extends Json,
+
     Result
 >(
     protocol_name: string,
-    responderIdent: Transcoder.Transcoder<IdentData, EncodedIdentData>,
     findResponder: (identData: IdentData, mc: MessageChannel) => null | Responder,
-    initiate: (mc: MessageChannel, initiator: Initiator, with_data: InitData) => Promise<Result>,
-    respond: (mc: MessageChannel, responder: Responder) => Promise<void>,
-): Protocol<Initiator, Responder, InitData, IdentData, Result> {
+    initiate: (mc: MessageChannel, initiator: Initiator, with_data: InitiatorInitData) => Promise<Result>,
+    respond: (mc: MessageChannel, responder: Responder, with_data: ResponderInitData) => Promise<void>,
+): Protocol<
+    Initiator,
+    Responder,
+    InitiatorInitData,
+    ResponderInitData,
+    IdentData,
+    Result
+> {
     registerProtocol(protocol_name, {
         findResponder,
-        responderIdent,
         respond,
     });
 
-    return async (sender: Initiator, port: Port, target: Address, with_data: InitData, ident_data: IdentData) => {
-        const data = await responderIdent.encode(ident_data);
-        if (data instanceof Error) return data;
-
+    return async (
+        sender: Initiator,
+        port: Port,
+        target: Address,
+        initiatorData: InitiatorInitData,
+        responderData: ResponderInitData,
+        ident_data: IdentData
+    ) => {
         const mc = new MessageChannel(
             target,
             port,
             [
                 Schema.encodeSync(TransactionInitDataSchema)({
-                    ident: data,
+                    ident: ident_data,
                     name: protocol_name,
+                    initData: responderData
                 })
             ],
             { target_processor: "protocol_processor" },
@@ -52,31 +94,54 @@ export function protocol<
             return new Error("Port is closed");
         }
 
-        return await localizeErrorAsync(initiate(mc, sender, with_data));
+        return await localizeErrorAsync(
+            initiate(mc, sender, initiatorData)
+        );
     }
 }
 
 export const NoResponder = "NoResponder" as const;
-export type NoResponderProtocol<Initiator, InitData, Result> = (
-    sender: Initiator, port: Port, target: Address, with_data: InitData
+export type NoResponderProtocol<
+    Initiator,
+    InitiatorInitData,
+    ResponderInitData extends Json,
+    Result
+> = (
+    sender: Initiator,
+    port: Port,
+    target: Address,
+    initiatorData: InitiatorInitData,
+    responderData: ResponderInitData,
 ) => Promise<Result | Error>;
 
 export function noResponderProtocol<
     Initiator,
-    InitData,
+    InitiatorInitData,
+    ResponderInitData extends Json,
     Result
 >(
     protocol_name: string,
-    initiate: (mc: MessageChannel, initiator: Initiator, with_data: InitData) => Promise<Result>,
-    respond: (mc: MessageChannel) => Promise<void>,
-): NoResponderProtocol<Initiator, InitData, Result> {
+    initiate: (mc: MessageChannel, initiator: Initiator, with_data: InitiatorInitData) => Promise<Result>,
+    respond: (mc: MessageChannel, with_data: ResponderInitData) => Promise<void>,
+): NoResponderProtocol<
+    Initiator,
+    InitiatorInitData,
+    ResponderInitData,
+    Result
+> {
     const p = protocol(
         protocol_name,
-        Transcoder.AnythingTranscoder,
         () => NoResponder,
         initiate,
-        respond
+        (mc: MessageChannel, responder: any, with_data: ResponderInitData) => respond(mc, with_data)
     )
-    return (sender: Initiator, port: Port, target: Address, with_data: InitData) =>
-        p(sender, port, target, with_data, null)
+
+    return (
+        sender: Initiator,
+        port: Port,
+        target: Address,
+        initiatorData: InitiatorInitData,
+        responderData: ResponderInitData,
+    ) =>
+        p(sender, port, target, initiatorData, responderData, null)
 }

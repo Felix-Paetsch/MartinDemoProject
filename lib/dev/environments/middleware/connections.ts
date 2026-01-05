@@ -1,7 +1,3 @@
-// TODO: (Maybe)
-// Try to remove effect as much as possible? Maybe not even? Still a good test case.
-
-
 import * as M from "../../../src/messaging/exports";
 import MessageChannel from "../../../src/middleware/channel/index";
 

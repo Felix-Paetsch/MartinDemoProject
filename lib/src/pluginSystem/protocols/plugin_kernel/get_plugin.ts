@@ -12,24 +12,23 @@ import { Transcoder } from "../../../utils/exports";
 
 const pluginData = Schema.Struct({
     address: MessagingEffect.Address.AddressFromString,
-    plugin_ident: pluginIdentWithInstanceIdSchema
+    plugin_ident: pluginIdentWithInstanceIdSchema,
 })
 
 export type GetPluginError = Error;
 export const get_plugin_from_kernel = protocol(
     "get_plugin_from_kernel",
-    KernelEnvironment.findTranscoder,
     KernelEnvironment.find,
-    async (mc: MessageChannel, initiator: PluginEnvironment, plugin_ident: PluginIdent) => {
-        return await mc.send_await_next_transcoded(
-            Transcoder.SchemaTranscoder(pluginIdentSchema),
-            plugin_ident,
+    async (mc: MessageChannel, initiator: PluginEnvironment) => {
+        return await mc.next_decoded(
             Transcoder.SchemaTranscoder(pluginData)
         );
     },
-    async (mc: MessageChannel, responder: KernelEnvironment) => {
-        const plugin_ident = await mc.next_decoded(Transcoder.SchemaTranscoder(pluginIdentSchema));
-        if (plugin_ident instanceof Error) return;
+    async (
+        mc: MessageChannel,
+        responder: KernelEnvironment,
+        plugin_ident: PluginIdent
+    ) => {
         const plugin = await responder.get_plugin(plugin_ident);
         if (plugin instanceof Error) return;
         await mc.send_encoded(Transcoder.SchemaTranscoder(pluginData), {
@@ -47,34 +46,27 @@ const getPluginMessageData = Schema.Struct({
 
 export const make_plugin_message_partner = protocol(
     "create_plugin_message_partner",
-    deferred(() => PluginEnvironment.findTranscoder),
     deferred(() => PluginEnvironment.find),
-    async (mc: MessageChannel, initiator: PluginEnvironment, plugin_ident: typeof pluginData.Type) => {
-        const mp_uuid = uuidv4();
-        const res = await mc.send_await_next_transcoded(
+    async (mc: MessageChannel, initiator: PluginEnvironment) => {
+        const res = await mc.next_decoded(
             Transcoder.SchemaTranscoder(getPluginMessageData),
-            {
-                mp_uuid,
-                plugin_ident: initiator.plugin_ident,
-                address: initiator.address
-            },
-            Transcoder.AnythingTranscoder
         );
         if (res instanceof Error) return res;
         return new PluginMessagePartner(
-            plugin_ident,
+            {
+                plugin_ident: res.plugin_ident,
+                address: res.address
+            },
             true,
-            mp_uuid,
+            res.mp_uuid,
             initiator
         );
     },
-    async (mc: MessageChannel, responder: PluginEnvironment) => {
-        const data = await mc.next_decoded(Transcoder.SchemaTranscoder(getPluginMessageData));
-        if (data instanceof Error) return;
+    async (mc: MessageChannel, responder: PluginEnvironment, plugin_ident: typeof pluginData.Encoded) => {
         const mp = new PluginMessagePartner(
             {
-                address: data.address,
-                plugin_ident: data.plugin_ident
+                address: plugin_ident.address,
+                plugin_ident: plugin_ident.plugin_ident
             },
             false,
             data.mp_uuid,

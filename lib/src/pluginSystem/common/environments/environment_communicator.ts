@@ -28,18 +28,33 @@ export abstract class EnvironmentCommunicator {
         return;
     }
 
-    execute_protocol<Responder extends NonNullable<unknown>, IdentData, InitData, Result>(
-        protocol: Protocol<this, Responder, IdentData, InitData, Result>,
+    execute_protocol<
+        Responder extends NonNullable<unknown>,
+        InitiatorInitData,
+        ResponderInitData extends Json,
+        IdentData extends Json,
+        Result
+    >(
+        protocol: Protocol<
+            this,
+            Responder,
+            InitiatorInitData,
+            ResponderInitData,
+            IdentData,
+            Result
+        >,
         target: Address,
-        initData: InitData,
+        initiatorInitData: InitiatorInitData,
+        responderInitData: ResponderInitData,
         responderIdentifier: IdentData
     ): Promise<Result | Error> {
         return protocol(
             this,
             this.port,
             target,
+            initiatorInitData,
+            responderInitData,
             responderIdentifier,
-            initData
         );
     }
 }

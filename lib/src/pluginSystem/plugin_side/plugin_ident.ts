@@ -7,7 +7,6 @@ export const pluginIdentSchema = Schema.Struct({
 
 export const pluginIdentWithInstanceIdSchema = Schema.Struct({
     name: Schema.String,
-    version: Schema.optional(Schema.String),
     instance_id: Schema.String,
 })
 

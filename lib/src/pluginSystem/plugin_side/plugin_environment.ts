@@ -49,10 +49,13 @@ export class PluginEnvironment extends EnvironmentCommunicator {
         const res = await this.#execute_kernel_protocol(get_plugin_from_kernel, plugin_ident);
         if (res instanceof Error) return res;
         return await this.#execute_plugin_protocol(
-            make_plugin_message_partner, res, {
-            address: res.address,
-            plugin_ident: res.plugin_ident
-        });
+            make_plugin_message_partner,
+            res,
+            {
+                address: res.address,
+                plugin_ident: res.plugin_ident
+            }
+        );
     }
     private on_plugin_request_cb: (mp: PluginMessagePartner) => Promise<void> = () => Promise.resolve();
     on_plugin_request(cb: (mp: PluginMessagePartner) => void | Promise<void>): void {
