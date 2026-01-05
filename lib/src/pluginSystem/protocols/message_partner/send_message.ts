@@ -25,7 +25,7 @@ export const send_message = message_partner_protocol(
 export const send_message_acknowledge = message_partner_protocol(
     "send_message_partner_message_acknowledge",
     async (mc, mp) => {
-        await mc.next();
+        return await mc.next();
     },
     async (mc, responder, data: {
         type: string,
